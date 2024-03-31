@@ -1,0 +1,24 @@
+{
+  "manifest_version": 3,
+  "name": "SpellTable Score Recorder",
+  "version": "0.1",
+  "description": "Allows you to easily record your games into a friend playground database",
+  "action": {
+    "default_popup": "src/pages/popup/index.html"
+  },
+  "background": {
+    "service_worker": "src/pages/background/index.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "js": ["src/pages/content/index.js"],
+      "matches": ["https://spelltable.wizards.com/game/*"]
+    }
+  ],
+  "permissions": ["scripting", "storage", "activeTab"],
+  "host_permissions": ["https://spelltable.wizards.com/game/*"],
+  "icons": {
+    "128": "logo.png"
+  }
+}
