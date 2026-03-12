@@ -12,42 +12,48 @@ The extension injects a content script into SpellTable game pages, extracts game
 
 ---
 
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Extension framework | **WXT** v0.20+ |
+| UI | **React** 19 + **TypeScript** 5.7 |
+| Styling | **Tailwind CSS** v4 (CSS-first, no config file) |
+| Build tool | **Vite** 7 (via WXT) |
+| Linting + formatting | **Biome** (replaces ESLint + Prettier) |
+| Testing | **Vitest** v3 + **Testing Library** |
+
+---
+
 ## Repository Structure
 
 ```
 spelltable-chrome-extension/
+├── entrypoints/               # WXT extension entry points (auto-wired by WXT)
+│   ├── background.ts          # Service worker: handles message routing + storage writes
+│   ├── content.ts             # Content script: DOM scraping + MutationObserver
+│   └── popup/
+│       ├── index.html         # Popup HTML shell
+│       ├── main.tsx           # React root mount
+│       ├── App.tsx            # Main popup component (Tailwind UI)
+│       └── app.css            # Tailwind import (@import "tailwindcss")
+├── src/
+│   └── shared/
+│       ├── storage.ts         # WXT storage items (playerStorage, commanderStorage)
+│       ├── hooks/
+│       │   └── useGameData.tsx  # React hook for reactive storage access
+│       └── test/
+│           └── setup.ts       # Vitest setup (@testing-library/jest-dom)
 ├── public/
-│   ├── manifest.json          # Chrome extension manifest (MV3)
 │   ├── logo.png               # Extension icon (128x128)
 │   └── logo-large.png
-├── src/
-│   ├── content.tsx            # Standalone UUID utility (currently unused)
-│   └── pages/
-│       ├── background/
-│       │   └── index.tsx      # Service worker: message routing + storage updates
-│       ├── content/
-│       │   └── index.tsx      # Content script: DOM extraction + message sending
-│       └── popup/
-│           ├── Popup.tsx      # Main popup React component
-│           ├── Popup.css
-│           ├── index.tsx      # React entry point (mounts Popup)
-│           ├── index.css
-│           └── index.html     # HTML template for popup page
-│   └── shared/
-│       ├── hooks/
-│       │   ├── useStorage.tsx     # React hook wrapping Chrome storage with useSyncExternalStore
-│       │   └── useMyExample.tsx   # Composite hook returning players + commanders
-│       └── storages/
-│           ├── base.tsx               # Generic storage factory (Chrome storage API wrapper)
-│           ├── playerStorage.tsx      # Storage instance for player name arrays
-│           ├── commanderStorage.tsx   # Storage instance for commander name arrays
-│           └── exampleThemeStorage.tsx # Example/unused theme storage
-├── .eslintrc.cjs              # ESLint config
-├── tsconfig.json              # TypeScript config (strict, noEmit)
-├── tsconfig.node.json         # TypeScript config for Node tooling scripts
-├── vite.config.ts             # Vite multi-entry build config
-├── package.json
-└── README.md
+├── .wxt/                      # WXT-generated types and tsconfig (do not edit manually)
+├── .output/                   # Build output — chrome-mv3/ is the loadable extension
+├── wxt.config.ts              # WXT + Vite + Tailwind configuration
+├── biome.json                 # Biome linter + formatter config
+├── vitest.config.ts           # Vitest test runner config
+├── tsconfig.json              # TypeScript config (standalone, WXT-compatible)
+└── package.json
 ```
 
 ---
@@ -58,51 +64,44 @@ spelltable-chrome-extension/
 
 | Component | File | Role |
 |---|---|---|
-| Content Script | `src/pages/content/index.tsx` | Runs on `spelltable.wizards.com/game/*`; scrapes DOM for player names and commander cards; sends data to background |
-| Background Service Worker | `src/pages/background/index.tsx` | Receives messages from content script and popup; writes to Chrome storage |
-| Popup UI | `src/pages/popup/Popup.tsx` | React UI showing current players/commanders; triggers a page refresh via message |
-| Storage Layer | `src/shared/storages/` | Generic Chrome storage abstraction used across all parts |
+| Content Script | `entrypoints/content.ts` | Runs on `spelltable.wizards.com/game/*`; scrapes DOM for player names and commander cards; sends `UPDATE_STORAGE` message when data changes; watches DOM via `MutationObserver` |
+| Background Service Worker | `entrypoints/background.ts` | Receives `UPDATE_STORAGE` messages; writes player/commander arrays to Chrome local storage |
+| Popup UI | `entrypoints/popup/App.tsx` | React component showing current players/commanders; triggers re-scrape via `chrome.scripting.executeScript` |
+| Storage | `src/shared/storage.ts` | WXT `storage.defineItem` wrappers for typed Chrome local storage |
+| Hook | `src/shared/hooks/useGameData.tsx` | React hook with `useState`/`useEffect` that subscribes to storage changes |
 
-### Message Passing Protocol
+### Message Passing
 
-Messages are passed between the content script, background, and popup using `chrome.runtime.sendMessage`. The message shape is:
+The content script and popup communicate through the background:
 
 ```typescript
-// Content script → Background
-{
-  action: "GET_PAGE_CONTENT",
-  data: { namesOnPage: string[], commandersOnPage: string[] }
-}
+// Content script → Background (when DOM data changes)
+chrome.runtime.sendMessage({
+  action: "UPDATE_STORAGE",
+  data: { namesOnPage: string[], commandersOnPage: string[] },
+});
 
-// Background stores data, then sends to popup
-{
-  action: "UPDATE_PAGE_DATA",
-  data: { namesOnPage: string[], commandersOnPage: string[], sessionID?: string }
-}
-
-// Popup → Background (to trigger a re-scrape)
-{
-  action: "GET_PAGE_CONTENT"
-}
+// Popup → SpellTable tab (to trigger a re-scrape)
+chrome.scripting.executeScript({ target: { tabId }, func: scrapeGamePage });
+// scrapeGamePage runs in the page context and sends UPDATE_STORAGE directly
 ```
 
 ### Storage Pattern
 
-All storage is handled by the base factory in `src/shared/storages/base.tsx`. It wraps the Chrome storage API with a typed interface and supports change listeners for reactive updates.
+Storage is defined with WXT's typed item API in `src/shared/storage.ts`:
 
 ```typescript
-// Usage pattern
-const storage = createStorage<string[]>("my-key", [], { storageType: StorageType.Local });
-// storage.get() — async read
-// storage.set(value) — async write
-// storage.subscribe(listener) — for useSyncExternalStore
+import { storage } from "wxt/utils/storage";
+
+export const playerStorage = storage.defineItem<string[]>("local:spelltable-players", {
+  fallback: [],
+});
 ```
 
-React components consume storage via the `useStorage` hook, which uses `useSyncExternalStore` for synchronization:
+React components consume storage via `useGameData`, which uses `storage.watch()` for reactive updates:
 
 ```typescript
-const players = useStorage(playerStorage);
-const commanders = useStorage(commanderStorage);
+const { players, commanders } = useGameData();
 ```
 
 ---
@@ -111,7 +110,7 @@ const commanders = useStorage(commanderStorage);
 
 ### Prerequisites
 
-- Node.js (v18+ recommended)
+- Node.js v18+
 - npm
 
 ### Setup
@@ -124,114 +123,117 @@ npm install
 
 | Command | Description |
 |---|---|
-| `npm run dev` | Start Vite dev server with HMR (useful for popup UI iteration) |
-| `npm run build` | Type-check with `tsc` then bundle with Vite; output goes to `dist/` |
-| `npm run lint` | Run ESLint with zero-warning tolerance on all `.ts`/`.tsx` files |
-| `npm run preview` | Preview the production build locally |
+| `npm run dev` | Start WXT dev mode — reloads the extension in Chrome on file changes |
+| `npm run build` | Build production extension to `.output/chrome-mv3/` |
+| `npm run build:firefox` | Build for Firefox to `.output/firefox-mv2/` |
+| `npm run check` | WXT type-check (runs `tsc` internally) |
+| `npm run lint` | Biome lint check |
+| `npm run format` | Biome auto-format (writes to files) |
+| `npm run test` | Run Vitest tests once |
+| `npm run test:watch` | Run Vitest in watch mode |
 
 ### Loading the Extension in Chrome
 
 1. Run `npm run build`
 2. Open `chrome://extensions`
 3. Enable **Developer mode**
-4. Click **Load unpacked** and select the `dist/` directory
+4. Click **Load unpacked** and select `.output/chrome-mv3/`
 5. Navigate to `https://spelltable.wizards.com/game/<id>` to test
 
-### Build Output Structure
+### Build Output
 
-Vite produces a multi-entry build:
+WXT outputs to `.output/chrome-mv3/` (not `dist/`):
 
 ```
-dist/
-├── src/pages/background/index.js   # Service worker
-├── src/pages/content/index.js      # Content script
-├── src/pages/popup/index.html      # Popup HTML
-└── assets/                          # CSS and chunk files
+.output/chrome-mv3/
+├── manifest.json             # Auto-generated from wxt.config.ts
+├── popup.html
+├── background.js
+├── content-scripts/content.js
+├── chunks/                   # JS chunks
+└── assets/                   # CSS + image assets
 ```
 
 ---
 
 ## Key Conventions
 
+### WXT Entrypoints
+
+WXT auto-discovers entry points in `entrypoints/` by filename. Each entrypoint uses a WXT-provided global:
+
+- `defineBackground(() => { ... })` — for `background.ts`
+- `defineContentScript({ matches, main() { ... } })` — for `content.ts`
+- Standard HTML + React for `popup/`
+
+These globals are injected by WXT — no import needed.
+
 ### TypeScript
 
-- **Strict mode** is enabled — avoid `any`, use proper types.
-- `noEmit: true` — Vite handles compilation; `tsc` is only used for type checking.
-- Use path aliases for imports (configured in `tsconfig.json` and `vite.config.ts`):
-  - `@src/*` → `src/`
-  - `@pages/*` → `src/pages/`
-  - `@assets/*` → `src/assets/`
-  - `@root/*` → project root
+- **Strict mode** is enabled.
+- `moduleResolution: "Bundler"` — use for all modern Vite/WXT projects.
+- `noEmit: true` — Vite handles compilation; `tsc` is for type-checking only.
+- The `.wxt/` directory contains generated types; do not edit them.
+- WXT path alias `@/*` maps to the project root.
+
+### Biome (replaces ESLint + Prettier)
+
+Run `npm run lint` before committing. Format with `npm run format`. Configuration is in `biome.json`. Do not add ESLint back.
+
+### Tailwind CSS v4
+
+- No `tailwind.config.js` — v4 is CSS-first.
+- Import in CSS: `@import "tailwindcss";` (see `entrypoints/popup/app.css`).
+- Plugin added via Vite in `wxt.config.ts`.
+
+### Styling Conventions
+
+- The popup is `w-80` (320px) — standard Chrome extension popup width.
+- Dark theme: `bg-gray-950` for the base, `bg-gray-900` for cards.
+- Primary action: `bg-indigo-600`. Positive action: `bg-emerald-700`.
 
 ### Naming
 
-- **Components**: PascalCase (`Popup.tsx`)
-- **Hooks**: camelCase with `use` prefix (`useStorage`, `useMyExample`)
-- **Storage keys**: kebab-case string literals (`"player-storage-key"`)
-- **Message actions**: SCREAMING_SNAKE_CASE (`"GET_PAGE_CONTENT"`)
-- **Files**: Lowercase kebab-case for non-component files
-
-### ESLint
-
-ESLint is configured for TypeScript and React hooks. Run `npm run lint` before committing. The linter is set to fail on any warnings (`--max-warnings 0`).
-
-Do not disable ESLint rules without a justification comment.
-
-### Chrome Extension Conventions
-
-- The extension targets **Manifest V3** — use service workers (not background pages), `chrome.scripting` instead of older APIs.
-- The content script only runs on `https://spelltable.wizards.com/game/*` (enforced in `manifest.json`).
-- All permissions (`scripting`, `storage`, `activeTab`) are declared in `manifest.json`.
+- **Components**: PascalCase (`App.tsx`)
+- **Hooks**: camelCase with `use` prefix (`useGameData`)
+- **Storage keys**: `local:kebab-case` WXT format (`local:spelltable-players`)
+- **Message actions**: SCREAMING_SNAKE_CASE (`UPDATE_STORAGE`)
 
 ---
 
 ## Current State & Known TODOs
 
-The project is pre-release (v0.1 in manifest, v0.0.0 in package.json) and actively in development.
-
 ### Known Incomplete Areas
 
 - **DOM selectors are brittle**: The content script uses hardcoded CSS class selectors (e.g., `.font-bold.truncate.leading-snug.text-sm`) that may break if SpellTable updates its markup.
-- **MutationObserver is commented out**: The content script should watch for page mutations to handle late-loaded player elements, but this logic is disabled.
-- **Submit Score is a stub**: The "Submit Score" button in the popup currently just calls `alert("SUBMIT")` — backend integration is not implemented.
-- **No tests**: There is no test infrastructure. Vitest or Jest would be appropriate to add.
-- **No CI/CD**: No GitHub Actions workflows exist yet.
-- **Debug logging**: Several `console.log` statements with debug messages remain in the content script and background worker. These should be removed or gated before release.
-- **`src/content.tsx`**: This file (a UUID utility) appears to be unused and may be a leftover.
-- **`exampleThemeStorage.tsx`**: This is a template/example file and is not used in the extension.
+- **Submit Score is a stub**: The "Submit Score" button in the popup calls `alert("SUBMIT")` — backend integration is not implemented.
+- **No tests yet**: Test infrastructure is set up (Vitest + Testing Library) but no test files exist. Add tests in `src/**/*.test.tsx` or `entrypoints/**/*.test.ts`.
+- **No CI/CD**: No GitHub Actions workflows exist.
 
----
+### Adding New Features
 
-## Adding New Features
+**New storage key:**
+Add a `storage.defineItem` call to `src/shared/storage.ts`, then consume it in `useGameData.tsx`.
 
-### New Storage Key
+**New message action:**
+Add a `case` to the `chrome.runtime.onMessage` listener in `entrypoints/background.ts`.
 
-1. Create a new file in `src/shared/storages/` following the pattern in `playerStorage.tsx`.
-2. Export a typed storage instance using `createStorage<T>(key, defaultValue, options)`.
-3. Consume it in components via `useStorage(yourStorage)`.
-
-### New Message Action
-
-1. Add the new action string to the message type union in the relevant file.
-2. Handle it in `src/pages/background/index.tsx` inside the `chrome.runtime.onMessage` listener.
-3. Send it from either the content script or popup as needed.
-
-### New Popup UI
-
-The popup is a standard React SPA. Add components under `src/pages/popup/` and import them into `Popup.tsx`.
+**New popup UI:**
+Edit `entrypoints/popup/App.tsx`. Use Tailwind utility classes for styling.
 
 ---
 
 ## Dependencies
 
-| Package | Version | Purpose |
-|---|---|---|
-| react | ^18.2.0 | UI framework |
-| react-dom | ^18.2.0 | DOM rendering |
-| typescript | 5.2.2 | Type checking |
-| vite | 5.1.6 | Build tool and dev server |
-| @vitejs/plugin-react | — | React support in Vite |
-| eslint | 8.57.0 | Linting |
-| @typescript-eslint/* | — | TypeScript ESLint rules |
-| eslint-plugin-react-hooks | — | React hooks linting rules |
-| @types/chrome | 0.0.263 | Chrome extension API types |
+| Package | Purpose |
+|---|---|
+| `wxt` | Extension framework (build, HMR, manifest, entrypoints) |
+| `react` / `react-dom` | UI framework |
+| `typescript` | Type checking |
+| `tailwindcss` / `@tailwindcss/vite` | Utility CSS framework (v4) |
+| `@vitejs/plugin-react` | React support for Vite (used by WXT and Vitest) |
+| `@biomejs/biome` | Linting + formatting |
+| `vitest` | Test runner |
+| `@testing-library/react` | React component testing utilities |
+| `@testing-library/jest-dom` | DOM assertion matchers |
+| `jsdom` | Browser DOM simulation for tests |
