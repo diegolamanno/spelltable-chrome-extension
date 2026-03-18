@@ -9,7 +9,10 @@ export default defineConfig({
     description:
       "Allows you to easily record your games into a friend playground database",
     permissions: ["scripting", "storage", "activeTab"],
-    host_permissions: ["https://spelltable.wizards.com/game/*"],
+    host_permissions: [
+      "https://spelltable.wizards.com/game/*",
+      "https://api.notion.com/*",
+    ],
     icons: { "128": "/logo.png" },
   },
   vite: () => ({

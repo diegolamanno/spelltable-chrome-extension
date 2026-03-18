@@ -11,6 +11,7 @@ const WIN_CONDITIONS = [
 ] as const;
 
 type WinCondition = (typeof WIN_CONDITIONS)[number]["id"];
+type SubmitStatus = "idle" | "loading" | "success" | "error";
 
 function scrapeGamePage(): void {
   const players = Array.from(
@@ -33,17 +34,33 @@ function scrapeGamePage(): void {
   });
 }
 
+function Header() {
+  return (
+    <header className="flex items-center gap-3 mb-5">
+      <img src="/logo.png" className="w-9 h-9 rounded" alt="SpellTable Score Recorder" />
+      <div>
+        <h1 className="text-base font-bold text-indigo-300 leading-tight">Match Logger</h1>
+        <p className="text-xs text-gray-500">SpellTable Score Recorder</p>
+      </div>
+    </header>
+  );
+}
+
 export default function App() {
   const { players, commanders } = useGameData();
   const [winner, setWinner] = useState<string | null>(null);
   const [wincon, setWincon] = useState<WinCondition | null>(null);
   const [isConfirming, setIsConfirming] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<SubmitStatus>("idle");
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
-  // Reset selections when the player list changes (after a Refresh)
+  // Reset form when the player list changes (after Refresh)
   useEffect(() => {
     setWinner(null);
     setWincon(null);
     setIsConfirming(false);
+    setSubmitStatus("idle");
+    setSubmitError(null);
   }, [players]);
 
   const handleRefresh = () => {
@@ -57,31 +74,66 @@ export default function App() {
   };
 
   const handleConfirm = () => {
-    // TODO: integrate with backend API
-    console.log({
-      winner,
-      winnerCommander: commanders[players.indexOf(winner!)],
-      wincon,
-    });
+    setSubmitStatus("loading");
+    setSubmitError(null);
+    chrome.runtime.sendMessage(
+      {
+        action: "SUBMIT_GAME",
+        data: { players, commanders, winner, wincon },
+      },
+      (response: { success: boolean; error?: string } | undefined) => {
+        if (response?.success) {
+          setSubmitStatus("success");
+        } else {
+          setSubmitStatus("error");
+          setSubmitError(response?.error ?? "Unknown error");
+        }
+      }
+    );
+  };
+
+  const handleReset = () => {
+    setWinner(null);
+    setWincon(null);
     setIsConfirming(false);
+    setSubmitStatus("idle");
+    setSubmitError(null);
   };
 
   const winnerIndex = winner !== null ? players.indexOf(winner) : -1;
   const winconLabel = WIN_CONDITIONS.find((w) => w.id === wincon)?.label;
   const canSubmit = winner !== null && wincon !== null;
 
-  // — Confirmation screen —
-  if (isConfirming) {
+  // — Success screen —
+  if (submitStatus === "success") {
     return (
       <div className="w-80 bg-gray-950 text-white p-4 font-sans">
-        <header className="flex items-center gap-3 mb-5">
-          <img src="/logo.png" className="w-9 h-9 rounded" alt="SpellTable Score Recorder" />
-          <div>
-            <h1 className="text-base font-bold text-indigo-300 leading-tight">Match Logger</h1>
-            <p className="text-xs text-gray-500">SpellTable Score Recorder</p>
+        <Header />
+        <div className="flex flex-col items-center text-center py-4 mb-5">
+          <div className="w-12 h-12 rounded-full bg-emerald-900 flex items-center justify-center mb-3">
+            <span className="text-emerald-400 text-2xl">✓</span>
           </div>
-        </header>
+          <p className="text-white font-semibold text-sm mb-1">Game recorded!</p>
+          <p className="text-gray-500 text-xs">
+            {winner} ({commanders[winnerIndex] ?? "unknown commander"}) won via {winconLabel}.
+          </p>
+        </div>
+        <button
+          onClick={handleReset}
+          className="w-full py-2 px-3 bg-gray-800 hover:bg-gray-700 rounded-lg text-sm font-medium transition-colors cursor-pointer"
+        >
+          Record another game
+        </button>
+      </div>
+    );
+  }
 
+  // — Confirmation screen —
+  if (isConfirming) {
+    const isLoading = submitStatus === "loading";
+    return (
+      <div className="w-80 bg-gray-950 text-white p-4 font-sans">
+        <Header />
         <p className="text-sm font-semibold text-white mb-3">Confirm submission?</p>
 
         <div className="space-y-3 mb-5">
@@ -103,18 +155,28 @@ export default function App() {
           </div>
         </div>
 
+        {submitStatus === "error" && (
+          <p className="text-red-400 text-xs mb-3">⚠ {submitError}</p>
+        )}
+
         <div className="flex gap-2">
           <button
-            onClick={() => setIsConfirming(false)}
-            className="flex-1 py-2 px-3 bg-gray-800 hover:bg-gray-700 active:bg-gray-600 rounded-lg text-sm font-medium transition-colors cursor-pointer"
+            onClick={() => {
+              setIsConfirming(false);
+              setSubmitStatus("idle");
+              setSubmitError(null);
+            }}
+            disabled={isLoading}
+            className="flex-1 py-2 px-3 bg-gray-800 hover:bg-gray-700 active:bg-gray-600 disabled:opacity-40 disabled:cursor-not-allowed rounded-lg text-sm font-medium transition-colors cursor-pointer"
           >
             Edit
           </button>
           <button
             onClick={handleConfirm}
-            className="flex-1 py-2 px-3 bg-emerald-700 hover:bg-emerald-600 active:bg-emerald-800 rounded-lg text-sm font-medium transition-colors cursor-pointer"
+            disabled={isLoading}
+            className="flex-1 py-2 px-3 bg-emerald-700 hover:bg-emerald-600 active:bg-emerald-800 disabled:opacity-40 disabled:cursor-not-allowed rounded-lg text-sm font-medium transition-colors cursor-pointer"
           >
-            Confirm
+            {isLoading ? "Submitting…" : "Confirm"}
           </button>
         </div>
       </div>
@@ -124,13 +186,7 @@ export default function App() {
   // — Main form —
   return (
     <div className="w-80 bg-gray-950 text-white p-4 font-sans">
-      <header className="flex items-center gap-3 mb-5">
-        <img src="/logo.png" className="w-9 h-9 rounded" alt="SpellTable Score Recorder" />
-        <div>
-          <h1 className="text-base font-bold text-indigo-300 leading-tight">Match Logger</h1>
-          <p className="text-xs text-gray-500">SpellTable Score Recorder</p>
-        </div>
-      </header>
+      <Header />
 
       {/* Player list / winner picker */}
       <div className="mb-4">

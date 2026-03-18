@@ -13,6 +13,7 @@ dist-ssr
 .output
 .wxt
 *.local
+.env
 
 # Editor directories and files
 .vscode/*
