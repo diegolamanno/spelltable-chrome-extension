@@ -52,7 +52,9 @@ async function handleSubmitGame(data: SubmitGameData): Promise<SubmitGameRespons
 
 export default defineBackground(() => {
   chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+    console.log("[Background] Received message:", message);
     if (message.action === "UPDATE_STORAGE") {
+      console.log("[Background] Updating storage with:", message.data.playersOnPage);
       gameStorage.setValue(message.data.playersOnPage);
       return false;
     }
