@@ -14,19 +14,50 @@ type WinCondition = (typeof WIN_CONDITIONS)[number]["id"];
 type SubmitStatus = "idle" | "loading" | "success" | "error";
 
 function scrapeGamePage(): void {
-  const players = Array.from(
-    document.querySelectorAll(".font-bold.truncate.leading-snug.text-sm")
-  )
-    .map((el) => el.textContent?.trim().toLowerCase() ?? "")
-    .filter(Boolean);
+  const nameEls = Array.from(
+    document.querySelectorAll<HTMLElement>(".font-bold.truncate.leading-snug.text-sm")
+  );
 
-  const commanders = Array.from(
-    document.querySelectorAll(
-      ".text-xs.italic.text-gray-400.truncate.leading-snug.flex > div"
-    )
-  )
-    .map((el) => el.textContent?.trim() ?? "")
-    .filter(Boolean);
+  if (nameEls.length === 0) return;
+
+  function findSeat(nameEl: HTMLElement): HTMLElement {
+    let cur: HTMLElement | null = nameEl.parentElement;
+    for (let depth = 0; depth < 8; depth++) {
+      if (!cur) break;
+      if (cur.querySelector(".text-xs.italic.text-gray-400.truncate.leading-snug.flex")) {
+        return cur;
+      }
+      cur = cur.parentElement;
+    }
+    return nameEl;
+  }
+
+  const rawSeats = nameEls
+    .map((nameEl) => {
+      const seat = findSeat(nameEl);
+      const name = nameEl.textContent?.trim().toLowerCase() ?? "";
+      const commanderNames = Array.from(
+        seat.querySelectorAll(
+          ".text-xs.italic.text-gray-400.truncate.leading-snug.flex > div"
+        )
+      )
+        .map((el) => el.textContent?.trim() ?? "")
+        .filter(Boolean);
+      return { name, commanders: commanderNames, rect: seat.getBoundingClientRect() };
+    })
+    .filter((s) => s.name);
+
+  const avgY = rawSeats.reduce((sum, s) => sum + s.rect.top + s.rect.height / 2, 0) / rawSeats.length;
+  const topRow = rawSeats
+    .filter((s) => s.rect.top + s.rect.height / 2 <= avgY)
+    .sort((a, b) => a.rect.left - b.rect.left);
+  const bottomRow = rawSeats
+    .filter((s) => s.rect.top + s.rect.height / 2 > avgY)
+    .sort((a, b) => b.rect.left - a.rect.left);
+  const sorted = [...topRow, ...bottomRow];
+
+  const players = sorted.map((s) => s.name);
+  const commanders = sorted.map((s) => s.commanders.join(" / "));
 
   chrome.runtime.sendMessage({
     action: "UPDATE_STORAGE",
