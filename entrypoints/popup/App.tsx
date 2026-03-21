@@ -14,23 +14,68 @@ type WinCondition = (typeof WIN_CONDITIONS)[number]["id"];
 type SubmitStatus = "idle" | "loading" | "success" | "error";
 
 function scrapeGamePage(): void {
-  const players = Array.from(
-    document.querySelectorAll(".font-bold.truncate.leading-snug.text-sm")
-  )
-    .map((el) => el.textContent?.trim().toLowerCase() ?? "")
-    .filter(Boolean);
+  function findCommonAncestor(els: Element[]): Element | null {
+    let ancestor = els[0].parentElement;
+    while (ancestor) {
+      if (els.every((el) => ancestor!.contains(el))) return ancestor;
+      ancestor = ancestor.parentElement;
+    }
+    return null;
+  }
 
-  const commanders = Array.from(
-    document.querySelectorAll(
-      ".text-xs.italic.text-gray-400.truncate.leading-snug.flex > div"
-    )
-  )
-    .map((el) => el.textContent?.trim() ?? "")
-    .filter(Boolean);
+  function clockwisePos(el: Element, midX: number, midY: number): number {
+    const rect = el.getBoundingClientRect();
+    const isTop = rect.top + rect.height / 2 < midY;
+    const isLeft = rect.left + rect.width / 2 < midX;
+    if (isTop && isLeft) return 0;
+    if (isTop && !isLeft) return 1;
+    if (!isTop && !isLeft) return 2;
+    return 3;
+  }
+
+  const nameEls = Array.from(
+    document.querySelectorAll(".font-bold.truncate.leading-snug.text-sm")
+  );
+
+  if (nameEls.length === 0) return;
+
+  const gridContainer = findCommonAncestor(nameEls);
+
+  const seats = nameEls.map((nameEl) => {
+    let seat: Element = nameEl;
+    while (seat.parentElement && seat.parentElement !== gridContainer) {
+      seat = seat.parentElement;
+    }
+    return seat;
+  });
+
+  const midX = window.innerWidth / 2;
+  const midY = window.innerHeight / 2;
+
+  const sorted = [...seats].sort(
+    (a, b) => clockwisePos(a, midX, midY) - clockwisePos(b, midX, midY)
+  );
+
+  const playerData = sorted
+    .map((seat) => ({
+      name:
+        seat
+          .querySelector(".font-bold.truncate.leading-snug.text-sm")
+          ?.textContent?.trim()
+          .toLowerCase() ?? "",
+      commanders: Array.from(
+        seat.querySelectorAll(
+          ".text-xs.italic.text-gray-400.truncate.leading-snug.flex > div"
+        )
+      )
+        .map((el) => el.textContent?.trim() ?? "")
+        .filter(Boolean),
+    }))
+    .filter((p) => p.name);
 
   chrome.runtime.sendMessage({
     action: "UPDATE_STORAGE",
-    data: { namesOnPage: players, commandersOnPage: commanders },
+    data: { playersOnPage: playerData },
   });
 }
 
@@ -47,7 +92,7 @@ function Header() {
 }
 
 export default function App() {
-  const { players, commanders } = useGameData();
+  const { players } = useGameData();
   const [winner, setWinner] = useState<string | null>(null);
   const [wincon, setWincon] = useState<WinCondition | null>(null);
   const [isConfirming, setIsConfirming] = useState(false);
@@ -79,7 +124,7 @@ export default function App() {
     chrome.runtime.sendMessage(
       {
         action: "SUBMIT_GAME",
-        data: { players, commanders, winner, wincon },
+        data: { players, winner, wincon },
       },
       (response: { success: boolean; error?: string } | undefined) => {
         if (response?.success) {
@@ -100,7 +145,7 @@ export default function App() {
     setSubmitError(null);
   };
 
-  const winnerIndex = winner !== null ? players.indexOf(winner) : -1;
+  const winnerPlayer = winner !== null ? players.find((p) => p.name === winner) : undefined;
   const winconLabel = WIN_CONDITIONS.find((w) => w.id === wincon)?.label;
   const canSubmit = winner !== null && wincon !== null;
 
@@ -115,7 +160,8 @@ export default function App() {
           </div>
           <p className="text-white font-semibold text-sm mb-1">Game recorded!</p>
           <p className="text-gray-500 text-xs">
-            {winner} ({commanders[winnerIndex] ?? "unknown commander"}) won via {winconLabel}.
+            {winner} ({winnerPlayer?.commanders.join(" / ") ?? "unknown commander"}) won via{" "}
+            {winconLabel}.
           </p>
         </div>
         <button
@@ -141,8 +187,10 @@ export default function App() {
             <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Winner</p>
             <div className="bg-gray-900 rounded-lg px-3 py-2">
               <p className="text-white text-sm font-medium capitalize">{winner}</p>
-              {commanders[winnerIndex] && (
-                <p className="text-gray-400 text-xs italic">{commanders[winnerIndex]}</p>
+              {winnerPlayer && winnerPlayer.commanders.length > 0 && (
+                <p className="text-gray-400 text-xs italic">
+                  {winnerPlayer.commanders.join(" / ")}
+                </p>
               )}
             </div>
           </div>
@@ -203,11 +251,11 @@ export default function App() {
             <p className="text-xs text-gray-500 uppercase tracking-wide mb-2">Select winner</p>
             <ul className="space-y-1.5">
               {players.map((player, i) => {
-                const isSelected = winner === player;
+                const isSelected = winner === player.name;
                 return (
-                  <li key={player}>
+                  <li key={player.name}>
                     <button
-                      onClick={() => setWinner(isSelected ? null : player)}
+                      onClick={() => setWinner(isSelected ? null : player.name)}
                       className={`w-full flex items-start gap-2.5 rounded-lg px-3 py-2 text-left transition-colors cursor-pointer ${
                         isSelected
                           ? "bg-indigo-950 ring-2 ring-indigo-500"
@@ -219,10 +267,12 @@ export default function App() {
                       </span>
                       <div className="min-w-0">
                         <p className="text-white text-sm font-medium capitalize truncate">
-                          {player}
+                          {player.name}
                         </p>
-                        {commanders[i] && (
-                          <p className="text-gray-500 text-xs italic truncate">{commanders[i]}</p>
+                        {player.commanders.length > 0 && (
+                          <p className="text-gray-500 text-xs italic truncate">
+                            {player.commanders.join(" / ")}
+                          </p>
                         )}
                       </div>
                     </button>

@@ -1,22 +1,19 @@
 import { useEffect, useState } from "react";
-import { commanderStorage, playerStorage } from "../storage";
+import { gameStorage } from "../storage";
+import type { PlayerData } from "../storage";
 
 export function useGameData() {
-  const [players, setPlayers] = useState<string[]>([]);
-  const [commanders, setCommanders] = useState<string[]>([]);
+  const [players, setPlayers] = useState<PlayerData[]>([]);
 
   useEffect(() => {
-    playerStorage.getValue().then(setPlayers);
-    commanderStorage.getValue().then(setCommanders);
+    gameStorage.getValue().then((value) => setPlayers(value ?? []));
 
-    const unwatchPlayers = playerStorage.watch((value) => setPlayers(value ?? []));
-    const unwatchCommanders = commanderStorage.watch((value) => setCommanders(value ?? []));
+    const unwatch = gameStorage.watch((value) => setPlayers(value ?? []));
 
     return () => {
-      unwatchPlayers();
-      unwatchCommanders();
+      unwatch();
     };
   }, []);
 
-  return { players, commanders };
+  return { players };
 }
