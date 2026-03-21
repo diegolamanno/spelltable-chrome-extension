@@ -1,4 +1,5 @@
-import { playerStorage, commanderStorage } from "../src/shared/storage";
+import { gameStorage } from "../src/shared/storage";
+import type { PlayerData } from "../src/shared/storage";
 import {
   findPlayerByName,
   findDeckByCommander,
@@ -6,8 +7,7 @@ import {
 } from "../src/shared/notion";
 
 interface SubmitGameData {
-  players: string[];
-  commanders: string[];
+  players: PlayerData[];
   winner: string;
   wincon: string;
 }
@@ -19,17 +19,20 @@ interface SubmitGameResponse {
 }
 
 async function handleSubmitGame(data: SubmitGameData): Promise<SubmitGameResponse> {
-  const { players, commanders, winner, wincon } = data;
+  const { players, winner, wincon } = data;
 
   const date = new Date().toISOString().slice(0, 10); // "YYYY-MM-DD"
 
+  const playerNames = players.map((p) => p.name);
+  const commanderNames = players.map((p) => p.commanders.join(" / "));
+
   // Resolve all player and deck IDs in parallel
   const [playerIds, deckIds] = await Promise.all([
-    Promise.all(players.map((name) => findPlayerByName(name))),
-    Promise.all(commanders.map((name) => findDeckByCommander(name))),
+    Promise.all(playerNames.map((name) => findPlayerByName(name))),
+    Promise.all(commanderNames.map((name) => findDeckByCommander(name))),
   ]);
 
-  const winnerIndex = players.indexOf(winner);
+  const winnerIndex = players.findIndex((p) => p.name === winner);
   if (winnerIndex === -1) throw new Error(`Winner "${winner}" not in players list`);
 
   const winnerId = playerIds[winnerIndex];
@@ -50,8 +53,7 @@ async function handleSubmitGame(data: SubmitGameData): Promise<SubmitGameRespons
 export default defineBackground(() => {
   chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     if (message.action === "UPDATE_STORAGE") {
-      playerStorage.setValue(message.data.namesOnPage);
-      commanderStorage.setValue(message.data.commandersOnPage);
+      gameStorage.setValue(message.data.playersOnPage);
       return false;
     }
 

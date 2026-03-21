@@ -1,9 +1,10 @@
 import { storage } from "wxt/utils/storage";
 
-export const playerStorage = storage.defineItem<string[]>("local:spelltable-players", {
-  fallback: [],
-});
+export interface PlayerData {
+  name: string;
+  commanders: string[];
+}
 
-export const commanderStorage = storage.defineItem<string[]>("local:spelltable-commanders", {
+export const gameStorage = storage.defineItem<PlayerData[]>("local:spelltable-game", {
   fallback: [],
 });
