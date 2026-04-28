@@ -11,6 +11,7 @@ export default defineConfig({
     permissions: ["scripting", "storage", "activeTab"],
     host_permissions: [
       "https://spelltable.wizards.com/game/*",
+      "https://convoke.games/en/play/*",
       "https://api.notion.com/*",
     ],
     icons: { "128": "/logo.png" },

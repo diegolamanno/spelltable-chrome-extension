@@ -1,5 +1,13 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useGameData } from "../../src/shared/hooks/useGameData";
+import type { PlayerData } from "../../src/shared/storage";
+
+const DEBUG_SINGLE_PLAYER = import.meta.env.VITE_DEBUG_SINGLE_PLAYER === "true";
+const DEBUG_PLAYERS: PlayerData[] = [
+  { name: "Metalbot", commanders: ["Korvold, Fae-Cursed King"] },
+  { name: "Paperbot", commanders: ["Krenko, Mob Boss"] },
+  { name: "Waterbot", commanders: ["Yawgmoth, Thran Physician"] },
+];
 
 const WIN_CONDITIONS = [
   { id: "damage", label: "Damage" },
@@ -17,16 +25,25 @@ function Header() {
   return (
     <header className="flex items-center gap-3 mb-5">
       <img src="/logo.png" className="w-9 h-9 rounded" alt="SpellTable Score Recorder" />
-      <div>
+      <div className="flex-1 min-w-0">
         <h1 className="text-base font-bold text-indigo-300 leading-tight">Match Logger</h1>
         <p className="text-xs text-gray-500">SpellTable Score Recorder</p>
       </div>
+      {DEBUG_SINGLE_PLAYER && (
+        <span className="text-xs font-medium bg-amber-900 text-amber-300 px-2 py-0.5 rounded shrink-0">
+          DEBUG
+        </span>
+      )}
     </header>
   );
 }
 
 export default function App() {
-  const { players } = useGameData();
+  const { players: detectedPlayers } = useGameData();
+  const players = useMemo(
+    () => (DEBUG_SINGLE_PLAYER ? [...detectedPlayers, ...DEBUG_PLAYERS] : detectedPlayers),
+    [detectedPlayers],
+  );
   const [winner, setWinner] = useState<string | null>(null);
   const [wincon, setWincon] = useState<WinCondition | null>(null);
   const [isConfirming, setIsConfirming] = useState(false);
