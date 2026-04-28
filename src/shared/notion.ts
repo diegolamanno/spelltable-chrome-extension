@@ -5,14 +5,23 @@ const GAMES_DB_ID = import.meta.env.VITE_NOTION_GAMES_DB_ID as string;
 
 const NOTION_VERSION = "2022-06-28";
 
-// Maps extension win condition IDs → Notion "Win Condition" select option names
+// Maps WIN_CONDITIONS button labels → Notion "Win Condition" select option names
 const WINCON_MAP: Record<string, string> = {
-  damage: "Combat",
-  "commander-damage": "Commander Damage",
-  burn: "Burn/Life Loss",
-  "alt-wincon": "Alt Win Con",
-  poison: "Infect",
-  mill: "Mill",
+  Combat:        "Combat",
+  "Cmdr Dmg":    "Commander Damage",
+  "Burn/Life":   "Burn/Life Loss",
+  "Alt Win Con": "Alt Win Con",
+  Infect:        "Infect",
+  Mill:          "Mill",
+  Combo:         "Combo",
+  Stolen:        "Stolen",
+  Draw:          "Draw",
+};
+
+// Maps extension KO type values → Notion "Type of KO" select option names
+const KO_TYPE_MAP: Record<string, string> = {
+  Simultaneous: "Simultaneous KO",
+  Staggered: "Staggered KO",
 };
 
 // ---------------------------------------------------------------------------
@@ -94,6 +103,12 @@ export interface GamePayload {
   winnerDeckId: string;
   wincon: string;
   date: string; // ISO date string e.g. "2026-03-18"
+  firstPlayerId: string | null;
+  firstKillId: string | null;
+  firstKillDeckId: string | null;
+  koType: string;
+  boardWipes: number;
+  solRing: boolean;
 }
 
 /**
@@ -101,10 +116,15 @@ export interface GamePayload {
  * Returns the created page ID.
  */
 export async function createGame(payload: GamePayload): Promise<string> {
-  const { playerIds, deckIds, winnerId, winnerDeckId, wincon, date } = payload;
+  const {
+    playerIds, deckIds, winnerId, winnerDeckId, wincon, date,
+    firstPlayerId, firstKillId, firstKillDeckId, koType, boardWipes, solRing,
+  } = payload;
 
   const notionWincon = WINCON_MAP[wincon];
   if (!notionWincon) throw new Error(`Unknown win condition: "${wincon}"`);
+
+  const notionKoType = KO_TYPE_MAP[koType] ?? "Staggered KO";
 
   const result = (await notionFetch("/pages", {
     parent: { database_id: GAMES_DB_ID },
@@ -130,10 +150,24 @@ export async function createGame(payload: GamePayload): Promise<string> {
       "Win Condition": {
         select: { name: notionWincon },
       },
-      // Placeholder — will be expanded later
       "Type of KO": {
-        select: { name: "Staggered KO" },
+        select: { name: notionKoType },
       },
+      "Board Wipes": {
+        number: boardWipes,
+      },
+      "Sol Ring": {
+        checkbox: solRing,
+      },
+      ...(firstPlayerId && {
+        "Starting Player": { relation: [{ id: firstPlayerId }] },
+      }),
+      ...(firstKillId && {
+        "First Blood": { relation: [{ id: firstKillId }] },
+      }),
+      ...(firstKillDeckId && {
+        "First Blood Deck": { relation: [{ id: firstKillDeckId }] },
+      }),
     },
   })) as { id: string };
 

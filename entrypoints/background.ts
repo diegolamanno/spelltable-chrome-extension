@@ -10,6 +10,11 @@ interface SubmitGameData {
   players: PlayerData[];
   winner: string;
   wincon: string;
+  firstPlayer: string | null;
+  firstKill: string | null;
+  koType: string;
+  boardWipes: number;
+  solRing: boolean;
 }
 
 interface SubmitGameResponse {
@@ -19,7 +24,7 @@ interface SubmitGameResponse {
 }
 
 async function handleSubmitGame(data: SubmitGameData): Promise<SubmitGameResponse> {
-  const { players, winner, wincon } = data;
+  const { players, winner, wincon, firstPlayer, firstKill, koType, boardWipes, solRing } = data;
 
   const date = new Date().toISOString().slice(0, 10); // "YYYY-MM-DD"
 
@@ -38,6 +43,14 @@ async function handleSubmitGame(data: SubmitGameData): Promise<SubmitGameRespons
   const winnerId = playerIds[winnerIndex];
   const winnerDeckId = deckIds[winnerIndex];
 
+  // Derive first player and first kill IDs from already-resolved arrays
+  const firstPlayerIndex = firstPlayer ? players.findIndex((p) => p.name === firstPlayer) : -1;
+  const firstPlayerId = firstPlayerIndex !== -1 ? playerIds[firstPlayerIndex] : null;
+
+  const firstKillIndex = firstKill ? players.findIndex((p) => p.name === firstKill) : -1;
+  const firstKillId = firstKillIndex !== -1 ? playerIds[firstKillIndex] : null;
+  const firstKillDeckId = firstKillIndex !== -1 ? deckIds[firstKillIndex] : null;
+
   const gameId = await createGame({
     playerIds,
     deckIds,
@@ -45,6 +58,12 @@ async function handleSubmitGame(data: SubmitGameData): Promise<SubmitGameRespons
     winnerDeckId,
     wincon,
     date,
+    firstPlayerId,
+    firstKillId,
+    firstKillDeckId,
+    koType,
+    boardWipes,
+    solRing,
   });
 
   return { success: true, gameId };
