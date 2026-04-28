@@ -17,6 +17,7 @@ const P = {
 const PLAYER_COLORS = [P.peach, P.mint, P.lemon, P.periwinkle];
 const WIN_COLORS    = [P.peach, P.mint, P.lemon, P.periwinkle, P.pink, P.sky, "#c890e8", "#e87890", "#a0b0c0"];
 const WIN_CONDITIONS = ["Combat", "Cmdr Dmg", "Burn/Life", "Alt Win Con", "Infect", "Mill", "Combo", "Stolen", "Draw"];
+const MANA_COLORS   = ["#F5E6A3", "#6EB5FF", "#C084FC", "#FF7B54", "#57D9A3"];
 
 // ── Theme tokens ───────────────────────────────────────────────────────────────
 type Tokens = ReturnType<typeof getTokens>;
@@ -175,7 +176,6 @@ function PlayerRow({ player, index, isWinner, isFirst, onSelectWinner, onSetFirs
         </span>
       </span>
 
-      {/* Time pill — shown when time data is available */}
       {time && (
         <span style={{ fontSize: 11, fontWeight: 600, color: t.muted, flexShrink: 0,
           fontVariantNumeric: "tabular-nums", letterSpacing: "0.02em",
@@ -186,7 +186,6 @@ function PlayerRow({ player, index, isWinner, isFirst, onSelectWinner, onSetFirs
         </span>
       )}
 
-      {/* Crown button */}
       <span onClick={(e) => { e.stopPropagation(); onSetFirst(); }}
         role="button" title="Set as first player"
         style={{ width: 22, height: 22, borderRadius: 6, flexShrink: 0,
@@ -201,7 +200,6 @@ function PlayerRow({ player, index, isWinner, isFirst, onSelectWinner, onSetFirs
         </svg>
       </span>
 
-      {/* Winner checkmark or spacer */}
       {isWinner ? (
         <svg width="15" height="15" viewBox="0 0 16 16" fill="none" style={{ flexShrink: 0 }}>
           <circle cx="8" cy="8" r="7.5" fill={col} />
@@ -217,8 +215,8 @@ function PlayerRow({ player, index, isWinner, isFirst, onSelectWinner, onSetFirs
 }
 
 // ── KillEvent ──────────────────────────────────────────────────────────────────
-function KillEvent({ players, killer, victim, onKiller, onVictim, t, isDark, disabled, disabledReason }: {
-  players: PlayerData[]; killer: string | null; victim: string | null;
+function KillEvent({ players, killer, victim, winner, onKiller, onVictim, t, isDark, disabled, disabledReason }: {
+  players: PlayerData[]; killer: string | null; victim: string | null; winner: string | null;
   onKiller: (name: string | null) => void; onVictim: (name: string | null) => void;
   t: Tokens; isDark: boolean; disabled?: boolean; disabledReason?: string;
 }) {
@@ -226,20 +224,20 @@ function KillEvent({ players, killer, victim, onKiller, onVictim, t, isDark, dis
   const killerIdx = players.findIndex(p => p.name === killer);
   const victimIdx = players.findIndex(p => p.name === victim);
 
-  function Chip({ player, index, selected, onSelect, disabled }: {
+  function Chip({ player, index, selected, onSelect, disabled: chipDisabled }: {
     player: PlayerData; index: number; selected: boolean;
     onSelect: (name: string | null) => void; disabled: boolean;
   }) {
     const col = PLAYER_COLORS[index % PLAYER_COLORS.length];
     return (
-      <button onClick={() => !disabled && onSelect(selected ? null : player.name)} style={{
+      <button onClick={() => !chipDisabled && onSelect(selected ? null : player.name)} style={{
         padding: "3px 8px", borderRadius: 20, fontSize: 11, fontWeight: 600,
         background: selected ? `${col}${isDark ? "44" : "55"}` : t.statBg,
         border: `1.5px solid ${selected ? col : t.border}`,
         color: selected ? t.ink : t.muted,
-        cursor: disabled ? "default" : "pointer",
+        cursor: chipDisabled ? "default" : "pointer",
         fontFamily: "'DM Sans',sans-serif", transition: "all 0.15s",
-        opacity: disabled ? 0.35 : 1,
+        opacity: chipDisabled ? 0.35 : 1,
         boxShadow: selected ? `0 2px 6px ${col}44` : "none",
       }}>{player.name}</button>
     );
@@ -273,7 +271,6 @@ function KillEvent({ players, killer, victim, onKiller, onVictim, t, isDark, dis
       overflow: "hidden", transition: "all 0.2s",
     }}>
       {both ? (
-        /* ── Collapsed summary ── */
         <div style={{ padding: "9px 12px", display: "flex", alignItems: "center", gap: 8 }}>
           <span style={{ width: 7, height: 7, borderRadius: "50%", flexShrink: 0,
             background: PLAYER_COLORS[killerIdx % PLAYER_COLORS.length],
@@ -300,9 +297,7 @@ function KillEvent({ players, killer, victim, onKiller, onVictim, t, isDark, dis
               fontFamily: "'DM Sans',sans-serif" }}>×</button>
         </div>
       ) : (
-        /* ── Expanded picker ── */
         <>
-          {/* Killer row */}
           <div style={{ padding: "9px 10px 7px" }}>
             <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: "0.1em",
               textTransform: "uppercase", color: t.muted, marginBottom: 6,
@@ -322,7 +317,6 @@ function KillEvent({ players, killer, victim, onKiller, onVictim, t, isDark, dis
             </div>
           </div>
 
-          {/* Sword divider */}
           <div style={{ position: "relative", height: 18, margin: "0 10px" }}>
             <div style={{ position: "absolute", top: "50%", left: 0, right: 0,
               height: 1, background: t.divider }} />
@@ -339,7 +333,6 @@ function KillEvent({ players, killer, victim, onKiller, onVictim, t, isDark, dis
             </div>
           </div>
 
-          {/* Victim row */}
           <div style={{ padding: "7px 10px 9px" }}>
             <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: "0.1em",
               textTransform: "uppercase", color: t.muted, marginBottom: 6,
@@ -350,7 +343,8 @@ function KillEvent({ players, killer, victim, onKiller, onVictim, t, isDark, dis
             <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
               {players.map((p, i) => (
                 <Chip key={p.name} player={p} index={i}
-                  selected={victim === p.name} disabled={killer === p.name}
+                  selected={victim === p.name}
+                  disabled={killer === p.name || p.name === winner}
                   onSelect={onVictim} />
               ))}
             </div>
@@ -429,17 +423,16 @@ function ToggleSwitch({ value, onChange }: { value: boolean; onChange: (v: boole
   );
 }
 
-// ── SuccessScreen ──────────────────────────────────────────────────────────────
-function SuccessScreen({ data, onReset, t }: {
-  data: {
-    winner: string | null; wincon: string | null; firstPlayer: string | null;
-    firstKiller: string | null; firstVictim: string | null;
-    koType: string; boardWipes: number; rounds: number; solRing: boolean;
-  };
-  onReset: () => void; t: Tokens;
-}) {
-  const rows = [
-    { label: "Winner",        value: data.winner ?? "—" },
+// ── Shared summary types, builder, and grid ────────────────────────────────────
+type SummaryData = {
+  winner: string | null; wincon: string | null; firstPlayer: string | null;
+  firstKiller: string | null; firstVictim: string | null;
+  koType: string; boardWipes: number; rounds: number; solRing: boolean;
+};
+
+function buildRows(data: SummaryData) {
+  return [
+    { label: "Winner",        value: data.winner ?? "—",  accent: true },
     { label: "Win condition", value: data.wincon ?? "—" },
     { label: "First player",  value: data.firstPlayer ?? "—" },
     { label: "First killer",  value: data.firstKiller ?? "None" },
@@ -449,6 +442,262 @@ function SuccessScreen({ data, onReset, t }: {
     { label: "Rounds played", value: String(data.rounds) },
     { label: "Sol Ring T1",   value: data.solRing ? "Yes ✦" : "No" },
   ];
+}
+
+function SummaryGrid({ data, t }: { data: SummaryData; t: Tokens }) {
+  const rows = buildRows(data);
+  return (
+    <div style={{ width: "100%", display: "grid", gridTemplateColumns: "1fr 1fr",
+      gap: 1, background: t.border, borderRadius: 11, overflow: "hidden",
+      border: `1px solid ${t.border}` }}>
+      {rows.map((r, i) => (
+        <div key={r.label} style={{
+          display: "flex", flexDirection: "column", padding: "8px 12px",
+          background: t.bg,
+          borderBottom: i < rows.length - 2 ? `1px solid ${t.divider}` : "none",
+        }}>
+          <span style={{ fontSize: 10, color: t.muted, fontWeight: 600,
+            letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 2 }}>{r.label}</span>
+          <span style={{ fontSize: 13, fontWeight: r.accent ? 800 : 700, color: t.ink }}>{r.value}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ── ManaSpark — canvas particle celebration ────────────────────────────────────
+function ManaSpark({ active }: { active: boolean }) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const rafRef    = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (!active) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    canvas.width  = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight;
+    const W = canvas.width, H = canvas.height;
+    const cx = W / 2, cy = H * 0.55;
+
+    interface Particle {
+      x: number; y: number; vx: number; vy: number; alpha: number;
+      color: string; kind: "pip" | "spark" | "card"; size: number;
+      spin: number; rot: number; life: number; gravity: number;
+      trail: { x: number; y: number }[];
+    }
+
+    const particles: Particle[] = [];
+    for (let i = 0; i < 72; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = 1.8 + Math.random() * 4.2;
+      const color = MANA_COLORS[Math.floor(Math.random() * MANA_COLORS.length)];
+      const rnd   = Math.random();
+      const kind: Particle["kind"] = rnd < 0.55 ? "pip" : rnd < 0.82 ? "spark" : "card";
+      particles.push({
+        x: cx, y: cy,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed - 2.5 - Math.random() * 2,
+        alpha: 1, color, kind,
+        size: kind === "card" ? 4 + Math.random() * 5 : 3 + Math.random() * 5,
+        spin: (Math.random() - 0.5) * 0.18,
+        rot: Math.random() * Math.PI * 2,
+        life: 0.82 + Math.random() * 0.18,
+        gravity: 0.07 + Math.random() * 0.05,
+        trail: [],
+      });
+    }
+
+    let ringAlpha = 1.0, ringRadius = 8;
+
+    const draw = () => {
+      ctx.clearRect(0, 0, W, H);
+
+      if (ringAlpha > 0) {
+        ctx.beginPath();
+        ctx.arc(cx, cy, ringRadius, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(255,220,120,${ringAlpha})`;
+        ctx.lineWidth = 3;
+        ctx.stroke();
+        ringRadius += 4;
+        ringAlpha  -= 0.055;
+      }
+
+      let alive = false;
+      for (const p of particles) {
+        if (p.alpha <= 0) continue;
+        alive = true;
+
+        p.trail.push({ x: p.x, y: p.y });
+        if (p.trail.length > 5) p.trail.shift();
+
+        for (let j = 1; j < p.trail.length; j++) {
+          const ta = (j / p.trail.length) * p.alpha * 0.3;
+          ctx.save();
+          ctx.globalAlpha = ta;
+          ctx.beginPath();
+          ctx.moveTo(p.trail[j - 1].x, p.trail[j - 1].y);
+          ctx.lineTo(p.trail[j].x, p.trail[j].y);
+          ctx.strokeStyle = p.color;
+          ctx.lineWidth = p.size * 0.3;
+          ctx.stroke();
+          ctx.restore();
+        }
+
+        ctx.save();
+        ctx.globalAlpha = p.alpha;
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.rot);
+
+        if (p.kind === "pip") {
+          const grad = ctx.createRadialGradient(0, 0, 0, 0, 0, p.size);
+          grad.addColorStop(0, "#fff");
+          grad.addColorStop(0.35, p.color);
+          grad.addColorStop(1, p.color + "00");
+          ctx.beginPath();
+          ctx.arc(0, 0, p.size, 0, Math.PI * 2);
+          ctx.fillStyle = grad;
+          ctx.fill();
+        } else if (p.kind === "spark") {
+          ctx.fillStyle = p.color;
+          ctx.beginPath();
+          for (let n = 0; n < 8; n++) {
+            const a = (n * Math.PI) / 4;
+            const r = n % 2 === 0 ? p.size : p.size * 0.35;
+            if (n === 0) ctx.moveTo(Math.cos(a) * r, Math.sin(a) * r);
+            else         ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r);
+          }
+          ctx.closePath();
+          ctx.fill();
+          ctx.beginPath();
+          ctx.arc(0, 0, p.size * 0.3, 0, Math.PI * 2);
+          ctx.fillStyle = "#fff";
+          ctx.fill();
+        } else {
+          const cw = p.size * 0.9, ch = p.size * 1.3;
+          ctx.beginPath();
+          if (typeof ctx.roundRect === "function") {
+            ctx.roundRect(-cw / 2, -ch / 2, cw, ch, 1.5);
+          } else {
+            ctx.rect(-cw / 2, -ch / 2, cw, ch);
+          }
+          ctx.fillStyle = p.color;
+          ctx.fill();
+          ctx.strokeStyle = "rgba(255,255,255,0.6)";
+          ctx.lineWidth = 0.7;
+          ctx.stroke();
+        }
+
+        ctx.restore();
+
+        p.x  += p.vx;
+        p.y  += p.vy;
+        p.vy += p.gravity;
+        p.vx *= 0.985;
+        p.rot += p.spin;
+        p.alpha -= 0.013 * (1 / p.life);
+      }
+
+      if (alive || ringAlpha > 0) rafRef.current = requestAnimationFrame(draw);
+    };
+
+    rafRef.current = requestAnimationFrame(draw);
+    return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
+  }, [active]);
+
+  if (!active) return null;
+  return (
+    <canvas ref={canvasRef} style={{
+      position: "absolute", inset: 0, width: "100%", height: "100%",
+      pointerEvents: "none", zIndex: 50, borderRadius: 18,
+    }} />
+  );
+}
+
+// ── ConfirmScreen ──────────────────────────────────────────────────────────────
+function ConfirmScreen({ data, onConfirm, onBack, submitting, submitError, t }: {
+  data: SummaryData; onConfirm: () => void; onBack: () => void;
+  submitting: boolean; submitError: string | null; t: Tokens;
+}) {
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 14,
+      padding: "8px 0", animation: "fadeUp 0.22s ease" }}>
+
+      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <div style={{ width: 36, height: 36, borderRadius: "50%", flexShrink: 0,
+          background: `${P.periwinkle}22`, border: `2px solid ${P.periwinkle}55`,
+          display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M8 2v5l3 2" stroke={P.periwinkle} strokeWidth="1.8"
+              strokeLinecap="round" strokeLinejoin="round" />
+            <circle cx="8" cy="8" r="6.5" stroke={P.periwinkle} strokeWidth="1.4" />
+          </svg>
+        </div>
+        <div>
+          <p style={{ fontWeight: 700, fontSize: 14, color: t.ink }}>Confirm submission</p>
+          <p style={{ fontSize: 11.5, color: t.muted, marginTop: 1 }}>
+            Double-check before logging to the platform
+          </p>
+        </div>
+      </div>
+
+      <SummaryGrid data={data} t={t} />
+
+      {submitError && (
+        <p style={{ color: "#e05050", fontSize: 11 }}>⚠ {submitError}</p>
+      )}
+
+      <div style={{ display: "flex", gap: 8 }}>
+        <button onClick={onBack} disabled={submitting} style={{
+          flex: 1, padding: "10px 0", borderRadius: 10,
+          background: t.statBg, border: `1px solid ${t.border}`,
+          color: t.muted, fontFamily: "'DM Sans',sans-serif",
+          fontWeight: 600, fontSize: 13.5,
+          cursor: submitting ? "default" : "pointer",
+          opacity: submitting ? 0.5 : 1,
+          display: "flex", alignItems: "center", justifyContent: "center", gap: 5,
+          transition: "all 0.15s",
+        }}>
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+            <path d="M8 3L4 6.5 8 10" stroke={t.muted} strokeWidth="1.5"
+              strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          Edit
+        </button>
+        <button onClick={onConfirm} disabled={submitting} style={{
+          flex: 2, padding: "10px 0", borderRadius: 10,
+          background: submitting
+            ? "rgba(60,160,100,0.6)"
+            : `linear-gradient(135deg,${P.mint},#48b880)`,
+          border: "none", color: "#0e2a1a",
+          fontFamily: "'DM Sans',sans-serif", fontWeight: 700, fontSize: 14,
+          cursor: submitting ? "default" : "pointer",
+          boxShadow: `0 4px 14px ${P.mint}44`,
+          display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
+          transition: "all 0.2s",
+        }}>
+          {submitting ? (
+            <>
+              <svg width="12" height="12" viewBox="0 0 13 13" fill="none"
+                style={{ animation: "spin 0.7s linear infinite" }}>
+                <circle cx="6.5" cy="6.5" r="5.5" stroke="rgba(14,42,26,0.3)" strokeWidth="1.8" />
+                <path d="M6.5 1A5.5 5.5 0 0 1 12 6.5" stroke="#0e2a1a" strokeWidth="1.8" strokeLinecap="round" />
+              </svg>
+              Logging…
+            </>
+          ) : "✓  Looks good, log it"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ── SuccessScreen ──────────────────────────────────────────────────────────────
+function SuccessScreen({ data, onReset, t }: {
+  data: SummaryData; onReset: () => void; t: Tokens;
+}) {
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center",
       gap: 12, padding: "8px 0", animation: "successIn 0.3s ease" }}>
@@ -463,22 +712,7 @@ function SuccessScreen({ data, onReset, t }: {
       </div>
       <p style={{ color: P.mint, fontWeight: 700, fontSize: 15 }}>Score Logged!</p>
 
-      {/* Two-column summary grid */}
-      <div style={{ width: "100%", display: "grid", gridTemplateColumns: "1fr 1fr",
-        gap: 1, background: t.border, borderRadius: 11, overflow: "hidden",
-        border: `1px solid ${t.border}` }}>
-        {rows.map((r, i) => (
-          <div key={r.label} style={{
-            display: "flex", flexDirection: "column", padding: "8px 12px",
-            background: t.bg,
-            borderBottom: i < rows.length - 2 ? `1px solid ${t.divider}` : "none",
-          }}>
-            <span style={{ fontSize: 10, color: t.muted, fontWeight: 600,
-              letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 2 }}>{r.label}</span>
-            <span style={{ fontSize: 13, fontWeight: 700, color: t.ink }}>{r.value}</span>
-          </div>
-        ))}
-      </div>
+      <SummaryGrid data={data} t={t} />
 
       <button onClick={onReset} style={{
         width: "100%", padding: "11px", borderRadius: 10,
@@ -514,23 +748,22 @@ export default function App() {
   useEffect(() => { document.body.style.background = t.bodyBg; }, [isDark]);
 
   // Game state
-  const [winner, setWinner]             = useState<string | null>(null);
-  const [wincon, setWincon]             = useState<string | null>(null);
-  const [firstPlayer, setFirstPlayer]   = useState<string | null>(null);
-  const [firstKiller, setFirstKiller]   = useState<string | null>(null);
-  const [firstVictim, setFirstVictim]   = useState<string | null>(null);
-  const [koType, setKoType]             = useState("Staggered");
-  const [boardWipes, setBoardWipes]     = useState(0);
-  const [rounds, setRounds]             = useState(0);
-  const [solRing, setSolRing]           = useState(false);
-  const [submitted, setSubmitted]       = useState(false);
-  const [submitting, setSubmitting]     = useState(false);
-  const [submitError, setSubmitError]   = useState<string | null>(null);
-  const [refreshing, setRefreshing]     = useState(false);
-  const [menuOpen, setMenuOpen]         = useState(false);
-  const [formKey, setFormKey]           = useState(0);
-
-  // Player clock times — populated by the content script in production
+  const [winner, setWinner]           = useState<string | null>(null);
+  const [wincon, setWincon]           = useState<string | null>(null);
+  const [firstPlayer, setFirstPlayer] = useState<string | null>(null);
+  const [firstKiller, setFirstKiller] = useState<string | null>(null);
+  const [firstVictim, setFirstVictim] = useState<string | null>(null);
+  const [koType, setKoType]           = useState("Staggered");
+  const [boardWipes, setBoardWipes]   = useState(0);
+  const [rounds, setRounds]           = useState(0);
+  const [solRing, setSolRing]         = useState(false);
+  const [submitted, setSubmitted]     = useState(false);
+  const [confirming, setConfirming]   = useState(false);
+  const [submitting, setSubmitting]   = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [refreshing, setRefreshing]   = useState(false);
+  const [menuOpen, setMenuOpen]       = useState(false);
+  const [formKey, setFormKey]         = useState(0);
   const [playerTimes, setPlayerTimes] = useState<Record<string, string>>({});
 
   useEffect(() => {
@@ -550,27 +783,25 @@ export default function App() {
   // Draw clears winner and kill event
   const isDraw = wincon === "Draw";
   useEffect(() => {
-    if (isDraw) {
-      setWinner(null);
-      setFirstKiller(null);
-      setFirstVictim(null);
-    }
+    if (isDraw) { setWinner(null); setFirstKiller(null); setFirstVictim(null); }
   }, [isDraw]);
 
   // Two-way KO type ↔ kill event constraint
   const killEventActive = firstKiller !== null || firstVictim !== null;
   const handleKoTypeChange = (v: string) => {
     setKoType(v);
-    if (v === "Simultaneous") {
-      setFirstKiller(null);
-      setFirstVictim(null);
-    }
+    if (v === "Simultaneous") { setFirstKiller(null); setFirstVictim(null); }
   };
-  useEffect(() => {
-    if (killEventActive) setKoType("Staggered");
-  }, [killEventActive]);
+  useEffect(() => { if (killEventActive) setKoType("Staggered"); }, [killEventActive]);
+
+  // Winner can't be the first victim
+  useEffect(() => { if (winner !== null && firstVictim === winner) setFirstVictim(null); }, [winner]);
 
   const canSubmit = wincon !== null && (isDraw || winner !== null);
+
+  const summaryData: SummaryData = {
+    winner, wincon, firstPlayer, firstKiller, firstVictim, koType, boardWipes, rounds, solRing,
+  };
 
   const handleRefresh = async () => {
     if (refreshing) return;
@@ -585,8 +816,16 @@ export default function App() {
     }
   };
 
-  const handleSubmit = () => {
-    if (!canSubmit || submitting) return;
+  // Submit Score → show confirm screen (no API call yet)
+  const handleReview = () => {
+    if (!canSubmit) return;
+    setSubmitError(null);
+    setConfirming(true);
+  };
+
+  // "Looks good, log it" → actual API call
+  const handleConfirm = () => {
+    if (submitting) return;
     setSubmitting(true);
     setSubmitError(null);
     chrome.runtime.sendMessage(
@@ -597,27 +836,20 @@ export default function App() {
           setSubmitError(chrome.runtime.lastError.message ?? "Extension error");
           return;
         }
-        if (response?.success) {
-          setSubmitted(true);
-        } else {
-          setSubmitError(response?.error ?? "Submission failed");
-        }
+        if (response?.success) { setConfirming(false); setSubmitted(true); }
+        else { setSubmitError(response?.error ?? "Submission failed"); }
       },
     );
   };
 
+  const handleBack = () => { setConfirming(false); setSubmitError(null); };
+
   const handleReset = () => {
-    setSubmitted(false);
-    setSubmitError(null);
-    setWinner(null);
-    setWincon(null);
+    setSubmitted(false); setConfirming(false); setSubmitError(null);
+    setWinner(null); setWincon(null);
     setFirstPlayer(players.length > 0 ? players[0].name : null);
-    setFirstKiller(null);
-    setFirstVictim(null);
-    setKoType("Staggered");
-    setBoardWipes(0);
-    setRounds(0);
-    setSolRing(false);
+    setFirstKiller(null); setFirstVictim(null);
+    setKoType("Staggered"); setBoardWipes(0); setRounds(0); setSolRing(false);
     setFormKey(k => k + 1);
   };
 
@@ -625,6 +857,8 @@ export default function App() {
     <div style={{ width: 560, background: t.bg, borderRadius: 18, overflow: "visible",
       boxShadow: t.shadow, fontFamily: "'DM Sans',sans-serif",
       transition: "background 0.25s, box-shadow 0.25s", position: "relative" }}>
+
+      <ManaSpark active={submitted} />
 
       {/* ── Header ── */}
       <div style={{ padding: "10px 16px 10px", borderBottom: `1.5px solid ${t.border}`,
@@ -647,7 +881,6 @@ export default function App() {
           </div>
         </div>
 
-        {/* Session active pill */}
         <div style={{ marginLeft: "auto", marginRight: 6,
           padding: "4px 10px", borderRadius: 20, fontSize: 11, fontWeight: 600,
           background: isDark ? "rgba(104,212,160,0.1)" : "rgba(104,212,160,0.15)",
@@ -667,7 +900,6 @@ export default function App() {
           </span>
         )}
 
-        {/* Refresh icon button */}
         <button onClick={handleRefresh} disabled={refreshing} title="Refresh player data" style={{
           width: 28, height: 28, borderRadius: 7,
           background: isDark ? "rgba(255,255,255,0.05)" : "rgba(28,30,42,0.05)",
@@ -684,7 +916,6 @@ export default function App() {
           </svg>
         </button>
 
-        {/* Gear button */}
         <button onClick={() => setMenuOpen(o => !o)} style={{
           width: 28, height: 28, borderRadius: 7,
           background: menuOpen ? "rgba(128,152,216,0.15)" : (isDark ? "rgba(255,255,255,0.05)" : "rgba(28,30,42,0.05)"),
@@ -709,22 +940,28 @@ export default function App() {
           themeOverride={themeOverride} onOverride={handleOverride} t={t} />
       </div>
 
-      {/* ── Two-column body ── */}
+      {/* ── Body ── */}
       <div key={formKey} style={{ display: "flex", animation: "fadeUp 0.18s ease" }}>
 
         {submitted ? (
           <div style={{ flex: 1, padding: "18px 20px 16px" }}>
-            <SuccessScreen
-              data={{ winner, wincon, firstPlayer, firstKiller, firstVictim, koType, boardWipes, rounds, solRing }}
-              onReset={handleReset} t={t} />
+            <SuccessScreen data={summaryData} onReset={handleReset} t={t} />
+          </div>
+        ) : confirming ? (
+          <div style={{ flex: 1, padding: "18px 20px 16px" }}>
+            <ConfirmScreen
+              data={summaryData} onConfirm={handleConfirm} onBack={handleBack}
+              submitting={submitting} submitError={submitError} t={t} />
           </div>
         ) : (
           <>
-            {/* ── LEFT: Players + Kill Event ── */}
+            {/* ── LEFT column ── */}
             <div style={{ width: 272, flexShrink: 0, padding: "11px 16px 13px",
               borderRight: `1px solid ${t.colDivider}` }}>
 
-              <SectionLabel t={t} note={isDraw ? "· draw — no winner" : "· crown = first player"}>Select Winner</SectionLabel>
+              <SectionLabel t={t} note={isDraw ? "· draw — no winner" : "· crown = first player"}>
+                Select Winner
+              </SectionLabel>
 
               {players.length === 0 ? (
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "center",
@@ -750,16 +987,15 @@ export default function App() {
 
               <SectionLabel t={t}>First Kill Event</SectionLabel>
               <KillEvent players={players}
-                killer={firstKiller} victim={firstVictim}
+                killer={firstKiller} victim={firstVictim} winner={winner}
                 onKiller={setFirstKiller} onVictim={setFirstVictim}
                 t={t} isDark={isDark}
                 disabled={isDraw || koType === "Simultaneous"}
                 disabledReason={isDraw ? "N/A — draw game" : "N/A — simultaneous KO"} />
             </div>
 
-            {/* ── RIGHT: Win condition + stats + submit ── */}
-            <div style={{ flex: 1, padding: "11px 16px 13px",
-              display: "flex", flexDirection: "column" }}>
+            {/* ── RIGHT column ── */}
+            <div style={{ flex: 1, padding: "11px 16px 13px", display: "flex", flexDirection: "column" }}>
 
               <SectionLabel t={t}>Win Condition</SectionLabel>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 5, marginBottom: 13 }}>
@@ -819,43 +1055,25 @@ export default function App() {
 
               {!canSubmit && (
                 <p style={{ fontSize: 11, color: t.muted, marginBottom: 8 }}>
-                  {winner === null && wincon === null ? "Select a winner and win condition to submit"
-                    : winner === null ? "Select a winner to continue"
-                    : "Select a win condition to continue"}
-                </p>
-              )}
-
-              {submitError && (
-                <p style={{ color: "#e05050", fontSize: 11, marginBottom: 8 }}>
-                  ⚠ {submitError}
+                  {wincon === null && winner === null ? "Select a winner and win condition to submit"
+                    : wincon === null ? "Select a win condition to continue"
+                    : "Select a winner to continue"}
                 </p>
               )}
 
               <div style={{ flex: 1 }} />
 
-              <button onClick={handleSubmit} disabled={!canSubmit || submitting} style={{
+              <button onClick={handleReview} disabled={!canSubmit} style={{
                 width: "100%", padding: "11px 0", borderRadius: 10,
-                background: canSubmit
-                  ? (submitting ? "rgba(60,160,100,0.7)" : `linear-gradient(135deg,${P.mint},#48b880)`)
-                  : t.disabledBg,
+                background: canSubmit ? `linear-gradient(135deg,${P.mint},#48b880)` : t.disabledBg,
                 border: canSubmit ? "none" : `1px solid ${t.border}`,
                 color: canSubmit ? "#0e2a1a" : t.disabledFg,
                 fontFamily: "'DM Sans',sans-serif", fontWeight: 700, fontSize: 14,
-                cursor: canSubmit && !submitting ? "pointer" : "default",
+                cursor: canSubmit ? "pointer" : "default",
                 boxShadow: canSubmit ? `0 4px 14px ${P.mint}44` : "none",
-                display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
                 transition: "all 0.2s",
               }}>
-                {submitting ? (
-                  <>
-                    <svg width="12" height="12" viewBox="0 0 13 13" fill="none"
-                      style={{ animation: "spin 0.7s linear infinite" }}>
-                      <circle cx="6.5" cy="6.5" r="5.5" stroke="rgba(14,42,26,0.3)" strokeWidth="1.8" />
-                      <path d="M6.5 1A5.5 5.5 0 0 1 12 6.5" stroke="#0e2a1a" strokeWidth="1.8" strokeLinecap="round" />
-                    </svg>
-                    Submitting…
-                  </>
-                ) : "Submit Score"}
+                Submit Score
               </button>
             </div>
           </>
