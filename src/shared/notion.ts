@@ -99,15 +99,18 @@ export async function findDeckByCommander(commanderName: string): Promise<string
 export interface GamePayload {
   playerIds: string[];
   deckIds: string[];
-  winnerId: string;
-  winnerDeckId: string;
+  winnerId: string | null;
+  winnerDeckId: string | null;
   wincon: string;
   date: string; // ISO date string e.g. "2026-03-18"
   firstPlayerId: string | null;
-  firstKillId: string | null;
-  firstKillDeckId: string | null;
+  firstKillerId: string | null;
+  firstKillerDeckId: string | null;
+  firstVictimId: string | null;
+  firstVictimDeckId: string | null;
   koType: string;
   boardWipes: number;
+  rounds: number;
   solRing: boolean;
 }
 
@@ -118,7 +121,7 @@ export interface GamePayload {
 export async function createGame(payload: GamePayload): Promise<string> {
   const {
     playerIds, deckIds, winnerId, winnerDeckId, wincon, date,
-    firstPlayerId, firstKillId, firstKillDeckId, koType, boardWipes, solRing,
+    firstPlayerId, firstKillerId, firstKillerDeckId, firstVictimId, firstVictimDeckId, koType, boardWipes, rounds, solRing,
   } = payload;
 
   const notionWincon = WINCON_MAP[wincon];
@@ -138,15 +141,15 @@ export async function createGame(payload: GamePayload): Promise<string> {
       Players: {
         relation: playerIds.map((id) => ({ id })),
       },
-      Winner: {
-        relation: [{ id: winnerId }],
-      },
+      ...(winnerId && {
+        Winner: { relation: [{ id: winnerId }] },
+      }),
       Decks: {
         relation: deckIds.map((id) => ({ id })),
       },
-      "Winner Deck": {
-        relation: [{ id: winnerDeckId }],
-      },
+      ...(winnerDeckId && {
+        "Winner Deck": { relation: [{ id: winnerDeckId }] },
+      }),
       "Win Condition": {
         select: { name: notionWincon },
       },
@@ -156,17 +159,26 @@ export async function createGame(payload: GamePayload): Promise<string> {
       "Board Wipes": {
         number: boardWipes,
       },
+      "Game Length": {
+        number: rounds,
+      },
       "Sol Ring": {
         checkbox: solRing,
       },
       ...(firstPlayerId && {
         "Starting Player": { relation: [{ id: firstPlayerId }] },
       }),
-      ...(firstKillId && {
-        "First Blood": { relation: [{ id: firstKillId }] },
+      ...(firstKillerId && {
+        "First Blood Killer": { relation: [{ id: firstKillerId }] },
       }),
-      ...(firstKillDeckId && {
-        "First Blood Deck": { relation: [{ id: firstKillDeckId }] },
+      ...(firstKillerDeckId && {
+        "First Blood Killer Deck": { relation: [{ id: firstKillerDeckId }] },
+      }),
+      ...(firstVictimId && {
+        "First Blood Victim": { relation: [{ id: firstVictimId }] },
+      }),
+      ...(firstVictimDeckId && {
+        "First Blood Victim Deck": { relation: [{ id: firstVictimDeckId }] },
       }),
     },
   })) as { id: string };
