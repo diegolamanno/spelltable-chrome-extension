@@ -59,26 +59,22 @@ function queryDatabase(databaseId: string, filter: object) {
 
 /**
  * Looks up a player page ID in the Players database.
- * Tries matching against the "Name" title property first, then falls back to
- * "Discord Nickname" — needed because SpellTable names are lowercased and may
- * differ from the canonical Name entry.
+ * Tries "Username - Spelltable" first, then falls back to "Username - Convoke".
  */
 export async function findPlayerByName(name: string): Promise<string> {
-  // Try title match first (Notion title equals is case-insensitive)
-  const byName = await queryDatabase(PLAYERS_DB_ID, {
-    property: "Name",
-    title: { equals: name },
-  });
-  if (byName.results.length > 0) return byName.results[0].id;
-
-  // Fall back to Discord Nickname
-  const byNick = await queryDatabase(PLAYERS_DB_ID, {
-    property: "Discord Nickname",
+  const bySpelltable = await queryDatabase(PLAYERS_DB_ID, {
+    property: "Username - Spelltable",
     rich_text: { equals: name },
   });
-  if (byNick.results.length > 0) return byNick.results[0].id;
+  if (bySpelltable.results.length > 0) return bySpelltable.results[0].id;
 
-  throw new Error(`Player not found: "${name}"`);
+  const byConvoke = await queryDatabase(PLAYERS_DB_ID, {
+    property: "Username - Convoke",
+    rich_text: { equals: name },
+  });
+  if (byConvoke.results.length > 0) return byConvoke.results[0].id;
+
+  throw new Error(`Player not found: "${name}" (checked Username - Spelltable and Username - Convoke)`);
 }
 
 /**
