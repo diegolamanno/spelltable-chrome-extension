@@ -107,6 +107,12 @@ export default defineBackground(() => {
       return false;
     }
 
+    if (message.action === "UPDATE_TIMES") {
+      console.log("[Background] Updating player times:", message.data.playerTimes);
+      playerTimesStorage.setValue(message.data.playerTimes);
+      return false;
+    }
+
     if (message.action === "SUBMIT_GAME") {
       handleSubmitGame(message.data as SubmitGameData)
         .then((result) => sendResponse(result))
