@@ -98,6 +98,30 @@ export async function findDeckByCommander(commanderName: string): Promise<string
   throw new Error(`Deck not found for commander: "${commanderName}"`);
 }
 
+/**
+ * Looks up a deck page ID scoped to a specific player owner.
+ * Uses a compound filter: Commander contains commanderName AND Owner relation contains playerId.
+ * Falls back to commander-only lookup if no owner-scoped match is found.
+ */
+export async function findDeckByPlayerAndCommander(
+  commanderName: string,
+  playerId: string,
+): Promise<string> {
+  const { decksDbId } = await notionConfigStorage.getValue();
+  if (!decksDbId) throw new Error("Decks DB ID not configured — open extension settings.");
+
+  const result = await queryDatabase(decksDbId, {
+    and: [
+      { property: "Commander", rich_text: { contains: commanderName } },
+      { property: "Owner", relation: { contains: playerId } },
+    ],
+  });
+
+  if (result.results.length > 0) return result.results[0].id;
+
+  return findDeckByCommander(commanderName);
+}
+
 export interface GamePayload {
   playerIds: string[];
   deckIds: string[];
