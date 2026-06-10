@@ -782,7 +782,7 @@ function SettingsField({ label, value, onChange, password, t, isDark }: {
 }
 
 function SettingsScreen({ onBack, t, isDark }: { onBack: () => void; t: Tokens; isDark: boolean }) {
-  const [config, setConfig] = useState<NotionConfig>({ apiKey: "", playersDbId: "", decksDbId: "", gamesDbId: "" });
+  const [config, setConfig] = useState<NotionConfig>({ apiKey: "", playersDbId: "", decksDbId: "", gamesDbId: "", gameSeatsDbId: "" });
   const [loaded, setLoaded] = useState(false);
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -843,6 +843,8 @@ function SettingsScreen({ onBack, t, isDark }: { onBack: () => void; t: Tokens; 
           <SettingsField label="Decks Database ID" value={config.decksDbId} onChange={set("decksDbId")}
             t={t} isDark={isDark} />
           <SettingsField label="Games Database ID" value={config.gamesDbId} onChange={set("gamesDbId")}
+            t={t} isDark={isDark} />
+          <SettingsField label="Game Seats Database ID" value={config.gameSeatsDbId} onChange={set("gameSeatsDbId")}
             t={t} isDark={isDark} />
           <p style={{ fontSize: 10.5, color: t.muted, lineHeight: 1.5 }}>
             Find your API key at notion.so/profile/integrations. Database IDs appear in the
