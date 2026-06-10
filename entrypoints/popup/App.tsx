@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useGameData } from "../../src/shared/hooks/useGameData";
 import type { PlayerData, NotionConfig } from "../../src/shared/storage";
-import { notionConfigStorage } from "../../src/shared/storage";
+import { notionConfigStorage, playerTimesStorage } from "../../src/shared/storage";
 
 const DEBUG_SINGLE_PLAYER = import.meta.env.VITE_DEBUG_SINGLE_PLAYER === "true";
 const DEBUG_PLAYERS: PlayerData[] = [
@@ -905,6 +905,15 @@ function SettingsScreen({ onBack, t, isDark }: { onBack: () => void; t: Tokens; 
   );
 }
 
+function formatSeconds(total: number): string {
+  const h = Math.floor(total / 3600);
+  const m = Math.floor((total % 3600) / 60);
+  const s = total % 60;
+  if (h > 0) return `${h}h ${m}m ${s}s`;
+  if (m > 0) return `${m}m ${s}s`;
+  return `${s}s`;
+}
+
 function debugShuffled(arr: PlayerData[]): PlayerData[] {
   const a = [...arr];
   for (let i = a.length - 1; i > 0; i--) {
@@ -968,9 +977,19 @@ export default function App() {
     setBoardWipes(0);
     setRounds(0);
     setSolRing(false);
-    setPlayerTimes({});
     setFormKey(k => k + 1);
   }, [players]);
+
+  useEffect(() => {
+    const toDisplay = (raw: Record<string, number> | null) => {
+      const out: Record<string, string> = {};
+      for (const [name, secs] of Object.entries(raw ?? {})) out[name] = formatSeconds(secs);
+      return out;
+    };
+    playerTimesStorage.getValue().then((raw) => setPlayerTimes(toDisplay(raw)));
+    const unwatch = playerTimesStorage.watch((raw) => setPlayerTimes(toDisplay(raw)));
+    return () => unwatch();
+  }, []);
 
   // Draw clears winner and kill event
   const isDraw = wincon === "Draw";
@@ -1175,7 +1194,7 @@ export default function App() {
                       isWinner={winner === p.name} isFirst={firstPlayer === p.name}
                       onSelectWinner={() => setWinner(v => v === p.name ? null : p.name)}
                       onSetFirst={() => setFirstPlayer(p.name)}
-                      t={t} isDark={isDark} time={playerTimes[p.name]}
+                      t={t} isDark={isDark} time={playerTimes[p.name.toLowerCase()]}
                       winnerDisabled={isDraw} />
                   ))}
                 </div>
