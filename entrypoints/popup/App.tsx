@@ -905,11 +905,22 @@ function SettingsScreen({ onBack, t, isDark }: { onBack: () => void; t: Tokens; 
   );
 }
 
+function debugShuffled(arr: PlayerData[]): PlayerData[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
 // ── App ────────────────────────────────────────────────────────────────────────
 export default function App() {
   const { players: detectedPlayers } = useGameData();
   const players = useMemo(
-    () => (DEBUG_SINGLE_PLAYER ? [...detectedPlayers, ...DEBUG_PLAYERS] : detectedPlayers),
+    () => DEBUG_SINGLE_PLAYER
+      ? debugShuffled([...detectedPlayers, ...DEBUG_PLAYERS])
+      : detectedPlayers,
     [detectedPlayers],
   );
 
