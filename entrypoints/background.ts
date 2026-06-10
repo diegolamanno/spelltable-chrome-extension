@@ -2,7 +2,7 @@ import { gameStorage } from "../src/shared/storage";
 import type { PlayerData } from "../src/shared/storage";
 import {
   findPlayerByName,
-  findDeckByCommander,
+  findDeckByPlayerAndCommander,
   createGame,
 } from "../src/shared/notion";
 
@@ -31,13 +31,14 @@ async function handleSubmitGame(data: SubmitGameData): Promise<SubmitGameRespons
   const date = new Date().toISOString().slice(0, 10); // "YYYY-MM-DD"
 
   const playerNames = players.map((p) => p.name);
-  const commanderNames = players.map((p) => p.commanders.join(" / "));
 
-  // Resolve all player and deck IDs in parallel
-  const [playerIds, deckIds] = await Promise.all([
-    Promise.all(playerNames.map((name) => findPlayerByName(name))),
-    Promise.all(commanderNames.map((name) => findDeckByCommander(name))),
-  ]);
+  // Step 1: resolve all player IDs (needed to scope deck lookups by owner)
+  const playerIds = await Promise.all(playerNames.map((name) => findPlayerByName(name)));
+
+  // Step 2: resolve deck IDs scoped to each player's owned deck
+  const deckIds = await Promise.all(
+    players.map((p, i) => findDeckByPlayerAndCommander(p.commanders.join(" / "), playerIds[i])),
+  );
 
   const winnerIndex = winner ? players.findIndex((p) => p.name === winner) : -1;
   if (winner && winnerIndex === -1) throw new Error(`Winner "${winner}" not in players list`);
