@@ -4,6 +4,7 @@ import {
   findPlayerByName,
   findDeckByPlayerAndCommander,
   createGame,
+  createGameSeat,
 } from "../src/shared/notion";
 
 interface SubmitGameData {
@@ -75,6 +76,20 @@ async function handleSubmitGame(data: SubmitGameData): Promise<SubmitGameRespons
     rounds,
     solRing,
   });
+
+  // Create one Game Seat entry per player, preserving seat order from scrape
+  await Promise.all(
+    players.map((p, i) =>
+      createGameSeat({
+        gameId,
+        playerId: playerIds[i],
+        deckId: deckIds[i],
+        seat: i + 1,
+        playerName: p.name,
+        date,
+      }),
+    ),
+  );
 
   return { success: true, gameId };
 }
