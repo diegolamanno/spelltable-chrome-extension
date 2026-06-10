@@ -1,15 +1,23 @@
-import { gameStorage } from "../src/shared/storage";
+import { gameStorage, playerTimesStorage } from "../src/shared/storage";
 import type { PlayerData } from "../src/shared/storage";
 import {
   findPlayerByName,
-  findDeckByCommander,
+  findDeckByPlayerAndCommander,
   createGame,
+  createGameSeat,
 } from "../src/shared/notion";
 
 interface SubmitGameData {
   players: PlayerData[];
-  winner: string;
+  winner: string | null;
   wincon: string;
+  firstPlayer: string | null;
+  firstKiller: string | null;
+  firstVictim: string | null;
+  koType: string;
+  boardWipes: number;
+  rounds: number;
+  solRing: boolean;
 }
 
 interface SubmitGameResponse {
@@ -19,24 +27,37 @@ interface SubmitGameResponse {
 }
 
 async function handleSubmitGame(data: SubmitGameData): Promise<SubmitGameResponse> {
-  const { players, winner, wincon } = data;
+  const { players, winner, wincon, firstPlayer, firstKiller, firstVictim, koType, boardWipes, rounds, solRing } = data;
 
   const date = new Date().toISOString().slice(0, 10); // "YYYY-MM-DD"
 
   const playerNames = players.map((p) => p.name);
-  const commanderNames = players.map((p) => p.commanders.join(" / "));
 
-  // Resolve all player and deck IDs in parallel
-  const [playerIds, deckIds] = await Promise.all([
-    Promise.all(playerNames.map((name) => findPlayerByName(name))),
-    Promise.all(commanderNames.map((name) => findDeckByCommander(name))),
-  ]);
+  // Step 1: resolve all player IDs (needed to scope deck lookups by owner)
+  const playerIds = await Promise.all(playerNames.map((name) => findPlayerByName(name)));
 
-  const winnerIndex = players.findIndex((p) => p.name === winner);
-  if (winnerIndex === -1) throw new Error(`Winner "${winner}" not in players list`);
+  // Step 2: resolve deck IDs scoped to each player's owned deck
+  const deckIds = await Promise.all(
+    players.map((p, i) => findDeckByPlayerAndCommander(p.commanders.join(" / "), playerIds[i])),
+  );
 
-  const winnerId = playerIds[winnerIndex];
-  const winnerDeckId = deckIds[winnerIndex];
+  const winnerIndex = winner ? players.findIndex((p) => p.name === winner) : -1;
+  if (winner && winnerIndex === -1) throw new Error(`Winner "${winner}" not in players list`);
+
+  const winnerId = winnerIndex !== -1 ? playerIds[winnerIndex] : null;
+  const winnerDeckId = winnerIndex !== -1 ? deckIds[winnerIndex] : null;
+
+  // Derive first player and first killer IDs from already-resolved arrays
+  const firstPlayerIndex = firstPlayer ? players.findIndex((p) => p.name === firstPlayer) : -1;
+  const firstPlayerId = firstPlayerIndex !== -1 ? playerIds[firstPlayerIndex] : null;
+
+  const firstKillerIndex = firstKiller ? players.findIndex((p) => p.name === firstKiller) : -1;
+  const firstKillerId = firstKillerIndex !== -1 ? playerIds[firstKillerIndex] : null;
+  const firstKillerDeckId = firstKillerIndex !== -1 ? deckIds[firstKillerIndex] : null;
+
+  const firstVictimIndex = firstVictim ? players.findIndex((p) => p.name === firstVictim) : -1;
+  const firstVictimId = firstVictimIndex !== -1 ? playerIds[firstVictimIndex] : null;
+  const firstVictimDeckId = firstVictimIndex !== -1 ? deckIds[firstVictimIndex] : null;
 
   const gameId = await createGame({
     playerIds,
@@ -45,7 +66,34 @@ async function handleSubmitGame(data: SubmitGameData): Promise<SubmitGameRespons
     winnerDeckId,
     wincon,
     date,
+    firstPlayerId,
+    firstKillerId,
+    firstKillerDeckId,
+    firstVictimId,
+    firstVictimDeckId,
+    koType,
+    boardWipes,
+    rounds,
+    solRing,
   });
+
+  const playerTimes = await playerTimesStorage.getValue();
+
+  // Create one Game Seat entry per player, preserving seat order from scrape
+  await Promise.all(
+    players.map((p, i) => {
+      const rawTime = playerTimes[p.name.toLowerCase()];
+      return createGameSeat({
+        gameId,
+        playerId: playerIds[i],
+        deckId: deckIds[i],
+        seat: i + 1,
+        playerName: p.name,
+        date,
+        ...(rawTime !== undefined && { rawTime }),
+      });
+    }),
+  );
 
   return { success: true, gameId };
 }
@@ -56,6 +104,12 @@ export default defineBackground(() => {
     if (message.action === "UPDATE_STORAGE") {
       console.log("[Background] Updating storage with:", message.data.playersOnPage);
       gameStorage.setValue(message.data.playersOnPage);
+      return false;
+    }
+
+    if (message.action === "UPDATE_TIMES") {
+      console.log("[Background] Updating player times:", message.data.playerTimes);
+      playerTimesStorage.setValue(message.data.playerTimes);
       return false;
     }
 

@@ -6,7 +6,7 @@ This file provides guidance for AI assistants working on this codebase.
 
 ## Project Overview
 
-**SpellTable Score Recorder** is a Chrome extension (Manifest V3) that scrapes player names and commander card data from active [SpellTable](https://spelltable.wizards.com) game sessions, stores them locally, and (eventually) submits game scores to an external database.
+**EDH Score Recorder** is a Chrome extension (Manifest V3) that scrapes player names and commander card data from active [SpellTable](https://spelltable.wizards.com) and [Convoke](https://convoke.games) game sessions, stores them locally, and submits game scores to a Notion database.
 
 The extension injects a content script into SpellTable game pages, extracts game data via DOM selectors, passes it to a background service worker, and surfaces it in a popup UI built with React.
 
