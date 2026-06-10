@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "wxt",
     "build": "wxt build",
+    "build:dev": "wxt build --mode dev",
+    "build:prod": "wxt build --mode prod",
     "build:firefox": "wxt build -b firefox",
     "check": "wxt check",
     "lint": "biome lint .",
