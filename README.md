@@ -1,4 +1,4 @@
-# SpellTable Score Recorder
+# EDH Score Recorder
 
 A Chrome extension for logging Commander game results from [SpellTable](https://spelltable.wizards.com) and [Convoke](https://convoke.games). It scrapes player names and commander cards from an active game, lets you fill in game details, and submits the result to a Notion database.
 

@@ -4,7 +4,7 @@ import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
   manifest: {
-    name: "SpellTable Score Recorder",
+    name: "EDH Score Recorder",
     version: "0.1",
     description:
       "Allows you to easily record your games into a friend playground database",
