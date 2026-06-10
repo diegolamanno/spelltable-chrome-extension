@@ -122,6 +122,48 @@ export async function findDeckByPlayerAndCommander(
   return findDeckByCommander(commanderName);
 }
 
+export interface GameSeatPayload {
+  gameId: string;
+  playerId: string;
+  deckId: string;
+  seat: number;
+  playerName: string;
+  date: string;
+}
+
+/**
+ * Creates a Game Seat entry linking a player + deck to a specific seat in a game.
+ */
+export async function createGameSeat(payload: GameSeatPayload): Promise<string> {
+  const { gameSeatsDbId } = await notionConfigStorage.getValue();
+  if (!gameSeatsDbId) throw new Error("Game Seats DB ID not configured — open extension settings.");
+
+  const { gameId, playerId, deckId, seat, playerName, date } = payload;
+
+  const result = (await notionFetch("/pages", {
+    parent: { database_id: gameSeatsDbId },
+    properties: {
+      Name: {
+        title: [{ text: { content: `Seat ${seat} – ${playerName} (${date})` } }],
+      },
+      Game: {
+        relation: [{ id: gameId }],
+      },
+      Player: {
+        relation: [{ id: playerId }],
+      },
+      Deck: {
+        relation: [{ id: deckId }],
+      },
+      Seat: {
+        number: seat,
+      },
+    },
+  })) as { id: string };
+
+  return result.id;
+}
+
 export interface GamePayload {
   playerIds: string[];
   deckIds: string[];
