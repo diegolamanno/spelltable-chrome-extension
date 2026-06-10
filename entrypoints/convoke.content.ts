@@ -3,6 +3,7 @@ export default defineContentScript({
 
   main() {
     let lastSerialized = "";
+    let lastTimesSerialized = "";
 
     function clockwisePos(el: Element, midX: number, midY: number): number {
       const rect = el.getBoundingClientRect();
@@ -12,6 +13,56 @@ export default defineContentScript({
       if (isTop && !isLeft) return 1; // top-right
       if (!isTop && !isLeft) return 2; // bottom-right
       return 3; // bottom-left
+    }
+
+    // Parses Convoke time strings like "2m 34s", "1h 2m 3s", "45s" into seconds
+    function parseTimeToSeconds(str: string): number {
+      const h = str.match(/(\d+)h/);
+      const m = str.match(/(\d+)m/);
+      const s = str.match(/(\d+)s/);
+      return (h ? parseInt(h[1]) * 3600 : 0) + (m ? parseInt(m[1]) * 60 : 0) + (s ? parseInt(s[1]) : 0);
+    }
+
+    // Scrapes player turn times from the game-end summary dialog.
+    // Convoke renders "N turn(s) · Xs" inside span.tabular-nums next to each player name.
+    function scrapeTimes() {
+      // Format: "2 turns · 7s" or "1 turn · 8s" etc.
+      const turnTimeRe = /^\d+\s+turns?\s+·\s+(.+)$/;
+      const times: Record<string, number> = {};
+
+      for (const span of document.querySelectorAll<HTMLElement>("span.tabular-nums")) {
+        const text = span.textContent?.trim() ?? "";
+        const match = text.match(turnTimeRe);
+        if (!match) continue;
+
+        // The player name lives in a sibling .font-medium span inside the same container.
+        // The Statistics section uses data-slot="hover-card-trigger"; the Winner vote section
+        // uses a plain parent div — two levels up covers both.
+        const container =
+          span.closest<HTMLElement>("[data-slot='hover-card-trigger']") ??
+          span.parentElement?.parentElement ?? null;
+        if (!container) continue;
+
+        const nameEl = container.querySelector<HTMLElement>(".font-medium");
+        if (!nameEl) continue;
+
+        const name = nameEl.textContent?.trim().toLowerCase();
+        if (!name || name in times) continue; // dedup across duplicate dialog sections
+
+        times[name] = parseTimeToSeconds(match[1]);
+      }
+
+      if (Object.keys(times).length === 0) return;
+
+      const serialized = JSON.stringify(times);
+      if (serialized === lastTimesSerialized) return;
+      lastTimesSerialized = serialized;
+
+      console.log("[Convoke] Player times scraped:", times);
+      chrome.runtime.sendMessage({
+        action: "UPDATE_TIMES",
+        data: { playerTimes: times },
+      });
     }
 
     function scrape() {
@@ -59,8 +110,12 @@ export default defineContentScript({
     }
 
     scrape();
+    scrapeTimes();
 
-    const observer = new MutationObserver(scrape);
+    const observer = new MutationObserver(() => {
+      scrape();
+      scrapeTimes();
+    });
     observer.observe(document.body, { childList: true, subtree: true, characterData: true });
 
     chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
