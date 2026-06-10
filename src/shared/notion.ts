@@ -145,7 +145,10 @@ export async function createGameSeat(payload: GameSeatPayload): Promise<string> 
     parent: { database_id: gameSeatsDbId },
     properties: {
       Name: {
-        title: [{ text: { content: `Seat ${seat} – ${playerName} (${date})` } }],
+        title: [
+          { type: "text", text: { content: `Seat ${seat} - ` } },
+          { type: "mention", mention: { type: "date", date: { start: date } } },
+        ],
       },
       Game: {
         relation: [{ id: gameId }],
@@ -208,7 +211,10 @@ export async function createGame(payload: GamePayload): Promise<string> {
     parent: { database_id: gamesDbId },
     properties: {
       Name: {
-        title: [{ text: { content: `Game – ${date}` } }],
+        title: [
+          { type: "text", text: { content: "EDH Session - " } },
+          { type: "mention", mention: { type: "date", date: { start: date } } },
+        ],
       },
       Date: {
         date: { start: date },
