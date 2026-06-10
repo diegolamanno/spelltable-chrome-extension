@@ -129,6 +129,7 @@ export interface GameSeatPayload {
   seat: number;
   playerName: string;
   date: string;
+  rawTime?: number; // total turn time in seconds; omitted when game logged before Convoke end screen
 }
 
 /**
@@ -138,7 +139,7 @@ export async function createGameSeat(payload: GameSeatPayload): Promise<string> 
   const { gameSeatsDbId } = await notionConfigStorage.getValue();
   if (!gameSeatsDbId) throw new Error("Game Seats DB ID not configured — open extension settings.");
 
-  const { gameId, playerId, deckId, seat, playerName, date } = payload;
+  const { gameId, playerId, deckId, seat, playerName, date, rawTime } = payload;
 
   const result = (await notionFetch("/pages", {
     parent: { database_id: gameSeatsDbId },
@@ -158,6 +159,9 @@ export async function createGameSeat(payload: GameSeatPayload): Promise<string> 
       Seat: {
         number: seat,
       },
+      ...(rawTime !== undefined && {
+        "Raw time": { number: rawTime },
+      }),
     },
   })) as { id: string };
 

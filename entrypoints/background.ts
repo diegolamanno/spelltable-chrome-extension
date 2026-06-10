@@ -1,4 +1,4 @@
-import { gameStorage } from "../src/shared/storage";
+import { gameStorage, playerTimesStorage } from "../src/shared/storage";
 import type { PlayerData } from "../src/shared/storage";
 import {
   findPlayerByName,
@@ -77,18 +77,22 @@ async function handleSubmitGame(data: SubmitGameData): Promise<SubmitGameRespons
     solRing,
   });
 
+  const playerTimes = await playerTimesStorage.getValue();
+
   // Create one Game Seat entry per player, preserving seat order from scrape
   await Promise.all(
-    players.map((p, i) =>
-      createGameSeat({
+    players.map((p, i) => {
+      const rawTime = playerTimes[p.name.toLowerCase()];
+      return createGameSeat({
         gameId,
         playerId: playerIds[i],
         deckId: deckIds[i],
         seat: i + 1,
         playerName: p.name,
         date,
-      }),
-    ),
+        ...(rawTime !== undefined && { rawTime }),
+      });
+    }),
   );
 
   return { success: true, gameId };
