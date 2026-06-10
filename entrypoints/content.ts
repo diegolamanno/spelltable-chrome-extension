@@ -106,13 +106,14 @@ export default defineContentScript({
     scrape();
 
     const observer = new MutationObserver(scrape);
-    observer.observe(document.body, { childList: true, subtree: true });
+    observer.observe(document.body, { childList: true, subtree: true, characterData: true });
 
     // Listen for manual refresh requests from popup
     chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
       console.log("[SpellTable] Content script received message:", message);
       if (message.action === "SCRAPE_NOW") {
         console.log("[SpellTable] Triggering manual scrape");
+        lastSerialized = ""; // force re-send even if data matches last observed state
         scrape();
         sendResponse({ success: true });
       }
