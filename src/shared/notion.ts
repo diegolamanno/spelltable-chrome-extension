@@ -1,7 +1,4 @@
-const API_KEY = import.meta.env.VITE_NOTION_API_KEY as string;
-const PLAYERS_DB_ID = import.meta.env.VITE_NOTION_PLAYERS_DB_ID as string;
-const DECKS_DB_ID = import.meta.env.VITE_NOTION_DECKS_DB_ID as string;
-const GAMES_DB_ID = import.meta.env.VITE_NOTION_GAMES_DB_ID as string;
+import { notionConfigStorage } from "./storage";
 
 const NOTION_VERSION = "2022-06-28";
 
@@ -29,10 +26,13 @@ const KO_TYPE_MAP: Record<string, string> = {
 // ---------------------------------------------------------------------------
 
 async function notionFetch(path: string, body: object): Promise<unknown> {
+  const cfg = await notionConfigStorage.getValue();
+  if (!cfg.apiKey) throw new Error("Notion API key not configured — open extension settings.");
+
   const res = await fetch(`https://api.notion.com/v1${path}`, {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${API_KEY}`,
+      Authorization: `Bearer ${cfg.apiKey}`,
       "Notion-Version": NOTION_VERSION,
       "Content-Type": "application/json",
     },
@@ -62,13 +62,16 @@ function queryDatabase(databaseId: string, filter: object) {
  * Tries "Username - Spelltable" first, then falls back to "Username - Convoke".
  */
 export async function findPlayerByName(name: string): Promise<string> {
-  const bySpelltable = await queryDatabase(PLAYERS_DB_ID, {
+  const { playersDbId } = await notionConfigStorage.getValue();
+  if (!playersDbId) throw new Error("Players DB ID not configured — open extension settings.");
+
+  const bySpelltable = await queryDatabase(playersDbId, {
     property: "Username - Spelltable",
     rich_text: { equals: name },
   });
   if (bySpelltable.results.length > 0) return bySpelltable.results[0].id;
 
-  const byConvoke = await queryDatabase(PLAYERS_DB_ID, {
+  const byConvoke = await queryDatabase(playersDbId, {
     property: "Username - Convoke",
     rich_text: { equals: name },
   });
@@ -82,7 +85,10 @@ export async function findPlayerByName(name: string): Promise<string> {
  * Uses a "contains" match on the Commander rich_text property.
  */
 export async function findDeckByCommander(commanderName: string): Promise<string> {
-  const result = await queryDatabase(DECKS_DB_ID, {
+  const { decksDbId } = await notionConfigStorage.getValue();
+  if (!decksDbId) throw new Error("Decks DB ID not configured — open extension settings.");
+
+  const result = await queryDatabase(decksDbId, {
     property: "Commander",
     rich_text: { contains: commanderName },
   });
@@ -115,6 +121,9 @@ export interface GamePayload {
  * Returns the created page ID.
  */
 export async function createGame(payload: GamePayload): Promise<string> {
+  const { gamesDbId } = await notionConfigStorage.getValue();
+  if (!gamesDbId) throw new Error("Games DB ID not configured — open extension settings.");
+
   const {
     playerIds, deckIds, winnerId, winnerDeckId, wincon, date,
     firstPlayerId, firstKillerId, firstKillerDeckId, firstVictimId, firstVictimDeckId, koType, boardWipes, rounds, solRing,
@@ -126,7 +135,7 @@ export async function createGame(payload: GamePayload): Promise<string> {
   const notionKoType = KO_TYPE_MAP[koType] ?? "Staggered KO";
 
   const result = (await notionFetch("/pages", {
-    parent: { database_id: GAMES_DB_ID },
+    parent: { database_id: gamesDbId },
     properties: {
       Name: {
         title: [{ text: { content: `Game – ${date}` } }],

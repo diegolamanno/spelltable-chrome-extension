@@ -8,3 +8,19 @@ export interface PlayerData {
 export const gameStorage = storage.defineItem<PlayerData[]>("local:spelltable-game", {
   fallback: [],
 });
+
+export interface NotionConfig {
+  apiKey: string;
+  playersDbId: string;
+  decksDbId: string;
+  gamesDbId: string;
+}
+
+export const notionConfigStorage = storage.defineItem<NotionConfig>("local:notion-config", {
+  fallback: {
+    apiKey:       (import.meta.env.VITE_NOTION_API_KEY as string)        ?? "",
+    playersDbId:  (import.meta.env.VITE_NOTION_PLAYERS_DB_ID as string)  ?? "",
+    decksDbId:    (import.meta.env.VITE_NOTION_DECKS_DB_ID as string)    ?? "",
+    gamesDbId:    (import.meta.env.VITE_NOTION_GAMES_DB_ID as string)    ?? "",
+  },
+});

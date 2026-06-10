@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useGameData } from "../../src/shared/hooks/useGameData";
-import type { PlayerData } from "../../src/shared/storage";
+import type { PlayerData, NotionConfig } from "../../src/shared/storage";
+import { notionConfigStorage } from "../../src/shared/storage";
 
 const DEBUG_SINGLE_PLAYER = import.meta.env.VITE_DEBUG_SINGLE_PLAYER === "true";
 const DEBUG_PLAYERS: PlayerData[] = [
@@ -84,9 +85,10 @@ function Divider({ t }: { t: Tokens }) {
 }
 
 // ── SettingsMenu ───────────────────────────────────────────────────────────────
-function SettingsMenu({ open, onClose, themeOverride, onOverride, t }: {
+function SettingsMenu({ open, onClose, themeOverride, onOverride, onSettings, t }: {
   open: boolean; onClose: () => void;
-  themeOverride: string; onOverride: (v: string) => void; t: Tokens;
+  themeOverride: string; onOverride: (v: string) => void;
+  onSettings: () => void; t: Tokens;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -130,6 +132,17 @@ function SettingsMenu({ open, onClose, themeOverride, onOverride, t }: {
           )}
         </button>
       ))}
+      <div style={{ height: 1, background: t.divider, margin: "5px 0" }} />
+      <button onClick={() => { onSettings(); onClose(); }} style={{
+        width: "100%", padding: "8px 13px", display: "flex", alignItems: "center", gap: 9,
+        background: "transparent", border: "none", cursor: "pointer", fontFamily: "'DM Sans',sans-serif",
+      }}>
+        <svg width="13" height="13" viewBox="0 0 14 14" fill="none" style={{ width: 16, flexShrink: 0 }}>
+          <circle cx="7" cy="7" r="5.5" stroke={t.muted} strokeWidth="1.3" />
+          <circle cx="7" cy="7" r="1.8" stroke={t.muted} strokeWidth="1.3" />
+        </svg>
+        <span style={{ fontSize: 13, fontWeight: 500, color: t.ink }}>Notion Settings</span>
+      </button>
     </div>
   );
 }
@@ -725,6 +738,171 @@ function SuccessScreen({ data, onReset, t }: {
   );
 }
 
+// ── SettingsScreen ─────────────────────────────────────────────────────────────
+function SettingsField({ label, value, onChange, password, t, isDark }: {
+  label: string; value: string; onChange: (v: string) => void;
+  password?: boolean; t: Tokens; isDark: boolean;
+}) {
+  const [show, setShow] = useState(false);
+  const [focused, setFocused] = useState(false);
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+      <label style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.1em",
+        textTransform: "uppercase", color: t.label }}>
+        {label}
+      </label>
+      <div style={{ position: "relative" }}>
+        <input
+          type={password && !show ? "password" : "text"}
+          value={value}
+          onChange={e => onChange(e.target.value)}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+          placeholder={password ? "secret_..." : "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"}
+          style={{
+            width: "100%", padding: password ? "8px 48px 8px 10px" : "8px 10px",
+            borderRadius: 8, border: `1.5px solid ${focused ? P.periwinkle : t.border}`,
+            background: isDark ? "rgba(255,255,255,0.04)" : "rgba(28,30,42,0.04)",
+            color: t.ink, fontFamily: "'DM Sans',sans-serif", fontSize: 12,
+            outline: "none", boxSizing: "border-box" as const, transition: "border-color 0.15s",
+          }}
+        />
+        {password && (
+          <button onClick={() => setShow(v => !v)} style={{
+            position: "absolute", right: 8, top: "50%", transform: "translateY(-50%)",
+            background: "none", border: "none", cursor: "pointer",
+            color: t.muted, fontSize: 11, fontFamily: "'DM Sans',sans-serif", fontWeight: 600,
+          }}>
+            {show ? "Hide" : "Show"}
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function SettingsScreen({ onBack, t, isDark }: { onBack: () => void; t: Tokens; isDark: boolean }) {
+  const [config, setConfig] = useState<NotionConfig>({ apiKey: "", playersDbId: "", decksDbId: "", gamesDbId: "" });
+  const [loaded, setLoaded] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    notionConfigStorage.getValue().then(c => { setConfig(c); setLoaded(true); });
+  }, []);
+
+  const handleSave = async () => {
+    setSaving(true);
+    await notionConfigStorage.setValue(config);
+    setSaving(false);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2500);
+  };
+
+  const set = (key: keyof NotionConfig) => (v: string) => setConfig(c => ({ ...c, [key]: v }));
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 14,
+      padding: "8px 0", animation: "fadeUp 0.22s ease" }}>
+
+      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <div style={{ width: 36, height: 36, borderRadius: "50%", flexShrink: 0,
+          background: `${P.periwinkle}22`, border: `2px solid ${P.periwinkle}55`,
+          display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <circle cx="8" cy="8" r="6.5" stroke={P.periwinkle} strokeWidth="1.4" />
+            <circle cx="8" cy="8" r="2" stroke={P.periwinkle} strokeWidth="1.4" />
+            {[0,60,120,180,240,300].map((deg, i) => (
+              <line key={i}
+                x1={8 + 4 * Math.cos(deg * Math.PI / 180)}
+                y1={8 + 4 * Math.sin(deg * Math.PI / 180)}
+                x2={8 + 6 * Math.cos(deg * Math.PI / 180)}
+                y2={8 + 6 * Math.sin(deg * Math.PI / 180)}
+                stroke={P.periwinkle} strokeWidth="1.3" strokeLinecap="round" />
+            ))}
+          </svg>
+        </div>
+        <div>
+          <p style={{ fontWeight: 700, fontSize: 14, color: t.ink }}>Notion Settings</p>
+          <p style={{ fontSize: 11.5, color: t.muted, marginTop: 1 }}>
+            Connect your Notion workspace
+          </p>
+        </div>
+      </div>
+
+      {!loaded ? (
+        <div style={{ textAlign: "center", color: t.muted, fontSize: 12, padding: "20px 0" }}>
+          Loading…
+        </div>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          <SettingsField label="API Key" value={config.apiKey} onChange={set("apiKey")}
+            password t={t} isDark={isDark} />
+          <SettingsField label="Players Database ID" value={config.playersDbId} onChange={set("playersDbId")}
+            t={t} isDark={isDark} />
+          <SettingsField label="Decks Database ID" value={config.decksDbId} onChange={set("decksDbId")}
+            t={t} isDark={isDark} />
+          <SettingsField label="Games Database ID" value={config.gamesDbId} onChange={set("gamesDbId")}
+            t={t} isDark={isDark} />
+          <p style={{ fontSize: 10.5, color: t.muted, lineHeight: 1.5 }}>
+            Find your API key at notion.so/profile/integrations. Database IDs appear in the
+            page URL after the workspace slug.
+          </p>
+        </div>
+      )}
+
+      {saved && (
+        <p style={{ color: P.mint, fontSize: 11.5, fontWeight: 600,
+          display: "flex", alignItems: "center", gap: 5 }}>
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+            <circle cx="6" cy="6" r="5.5" fill={P.mint} opacity="0.2" />
+            <path d="M3 6l2 2 4-4" stroke={P.mint} strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          Saved
+        </p>
+      )}
+
+      <div style={{ display: "flex", gap: 8 }}>
+        <button onClick={onBack} style={{
+          flex: 1, padding: "10px 0", borderRadius: 10,
+          background: t.statBg, border: `1px solid ${t.border}`,
+          color: t.muted, fontFamily: "'DM Sans',sans-serif",
+          fontWeight: 600, fontSize: 13.5, cursor: "pointer",
+          display: "flex", alignItems: "center", justifyContent: "center", gap: 5,
+          transition: "all 0.15s",
+        }}>
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+            <path d="M8 3L4 6.5 8 10" stroke={t.muted} strokeWidth="1.5"
+              strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          Back
+        </button>
+        <button onClick={handleSave} disabled={saving || !loaded} style={{
+          flex: 2, padding: "10px 0", borderRadius: 10,
+          background: saving ? "rgba(128,152,216,0.5)" : `linear-gradient(135deg,${P.periwinkle},#6070c8)`,
+          border: "none", color: "#fff",
+          fontFamily: "'DM Sans',sans-serif", fontWeight: 700, fontSize: 14,
+          cursor: saving || !loaded ? "default" : "pointer",
+          boxShadow: `0 4px 14px ${P.periwinkle}44`,
+          display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
+          transition: "all 0.2s",
+        }}>
+          {saving ? (
+            <>
+              <svg width="12" height="12" viewBox="0 0 13 13" fill="none"
+                style={{ animation: "spin 0.7s linear infinite" }}>
+                <circle cx="6.5" cy="6.5" r="5.5" stroke="rgba(255,255,255,0.3)" strokeWidth="1.8" />
+                <path d="M6.5 1A5.5 5.5 0 0 1 12 6.5" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" />
+              </svg>
+              Saving…
+            </>
+          ) : "Save"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // ── App ────────────────────────────────────────────────────────────────────────
 export default function App() {
   const { players: detectedPlayers } = useGameData();
@@ -757,14 +935,15 @@ export default function App() {
   const [boardWipes, setBoardWipes]   = useState(0);
   const [rounds, setRounds]           = useState(0);
   const [solRing, setSolRing]         = useState(false);
-  const [submitted, setSubmitted]     = useState(false);
-  const [confirming, setConfirming]   = useState(false);
-  const [submitting, setSubmitting]   = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
-  const [refreshing, setRefreshing]   = useState(false);
-  const [menuOpen, setMenuOpen]       = useState(false);
-  const [formKey, setFormKey]         = useState(0);
-  const [playerTimes, setPlayerTimes] = useState<Record<string, string>>({});
+  const [submitted, setSubmitted]       = useState(false);
+  const [confirming, setConfirming]     = useState(false);
+  const [submitting, setSubmitting]     = useState(false);
+  const [submitError, setSubmitError]   = useState<string | null>(null);
+  const [showSettings, setShowSettings] = useState(false);
+  const [refreshing, setRefreshing]     = useState(false);
+  const [menuOpen, setMenuOpen]         = useState(false);
+  const [formKey, setFormKey]           = useState(0);
+  const [playerTimes, setPlayerTimes]   = useState<Record<string, string>>({});
 
   useEffect(() => {
     setFirstPlayer(players.length > 0 ? players[0].name : null);
@@ -937,13 +1116,19 @@ export default function App() {
         </button>
 
         <SettingsMenu open={menuOpen} onClose={() => setMenuOpen(false)}
-          themeOverride={themeOverride} onOverride={handleOverride} t={t} />
+          themeOverride={themeOverride} onOverride={handleOverride}
+          onSettings={() => { setConfirming(false); setSubmitted(false); setShowSettings(true); }}
+          t={t} />
       </div>
 
       {/* ── Body ── */}
       <div key={formKey} style={{ display: "flex", animation: "fadeUp 0.18s ease" }}>
 
-        {submitted ? (
+        {showSettings ? (
+          <div style={{ flex: 1, padding: "18px 20px 16px" }}>
+            <SettingsScreen onBack={() => setShowSettings(false)} t={t} isDark={isDark} />
+          </div>
+        ) : submitted ? (
           <div style={{ flex: 1, padding: "18px 20px 16px" }}>
             <SuccessScreen data={summaryData} onReset={handleReset} t={t} />
           </div>
