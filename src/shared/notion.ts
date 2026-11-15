@@ -163,7 +163,7 @@ export async function createGameSeat(payload: GameSeatPayload): Promise<string> 
         number: seat,
       },
       ...(rawTime !== undefined && {
-        "Raw time": { number: rawTime },
+        "Raw Time": { number: rawTime },
       }),
     },
   })) as { id: string };

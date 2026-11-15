@@ -3,7 +3,9 @@ import { useGameData } from "../../src/shared/hooks/useGameData";
 import type { PlayerData, NotionConfig } from "../../src/shared/storage";
 import { notionConfigStorage, playerTimesStorage } from "../../src/shared/storage";
 
-const DEBUG_SINGLE_PLAYER = import.meta.env.VITE_DEBUG_SINGLE_PLAYER === "true";
+const DEBUG_SINGLE_PLAYER =
+  import.meta.env.MODE !== "prod" &&
+  import.meta.env.VITE_DEBUG_SINGLE_PLAYER === "true";
 const DEBUG_PLAYERS: PlayerData[] = [
   { name: "Metalbot",  commanders: ["Korvold, Fae-Cursed King"] },
   { name: "Paperbot",  commanders: ["Krenko, Mob Boss"] },

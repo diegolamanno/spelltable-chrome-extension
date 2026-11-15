@@ -53,6 +53,7 @@ spelltable-chrome-extension/
 ├── biome.json                 # Biome linter + formatter config
 ├── vitest.config.ts           # Vitest test runner config
 ├── tsconfig.json              # TypeScript config (standalone, WXT-compatible)
+├── docs/solutions/            # Documented solutions to past problems (bugs, best practices, API patterns), organized by category with YAML frontmatter (module, tags, problem_type)
 └── package.json
 ```
 
@@ -237,3 +238,19 @@ Edit `entrypoints/popup/App.tsx`. Use Tailwind utility classes for styling.
 | `@testing-library/react` | React component testing utilities |
 | `@testing-library/jest-dom` | DOM assertion matchers |
 | `jsdom` | Browser DOM simulation for tests |
+
+---
+
+## Agent skills
+
+### Issue tracker
+
+Issues are tracked in GitHub Issues for diegolamanno/spelltable-chrome-extension (via `gh`). See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Uses the five default triage labels: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: one `GLOSSARY.md` and `docs/adr/` at the repo root. See `docs/agents/domain.md`.
