@@ -1,5 +1,7 @@
-import { gameStorage, playerTimesStorage } from "../src/shared/storage";
+import { convokeMatchesStorage, gameStorage, playerTimesStorage } from "../src/shared/storage";
 import type { PlayerData } from "../src/shared/storage";
+import type { ConvokeMatchEvent } from "../src/shared/convoke/events";
+import { applyMatchEvent, type MatchRecords, pendingMatches } from "../src/shared/convoke/match-records";
 import {
   findPlayerByName,
   findDeckByPlayerAndCommander,
@@ -98,8 +100,51 @@ async function handleSubmitGame(data: SubmitGameData): Promise<SubmitGameRespons
   return { success: true, gameId };
 }
 
+// Badge on the extension icon = number of ended Convoke matches waiting to be logged.
+async function updateBadge(records: MatchRecords): Promise<void> {
+  const count = pendingMatches(records).length;
+  await chrome.action.setBadgeText({ text: count > 0 ? String(count) : "" });
+  await chrome.action.setBadgeBackgroundColor({ color: "#4f46e5" }); // indigo-600
+}
+
+// Events can arrive close together (e.g. /end then votes). Apply them one at a time
+// so one read-modify-write can't overwrite another.
+let matchQueue: Promise<void> = Promise.resolve();
+
+function handleConvokeMatchEvent(event: ConvokeMatchEvent): void {
+  matchQueue = matchQueue
+    .then(async () => {
+      const records = applyMatchEvent(await convokeMatchesStorage.getValue(), event);
+      await convokeMatchesStorage.setValue(records);
+      await updateBadge(records);
+      console.log(`[Background] Convoke ${event.type} applied; pending:`, pendingMatches(records).length);
+    })
+    .catch((err: unknown) => console.error("[Background] Failed to apply Convoke event", err));
+}
+
 export default defineBackground(() => {
+  // The service worker restarts often; restore the badge from storage each time.
+  convokeMatchesStorage.getValue().then(updateBadge).catch(() => {});
+
   chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+    if (message.action === "CONVOKE_MATCH_EVENT") {
+      handleConvokeMatchEvent(message.data as ConvokeMatchEvent);
+      return false;
+    }
+
+    // Dev builds only: sent by __edhMock.clear() on a Convoke page.
+    if (
+      message.action === "CONVOKE_DEV_CLEAR" &&
+      (import.meta.env.MODE === "dev" || import.meta.env.MODE === "development")
+    ) {
+      matchQueue = matchQueue.then(async () => {
+        await convokeMatchesStorage.setValue({});
+        await updateBadge({});
+        console.log("[Background] Cleared Convoke match records (dev)");
+      });
+      return false;
+    }
+
     console.log("[Background] Received message:", message);
     if (message.action === "UPDATE_STORAGE") {
       console.log("[Background] Updating storage with:", message.data.playersOnPage);

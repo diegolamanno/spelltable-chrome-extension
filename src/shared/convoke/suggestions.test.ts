@@ -1,12 +1,6 @@
 import { describe, expect, it } from "vitest";
 import fixture from "../../test/fixtures/convoke/two-match-session.json";
-import {
-  type ConvokeMatchResponse,
-  isVoteForMatch,
-  summariseEndedMatch,
-  suggestWinner,
-  toLocalDate,
-} from "./suggestions";
+import { type ConvokeMatchResponse, summariseEndedMatch, suggestWinner, toLocalDate } from "./suggestions";
 
 // Fixture players (anonymised): 9001 = Player 1, 9002 = Player 2, 9003 = Player 3, 9004 = Player 4
 const P1 = 9001;
@@ -82,7 +76,7 @@ describe("summariseEndedMatch", () => {
 
 describe("suggestWinner", () => {
   it("returns the candidate with the most votes", () => {
-    expect(suggestWinner({ [P1]: [P1, P4], [P2]: [P3] })).toEqual({ playerId: P1, votes: 2 });
+    expect(suggestWinner({ [P1]: 2, [P2]: 1 })).toEqual({ playerId: P1, votes: 2 });
   });
 
   it("returns null with no votes", () => {
@@ -91,26 +85,7 @@ describe("suggestWinner", () => {
   });
 
   it("returns null on a tie", () => {
-    expect(suggestWinner({ [P1]: [P1], [P2]: [P2] })).toBeNull();
-  });
-
-  it("uses the votes saved in the next match for match 2", () => {
-    const patch = fixture.winnerPatches
-      .map((p) => p.requestBody as { winnerVotes?: Record<string, number[]>; endedAt?: string })
-      .filter((b) => b.winnerVotes && isVoteForMatch(b, match2))
-      .at(-1);
-    expect(suggestWinner(patch?.winnerVotes)).toEqual({ playerId: P1, votes: 2 });
-  });
-});
-
-describe("isVoteForMatch", () => {
-  it("matches vote patches to the match whose end time they carry", () => {
-    const patches = fixture.winnerPatches.map((p) => p.requestBody as { endedAt?: string });
-    const forMatch1 = patches.filter((b) => isVoteForMatch(b, match1));
-    const forMatch2 = patches.filter((b) => isVoteForMatch(b, match2));
-    expect(forMatch1.length).toBeGreaterThan(0);
-    expect(forMatch2.length).toBeGreaterThan(0);
-    expect(forMatch1.some((b) => forMatch2.includes(b))).toBe(false);
+    expect(suggestWinner({ [P1]: 1, [P2]: 1 })).toBeNull();
   });
 });
 

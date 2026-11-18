@@ -43,6 +43,8 @@ export interface ConvokeGameLogEntry {
 export interface ConvokeMatchResponse {
   match: {
     id: string;
+    /** The lobby id (the one in the page URL). */
+    gameId?: string;
     startedAt: string | null;
     endedAt: string | null;
     state: {
@@ -55,9 +57,6 @@ export interface ConvokeMatchResponse {
   };
   game: { currentMatchId: string };
 }
-
-/** candidate player id → ids of the players who voted for them */
-export type WinnerVotes = Record<string, number[]>;
 
 // ---------------------------------------------------------------------------
 // Results
@@ -140,24 +139,17 @@ export function summariseEndedMatch(res: ConvokeMatchResponse): EndedMatchSummar
   };
 }
 
-/** Leading candidate, or null when nobody voted or the top is tied. */
-export function suggestWinner(votes: WinnerVotes | undefined): { playerId: number; votes: number } | null {
-  const ranked = Object.entries(votes ?? {})
-    .map(([id, voters]) => ({ playerId: Number(id), votes: voters.length }))
+/** Leading candidate from a tally (candidate id → votes), or null when nobody voted or the top is tied. */
+export function suggestWinner(
+  voteCounts: Record<string, number> | undefined,
+): { playerId: number; votes: number } | null {
+  const ranked = Object.entries(voteCounts ?? {})
+    .map(([id, votes]) => ({ playerId: Number(id), votes }))
     .filter((c) => c.votes > 0)
     .sort((a, b) => b.votes - a.votes);
   if (ranked.length === 0) return null;
   if (ranked.length > 1 && ranked[0].votes === ranked[1].votes) return null;
   return ranked[0];
-}
-
-/**
- * Winner votes are saved in the next match's state together with the ended match's
- * `state.endedAt`. Use that to tell which ended match a vote patch belongs to.
- */
-export function isVoteForMatch(patch: { endedAt?: string | null }, ended: ConvokeMatchResponse): boolean {
-  const endedAt = ended.match.state.endedAt;
-  return Boolean(endedAt) && patch.endedAt === endedAt;
 }
 
 /** ISO timestamp → YYYY-MM-DD in the given (default: the browser's) time zone. */
