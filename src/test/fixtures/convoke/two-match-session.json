@@ -1,0 +1,4063 @@
+{
+ "entries": 1405,
+ "milestones": [
+  {
+   "at": "2026-11-18T02:04:49.202Z",
+   "method": "POST",
+   "path": "/api/match/71ac5c6e-020f-47af-bb34-4cc684b888a1/start",
+   "status": 200,
+   "requestBody": {},
+   "responseBody": {
+    "match": {
+     "id": "71ac5c6e-020f-47af-bb34-4cc684b888a1",
+     "gameId": "ec56d993-3e8c-4fb9-9cd5-45953fbaeb80",
+     "playerIds": [
+      9001,
+      9002,
+      9003,
+      9004
+     ],
+     "winnerIds": [],
+     "status": "in-progress",
+     "format": "commander",
+     "startedAt": "2026-11-18T02:04:48.930Z",
+     "endedAt": null,
+     "stateVersion": 23,
+     "state": {
+      "currentPlayer": 0,
+      "playerOrder": [
+       9004,
+       9001,
+       9003,
+       9002
+      ],
+      "freedSeatPlayerIds": [],
+      "format": "commander",
+      "startedAt": "2026-11-18T02:04:48.462Z",
+      "endedAt": null,
+      "turnRound": 0,
+      "turnStartedAt": "2026-11-18T02:04:48.462Z",
+      "winnerVotes": {},
+      "monarchPlayerId": null,
+      "initiativePlayerId": null,
+      "players": [
+       {
+        "id": 9001,
+        "name": "Player 1",
+        "life": 40,
+        "poison": 0,
+        "isEliminated": false,
+        "isConnected": false,
+        "turnNumber": 0,
+        "totalTurnTimeMs": 0,
+        "commanderDamageTaken": [],
+        "secondaryCommanderDamageTaken": [],
+        "commanderTax": 0,
+        "playerStatus": null,
+        "commander": {
+         "name": "Felothar the Steadfast",
+         "oracle_id": "2b3f791a-d672-46fb-a03a-96e19f2c3121",
+         "scryfall_id": "2c3549f6-25df-4ea7-84ad-922ccd4af6b2"
+        },
+        "secondaryCommander": null,
+        "deckSelectionStatus": "unset"
+       },
+       {
+        "id": 9002,
+        "name": "Player 2",
+        "life": 40,
+        "poison": 0,
+        "isEliminated": false,
+        "isConnected": true,
+        "turnNumber": 0,
+        "totalTurnTimeMs": 0,
+        "commanderDamageTaken": [],
+        "secondaryCommanderDamageTaken": [],
+        "commanderTax": 0,
+        "playerStatus": null,
+        "commander": {
+         "name": "Tidus, Yuna's Guardian",
+         "oracle_id": "e8fbcafd-3617-4cd7-b55d-457fb7b60162",
+         "scryfall_id": null
+        },
+        "secondaryCommander": null,
+        "deckSelectionStatus": "chosen"
+       },
+       {
+        "id": 9003,
+        "name": "Player 3",
+        "life": 40,
+        "poison": 0,
+        "isEliminated": false,
+        "isConnected": true,
+        "turnNumber": 0,
+        "totalTurnTimeMs": 0,
+        "commanderDamageTaken": [],
+        "secondaryCommanderDamageTaken": [],
+        "commanderTax": 0,
+        "playerStatus": null,
+        "commander": {
+         "name": "Doran, Besieged by Time",
+         "oracle_id": "dd35a377-0865-4b25-bd0f-aaead29a9f0e",
+         "scryfall_id": null
+        },
+        "secondaryCommander": null,
+        "deckSelectionStatus": "chosen"
+       },
+       {
+        "id": 9004,
+        "name": "Player 4",
+        "life": 40,
+        "poison": 0,
+        "isEliminated": false,
+        "isConnected": true,
+        "turnNumber": 1,
+        "totalTurnTimeMs": 0,
+        "commanderDamageTaken": [],
+        "secondaryCommanderDamageTaken": [],
+        "commanderTax": 0,
+        "playerStatus": null,
+        "commander": {
+         "name": "Zurgo Stormrender",
+         "oracle_id": "0f93d88c-9d2e-416d-a10b-99483360b1fb",
+         "scryfall_id": "dc8eb325-75c9-4331-830d-3f7d62d77290"
+        },
+        "secondaryCommander": null,
+        "deckSelectionStatus": "unset"
+       }
+      ],
+      "eventTypes": []
+     },
+     "gameLog": []
+    },
+    "game": {
+     "id": "ec56d993-3e8c-4fb9-9cd5-45953fbaeb80",
+     "currentMatchId": "71ac5c6e-020f-47af-bb34-4cc684b888a1",
+     "participantIds": [
+      9001,
+      9002,
+      9003,
+      9004
+     ],
+     "status": "in-progress",
+     "format": "commander",
+     "seatLimit": 4,
+     "autoRandomizeSeatOrder": true,
+     "gameState": {
+      "currentPlayer": 0,
+      "playerOrder": [
+       9004,
+       9001,
+       9003,
+       9002
+      ],
+      "freedSeatPlayerIds": [],
+      "monarchPlayerId": null,
+      "initiativePlayerId": null,
+      "format": "commander",
+      "startedAt": "2026-11-18T02:04:48.462Z",
+      "endedAt": null,
+      "turnStartedAt": "2026-11-18T02:04:48.462Z",
+      "timerPausedAt": null,
+      "turnTimerPausedAt": null,
+      "turnRound": 0,
+      "winnerVotes": {}
+     },
+     "participants": [
+      {
+       "id": 9004,
+       "name": "Player 4",
+       "lastCommanderSelection": {
+        "deckUrl": null,
+        "commanderId": "dc8eb325-75c9-4331-830d-3f7d62d77290",
+        "companionId": null,
+        "commanderPrintId": "dc8eb325-75c9-4331-830d-3f7d62d77290",
+        "companionPrintId": null,
+        "secondaryCommanderId": null,
+        "secondaryCommanderPrintId": null
+       }
+      },
+      {
+       "id": 9002,
+       "name": "Player 2",
+       "lastCommanderSelection": {
+        "deckUrl": "https://example.invalid/deck",
+        "commanderId": "2cfd4494-346c-4cbc-8072-e267254cefcc",
+        "companionId": null,
+        "commanderPrintId": "2cfd4494-346c-4cbc-8072-e267254cefcc",
+        "companionPrintId": null,
+        "secondaryCommanderId": null,
+        "secondaryCommanderPrintId": null
+       }
+      },
+      {
+       "id": 9001,
+       "name": "Player 1",
+       "lastCommanderSelection": {
+        "deckUrl": null,
+        "commanderId": "2c3549f6-25df-4ea7-84ad-922ccd4af6b2",
+        "companionId": null,
+        "commanderPrintId": "2c3549f6-25df-4ea7-84ad-922ccd4af6b2",
+        "companionPrintId": null,
+        "secondaryCommanderId": null,
+        "secondaryCommanderPrintId": null
+       }
+      },
+      {
+       "id": 9003,
+       "name": "Player 3",
+       "lastCommanderSelection": {
+        "deckUrl": "https://example.invalid/deck",
+        "commanderId": "568aa70a-6765-486a-bd37-5d38b16c46de",
+        "companionId": null,
+        "commanderPrintId": "568aa70a-6765-486a-bd37-5d38b16c46de",
+        "companionPrintId": null,
+        "secondaryCommanderId": null,
+        "secondaryCommanderPrintId": null
+       }
+      }
+     ]
+    }
+   }
+  },
+  {
+   "at": "2026-11-18T02:44:54.139Z",
+   "method": "POST",
+   "path": "/api/match/71ac5c6e-020f-47af-bb34-4cc684b888a1/end",
+   "status": 200,
+   "requestBody": {
+    "winnerIds": []
+   },
+   "responseBody": {
+    "match": {
+     "id": "71ac5c6e-020f-47af-bb34-4cc684b888a1",
+     "gameId": "ec56d993-3e8c-4fb9-9cd5-45953fbaeb80",
+     "playerIds": [
+      9001,
+      9002,
+      9003,
+      9004
+     ],
+     "winnerIds": [],
+     "status": "completed",
+     "format": "commander",
+     "startedAt": "2026-11-18T02:04:48.930Z",
+     "endedAt": "2026-11-18T02:44:53.812Z",
+     "stateVersion": 221,
+     "state": {
+      "currentPlayer": 0,
+      "playerOrder": [
+       9004,
+       9001,
+       9003,
+       9002
+      ],
+      "freedSeatPlayerIds": [],
+      "format": "commander",
+      "startedAt": "2026-11-18T02:04:48.462Z",
+      "endedAt": "2026-11-18T02:44:53.436Z",
+      "turnRound": 7,
+      "turnStartedAt": "2026-11-18T02:44:33.833Z",
+      "winnerVotes": {},
+      "monarchPlayerId": null,
+      "initiativePlayerId": null,
+      "players": [
+       {
+        "id": 9001,
+        "name": "Player 1",
+        "life": 0,
+        "poison": 0,
+        "isEliminated": true,
+        "isConnected": false,
+        "turnNumber": 6,
+        "totalTurnTimeMs": 628252,
+        "commanderDamageTaken": [
+         {
+          "fromPlayerId": 9004,
+          "amount": 5
+         }
+        ],
+        "secondaryCommanderDamageTaken": [],
+        "commanderTax": 0,
+        "playerStatus": null,
+        "commander": {
+         "name": "Felothar the Steadfast",
+         "oracle_id": "2b3f791a-d672-46fb-a03a-96e19f2c3121",
+         "scryfall_id": "2c3549f6-25df-4ea7-84ad-922ccd4af6b2"
+        },
+        "secondaryCommander": null,
+        "deckSelectionStatus": "unset"
+       },
+       {
+        "id": 9002,
+        "name": "Player 2",
+        "life": 0,
+        "poison": 0,
+        "isEliminated": true,
+        "isConnected": true,
+        "turnNumber": 6,
+        "totalTurnTimeMs": 407244,
+        "commanderDamageTaken": [
+         {
+          "fromPlayerId": 9001,
+          "amount": 5
+         }
+        ],
+        "secondaryCommanderDamageTaken": [],
+        "commanderTax": 0,
+        "playerStatus": null,
+        "commander": {
+         "name": "Tidus, Yuna's Guardian",
+         "oracle_id": "e8fbcafd-3617-4cd7-b55d-457fb7b60162",
+         "scryfall_id": null
+        },
+        "secondaryCommander": null,
+        "deckSelectionStatus": "chosen"
+       },
+       {
+        "id": 9003,
+        "name": "Player 3",
+        "life": 1,
+        "poison": 0,
+        "isEliminated": false,
+        "isConnected": true,
+        "turnNumber": 7,
+        "totalTurnTimeMs": 705043,
+        "commanderDamageTaken": [],
+        "secondaryCommanderDamageTaken": [],
+        "commanderTax": 0,
+        "playerStatus": null,
+        "commander": {
+         "name": "Doran, Besieged by Time",
+         "oracle_id": "dd35a377-0865-4b25-bd0f-aaead29a9f0e",
+         "scryfall_id": null
+        },
+        "secondaryCommander": null,
+        "deckSelectionStatus": "chosen"
+       },
+       {
+        "id": 9004,
+        "name": "Player 4",
+        "life": 24,
+        "poison": 0,
+        "isEliminated": false,
+        "isConnected": true,
+        "turnNumber": 8,
+        "totalTurnTimeMs": 664430,
+        "commanderDamageTaken": [
+         {
+          "fromPlayerId": 9001,
+          "amount": 10
+         }
+        ],
+        "secondaryCommanderDamageTaken": [],
+        "commanderTax": 0,
+        "playerStatus": null,
+        "commander": {
+         "name": "Zurgo Stormrender",
+         "oracle_id": "0f93d88c-9d2e-416d-a10b-99483360b1fb",
+         "scryfall_id": "dc8eb325-75c9-4331-830d-3f7d62d77290"
+        },
+        "secondaryCommander": null,
+        "deckSelectionStatus": "unset"
+       }
+      ],
+      "eventTypes": [
+       "counter",
+       "turn"
+      ]
+     },
+     "gameLog": [
+      {
+       "at": "2026-11-18T02:04:48.808Z",
+       "type": "turnOrder",
+       "by": 9001,
+       "data": {
+        "previousOrder": [
+         9001,
+         9002,
+         9003,
+         9004
+        ],
+        "nextOrder": [
+         9004,
+         9001,
+         9003,
+         9002
+        ]
+       }
+      },
+      {
+       "at": "2026-11-18T02:05:09.100Z",
+       "type": "turn",
+       "by": 9004,
+       "data": {
+        "playerId": 9001,
+        "turnNumber": 1,
+        "previousTurnNumber": 0,
+        "reason": "advance"
+       }
+      },
+      {
+       "at": "2026-11-18T02:05:16.964Z",
+       "type": "turn",
+       "by": 9001,
+       "data": {
+        "playerId": 9003,
+        "turnNumber": 1,
+        "previousTurnNumber": 0,
+        "reason": "advance"
+       }
+      },
+      {
+       "at": "2026-11-18T02:05:37.234Z",
+       "type": "turn",
+       "by": 9003,
+       "data": {
+        "playerId": 9002,
+        "turnNumber": 1,
+        "previousTurnNumber": 0,
+        "reason": "advance"
+       }
+      },
+      {
+       "at": "2026-11-18T02:05:40.718Z",
+       "type": "turn",
+       "by": 9002,
+       "data": {
+        "playerId": 9004,
+        "turnNumber": 2,
+        "previousTurnNumber": 1,
+        "reason": "advance"
+       }
+      },
+      {
+       "at": "2026-11-18T02:05:49.094Z",
+       "type": "turn",
+       "by": 9004,
+       "data": {
+        "playerId": 9001,
+        "turnNumber": 2,
+        "previousTurnNumber": 1,
+        "reason": "advance"
+       }
+      },
+      {
+       "at": "2026-11-18T02:06:09.519Z",
+       "type": "turn",
+       "by": 9001,
+       "data": {
+        "playerId": 9003,
+        "turnNumber": 2,
+        "previousTurnNumber": 1,
+        "reason": "advance"
+       }
+      },
+      {
+       "at": "2026-11-18T02:06:29.219Z",
+       "type": "turn",
+       "by": 9003,
+       "data": {
+        "playerId": 9002,
+        "turnNumber": 2,
+        "previousTurnNumber": 1,
+        "reason": "advance"
+       }
+      },
+      {
+       "at": "2026-11-18T02:06:38.268Z",
+       "type": "turn",
+       "by": 9002,
+       "data": {
+        "playerId": 9004,
+        "turnNumber": 3,
+        "previousTurnNumber": 2,
+        "reason": "advance"
+       }
+      },
+      {
+       "at": "2026-11-18T02:06:52.324Z",
+       "type": "turn",
+       "by": 9004,
+       "data": {
+        "playerId": 9001,
+        "turnNumber": 3,
+        "previousTurnNumber": 2,
+        "reason": "advance"
+       }
+      },
+      {
+       "at": "2026-11-18T02:07:07.731Z",
+       "type": "turn",
+       "by": 9001,
+       "data": {
+        "playerId": 9003,
+        "turnNumber": 3,
+        "previousTurnNumber": 2,
+        "reason": "advance"
+       }
+      },
+      {
+       "at": "2026-11-18T02:07:40.829Z",
+       "type": "counter",
+       "by": 9003,
+       "data": {
+        "kind": "life",
+        "targetId": 9003,
+        "from": 40,
+        "to": 41,
+        "delta": 1
+       }
+      },
+      {
+       "at": "2026-11-18T02:07:41.574Z",
+       "type": "turn",
+       "by": 9003,
+       "data": {
+        "playerId": 9002,
+        "turnNumber": 3,
+        "previousTurnNumber": 2,
+        "reason": "advance"
+       }
+      },
+      {
+       "at": "2026-11-18T02:07:59.337Z",
+       "type": "counter",
+       "by": 9002,
+       "data": {
+        "kind": "life",
+        "targetId": 9002,
+        "from": 40,
+        "to": 39,
+        "delta": -1
+       }
+      },
+      {
+       "at": "2026-11-18T02:08:19.830Z",
+       "type": "turn",
+       "by": 9002,
+       "data": {
+        "playerId": 9004,
+        "turnNumber": 4,
+        "previousTurnNumber": 3,
+        "reason": "advance"
+       }
+      },
+      {
+       "at": "2026-11-18T02:08:35.011Z",
+       "type": "counter",
+       "by": 9004,
+       "data": {
+        "kind": "life",
+        "targetId": 9004,
+        "from": 40,
+        "to": 39,
+        "delta": -1
+       }
+      },
+      {
+       "at": "2026-11-18T02:08:48.882Z",
+       "type": "counter",
+       "by": 9004,
+       "data": {
+        "kind": "life",
+        "targetId": 9004,
+        "from": 39,
+        "to": 38,
+        "delta": -1
+       }
+      },
+      {
+       "at": "2026-11-18T02:08:53.394Z",
+       "type": "turn",
+       "by": 9004,
+       "data": {
+        "playerId": 9001,
+        "turnNumber": 4,
+        "previousTurnNumber": 3,
+        "reason": "advance"
+       }
+      },
+      {
+       "at": "2026-11-18T02:10:07.723Z",
+       "type": "counter",
+       "by": 9002,
+       "data": {
+        "kind": "life",
+        "targetId": 9002,
+        "from": 39,
+        "to": 34,
+        "delta": -5
+       }
+      },
+      {
+       "at": "2026-11-18T02:10:09.728Z",
+       "type": "turn",
+       "by": 9001,
+       "data": {
+        "playerId": 9003,
+        "turnNumber": 4,
+        "previousTurnNumber": 3,
+        "reason": "advance"
+       }
+      },
+      {
+       "at": "2026-11-18T02:10:11.384Z",
+       "type": "counter",
+       "by": 9002,
+       "data": {
+        "kind": "commander",
+        "targetId": 9002,
+        "from": 0,
+        "to": 4,
+        "delta": 4,
+        "fromPlayerId": 9001,
+        "commanderSlot": "primary"
+       }
+      },
+      {
+       "at": "2026-11-18T02:10:11.772Z",
+       "type": "counter",
+       "by": 9002,
+       "data": {
+        "kind": "commander",
+        "targetId": 9002,
+        "from": 0,
+        "to": 5,
+        "delta": 5,
+        "fromPlayerId": 9001,
+        "commanderSlot": "primary"
+       }
+      },
+      {
+       "at": "2026-11-18T02:10:17.877Z",
+       "type": "counter",
+       "by": 9003,
+       "data": {
+        "kind": "life",
+        "targetId": 9003,
+        "from": 41,
+        "to": 42,
+        "delta": 1
+       }
+      },
+      {
+       "at": "2026-11-18T02:10:58.411Z",
+       "type": "counter",
+       "by": 9002,
+       "data": {
+        "kind": "life",
+        "targetId": 9002,
+        "from": 34,
+        "to": 29,
+        "delta": -5
+       }
+      },
+      {
+       "at": "2026-11-18T02:11:07.390Z",
+       "type": "turn",
+       "by": 9003,
+       "data": {
+        "playerId": 9002,
+        "turnNumber": 4,
+        "previousTurnNumber": 3,
+        "reason": "advance"
+       }
+      },
+      {
+       "at": "2026-11-18T02:11:51.258Z",
+       "type": "counter",
+       "by": 9002,
+       "data": {
+        "kind": "life",
+        "targetId": 9002,
+        "from": 29,
+        "to": 27,
+        "delta": -2
+       }
+      },
+      {
+       "at": "2026-11-18T02:12:34.365Z",
+       "type": "counter",
+       "by": 9003,
+       "data": {
+        "kind": "life",
+        "targetId": 9003,
+        "from": 42,
+        "to": 40,
+        "delta": -2
+       }
+      },
+      {
+       "at": "2026-11-18T02:12:50.573Z",
+       "type": "turn",
+       "by": 9002,
+       "data": {
+        "playerId": 9004,
+        "turnNumber": 5,
+        "previousTurnNumber": 4,
+        "reason": "advance"
+       }
+      },
+      {
+       "at": "2026-11-18T02:13:11.948Z",
+       "type": "counter",
+       "by": 9004,
+       "data": {
+        "kind": "life",
+        "targetId": 9004,
+        "from": 38,
+        "to": 37,
+        "delta": -1
+       }
+      },
+      {
+       "at": "2026-11-18T02:14:41.812Z",
+       "type": "counter",
+       "by": 9001,
+       "data": {
+        "kind": "commander",
+        "targetId": 9001,
+        "from": 0,
+        "to": 5,
+        "delta": 5,
+        "fromPlayerId": 9004,
+        "commanderSlot": "primary"
+       }
+      },
+      {
+       "at": "2026-11-18T02:14:43.194Z",
+       "type": "counter",
+       "by": 9001,
+       "data": {
+        "kind": "life",
+        "targetId": 9001,
+        "from": 40,
+        "to": 35,
+        "delta": -5
+       }
+      },
+      {
+       "at": "2026-11-18T02:15:12.321Z",
+       "type": "turn",
+       "by": 9004,
+       "data": {
+        "playerId": 9001,
+        "turnNumber": 5,
+        "previousTurnNumber": 4,
+        "reason": "advance"
+       }
+      },
+      {
+       "at": "2026-11-18T02:18:55.937Z",
+       "type": "counter",
+       "by": 9004,
+       "data": {
+        "kind": "life",
+        "targetId": 9004,
+        "from": 37,
+        "to": 28,
+        "delta": -9
+       }
+      },
+      {
+       "at": "2026-11-18T02:18:56.269Z",
+       "type": "counter",
+       "by": 9004,
+       "data": {
+        "kind": "life",
+        "targetId": 9004,
+        "from": 28,
+        "to": 27,
+        "delta": -1
+       }
+      },
+      {
+       "at": "2026-11-18T02:18:57.978Z",
+       "type": "turn",
+       "by": 9001,
+       "data": {
+        "playerId": 9003,
+        "turnNumber": 5,
+        "previousTurnNumber": 4,
+        "reason": "advance"
+       }
+      },
+      {
+       "at": "2026-11-18T02:19:02.342Z",
+       "type": "counter",
+       "by": 9004,
+       "data": {
+        "kind": "commander",
+        "targetId": 9004,
+        "from": 0,
+        "to": 10,
+        "delta": 10,
+        "fromPlayerId": 9001,
+        "commanderSlot": "primary"
+       }
+      },
+      {
+       "at": "2026-11-18T02:19:54.024Z",
+       "type": "counter",
+       "by": 9003,
+       "data": {
+        "kind": "life",
+        "targetId": 9003,
+        "from": 40,
+        "to": 41,
+        "delta": 1
+       }
+      },
+      {
+       "at": "2026-11-18T02:20:12.635Z",
+       "type": "counter",
+       "by": 9003,
+       "data": {
+        "kind": "life",
+        "targetId": 9003,
+        "from": 41,
+        "to": 40,
+        "delta": -1
+       }
+      },
+      {
+       "at": "2026-11-18T02:22:07.069Z",
+       "type": "counter",
+       "by": 9001,
+       "data": {
+        "kind": "life",
+        "targetId": 9001,
+        "from": 35,
+        "to": 30,
+        "delta": -5
+       }
+      },
+      {
+       "at": "2026-11-18T02:22:47.221Z",
+       "type": "counter",
+       "by": 9001,
+       "data": {
+        "kind": "life",
+        "targetId": 9001,
+        "from": 30,
+        "to": 28,
+        "delta": -2
+       }
+      },
+      {
+       "at": "2026-11-18T02:22:47.676Z",
+       "type": "counter",
+       "by": 9001,
+       "data": {
+        "kind": "life",
+        "targetId": 9001,
+        "from": 28,
+        "to": 27,
+        "delta": -1
+       }
+      },
+      {
+       "at": "2026-11-18T02:23:01.502Z",
+       "type": "turn",
+       "by": 9003,
+       "data": {
+        "playerId": 9002,
+        "turnNumber": 5,
+        "previousTurnNumber": 4,
+        "reason": "advance"
+       }
+      },
+      {
+       "at": "2026-11-18T02:25:02.970Z",
+       "type": "counter",
+       "by": 9003,
+       "data": {
+        "kind": "life",
+        "targetId": 9003,
+        "from": 40,
+        "to": 36,
+        "delta": -4
+       }
+      },
+      {
+       "at": "2026-11-18T02:25:28.216Z",
+       "type": "turn",
+       "by": 9002,
+       "data": {
+        "playerId": 9004,
+        "turnNumber": 6,
+        "previousTurnNumber": 5,
+        "reason": "advance"
+       }
+      },
+      {
+       "at": "2026-11-18T02:25:55.539Z",
+       "type": "counter",
+       "by": 9003,
+       "data": {
+        "kind": "life",
+        "targetId": 9003,
+        "from": 36,
+        "to": 35,
+        "delta": -1
+       }
+      },
+      {
+       "at": "2026-11-18T02:27:21.737Z",
+       "type": "counter",
+       "by": 9003,
+       "data": {
+        "kind": "life",
+        "targetId": 9003,
+        "from": 35,
+        "to": 30,
+        "delta": -5
+       }
+      },
+      {
+       "at": "2026-11-18T02:28:35.933Z",
+       "type": "turn",
+       "by": 9004,
+       "data": {
+        "playerId": 9001,
+        "turnNumber": 6,
+        "previousTurnNumber": 5,
+        "reason": "advance"
+       }
+      },
+      {
+       "at": "2026-11-18T02:30:44.850Z",
+       "type": "counter",
+       "by": 9003,
+       "data": {
+        "kind": "life",
+        "targetId": 9003,
+        "from": 30,
+        "to": 33,
+        "delta": 3
+       }
+      },
+      {
+       "at": "2026-11-18T02:30:45.498Z",
+       "type": "counter",
+       "by": 9003,
+       "data": {
+        "kind": "life",
+        "targetId": 9003,
+        "from": 33,
+        "to": 31,
+        "delta": -2
+       }
+      },
+      {
+       "at": "2026-11-18T02:30:45.839Z",
+       "type": "counter",
+       "by": 9003,
+       "data": {
+        "kind": "life",
+        "targetId": 9003,
+        "from": 31,
+        "to": 30,
+        "delta": -1
+       }
+      },
+      {
+       "at": "2026-11-18T02:30:46.434Z",
+       "type": "counter",
+       "by": 9003,
+       "data": {
+        "kind": "life",
+        "targetId": 9003,
+        "from": 30,
+        "to": 27,
+        "delta": -3
+       }
+      },
+      {
+       "at": "2026-11-18T02:30:46.796Z",
+       "type": "counter",
+       "by": 9003,
+       "data": {
+        "kind": "life",
+        "targetId": 9003,
+        "from": 27,
+        "to": 26,
+        "delta": -1
+       }
+      },
+      {
+       "at": "2026-11-18T02:33:18.500Z",
+       "type": "turn",
+       "by": 9001,
+       "data": {
+        "playerId": 9003,
+        "turnNumber": 6,
+        "previousTurnNumber": 5,
+        "reason": "advance"
+       }
+      },
+      {
+       "at": "2026-11-18T02:35:51.287Z",
+       "type": "counter",
+       "by": 9003,
+       "data": {
+        "kind": "life",
+        "targetId": 9003,
+        "from": 26,
+        "to": 27,
+        "delta": 1
+       }
+      },
+      {
+       "at": "2026-11-18T02:36:50.992Z",
+       "type": "counter",
+       "by": 9002,
+       "data": {
+        "kind": "life",
+        "targetId": 9002,
+        "from": 27,
+        "to": 17,
+        "delta": -10
+       }
+      },
+      {
+       "at": "2026-11-18T02:37:02.291Z",
+       "type": "counter",
+       "by": 9001,
+       "data": {
+        "kind": "life",
+        "targetId": 9001,
+        "from": 27,
+        "to": 17,
+        "delta": -10
+       }
+      },
+      {
+       "at": "2026-11-18T02:37:36.909Z",
+       "type": "counter",
+       "by": 9003,
+       "data": {
+        "kind": "life",
+        "targetId": 9003,
+        "from": 27,
+        "to": 18,
+        "delta": -9
+       }
+      },
+      {
+       "at": "2026-11-18T02:37:37.844Z",
+       "type": "counter",
+       "by": 9003,
+       "data": {
+        "kind": "life",
+        "targetId": 9003,
+        "from": 18,
+        "to": 17,
+        "delta": -1
+       }
+      },
+      {
+       "at": "2026-11-18T02:37:57.817Z",
+       "type": "turn",
+       "by": 9003,
+       "data": {
+        "playerId": 9002,
+        "turnNumber": 6,
+        "previousTurnNumber": 5,
+        "reason": "advance"
+       }
+      },
+      {
+       "at": "2026-11-18T02:39:12.493Z",
+       "type": "counter",
+       "by": 9001,
+       "data": {
+        "kind": "life",
+        "targetId": 9001,
+        "from": 17,
+        "to": 10,
+        "delta": -7
+       }
+      },
+      {
+       "at": "2026-11-18T02:39:13.000Z",
+       "type": "counter",
+       "by": 9001,
+       "data": {
+        "kind": "life",
+        "targetId": 9001,
+        "from": 10,
+        "to": 9,
+        "delta": -1
+       }
+      },
+      {
+       "at": "2026-11-18T02:39:13.322Z",
+       "type": "counter",
+       "by": 9001,
+       "data": {
+        "kind": "life",
+        "targetId": 9001,
+        "from": 9,
+        "to": 8,
+        "delta": -1
+       }
+      },
+      {
+       "at": "2026-11-18T02:39:13.718Z",
+       "type": "counter",
+       "by": 9001,
+       "data": {
+        "kind": "life",
+        "targetId": 9001,
+        "from": 8,
+        "to": 7,
+        "delta": -1
+       }
+      },
+      {
+       "at": "2026-11-18T02:39:15.934Z",
+       "type": "counter",
+       "by": 9002,
+       "data": {
+        "kind": "life",
+        "targetId": 9002,
+        "from": 17,
+        "to": 8,
+        "delta": -9
+       }
+      },
+      {
+       "at": "2026-11-18T02:39:16.283Z",
+       "type": "counter",
+       "by": 9002,
+       "data": {
+        "kind": "life",
+        "targetId": 9002,
+        "from": 8,
+        "to": 7,
+        "delta": -1
+       }
+      },
+      {
+       "at": "2026-11-18T02:39:36.774Z",
+       "type": "counter",
+       "by": 9003,
+       "data": {
+        "kind": "life",
+        "targetId": 9003,
+        "from": 17,
+        "to": 10,
+        "delta": -7
+       }
+      },
+      {
+       "at": "2026-11-18T02:39:44.380Z",
+       "type": "turn",
+       "by": 9002,
+       "data": {
+        "playerId": 9004,
+        "turnNumber": 7,
+        "previousTurnNumber": 6,
+        "reason": "advance"
+       }
+      },
+      {
+       "at": "2026-11-18T02:39:56.612Z",
+       "type": "counter",
+       "by": 9003,
+       "data": {
+        "kind": "life",
+        "targetId": 9003,
+        "from": 10,
+        "to": 7,
+        "delta": -3
+       }
+      },
+      {
+       "at": "2026-11-18T02:40:25.414Z",
+       "type": "counter",
+       "by": 9004,
+       "data": {
+        "kind": "life",
+        "targetId": 9004,
+        "from": 27,
+        "to": 26,
+        "delta": -1
+       }
+      },
+      {
+       "at": "2026-11-18T02:42:19.102Z",
+       "type": "counter",
+       "by": 9003,
+       "data": {
+        "kind": "life",
+        "targetId": 9003,
+        "from": 7,
+        "to": 4,
+        "delta": -3
+       }
+      },
+      {
+       "at": "2026-11-18T02:42:20.194Z",
+       "type": "counter",
+       "by": 9003,
+       "data": {
+        "kind": "life",
+        "targetId": 9003,
+        "from": 4,
+        "to": 3,
+        "delta": -1
+       }
+      },
+      {
+       "at": "2026-11-18T02:42:40.851Z",
+       "type": "counter",
+       "by": 9003,
+       "data": {
+        "kind": "life",
+        "targetId": 9003,
+        "from": 3,
+        "to": 1,
+        "delta": -2
+       }
+      },
+      {
+       "at": "2026-11-18T02:42:42.294Z",
+       "type": "counter",
+       "by": 9001,
+       "data": {
+        "kind": "life",
+        "targetId": 9001,
+        "from": 7,
+        "to": 0,
+        "delta": -7
+       }
+      },
+      {
+       "at": "2026-11-18T02:43:43.107Z",
+       "type": "turn",
+       "by": 9004,
+       "data": {
+        "playerId": 9003,
+        "turnNumber": 7,
+        "previousTurnNumber": 6,
+        "reason": "advance"
+       }
+      },
+      {
+       "at": "2026-11-18T02:43:47.035Z",
+       "type": "counter",
+       "by": 9002,
+       "data": {
+        "kind": "life",
+        "targetId": 9002,
+        "from": 7,
+        "to": -1,
+        "delta": -8
+       }
+      },
+      {
+       "at": "2026-11-18T02:43:47.833Z",
+       "type": "counter",
+       "by": 9002,
+       "data": {
+        "kind": "life",
+        "targetId": 9002,
+        "from": -1,
+        "to": 0,
+        "delta": 1
+       }
+      },
+      {
+       "at": "2026-11-18T02:44:33.833Z",
+       "type": "turn",
+       "by": 9003,
+       "data": {
+        "playerId": 9004,
+        "turnNumber": 8,
+        "previousTurnNumber": 7,
+        "reason": "advance"
+       }
+      },
+      {
+       "at": "2026-11-18T02:44:39.776Z",
+       "type": "counter",
+       "by": 9004,
+       "data": {
+        "kind": "life",
+        "targetId": 9004,
+        "from": 26,
+        "to": 24,
+        "delta": -2
+       }
+      }
+     ]
+    },
+    "game": {
+     "id": "ec56d993-3e8c-4fb9-9cd5-45953fbaeb80",
+     "currentMatchId": "3027c39c-dd29-4dd3-873d-ed218ab341bc",
+     "participantIds": [
+      9001,
+      9002,
+      9003,
+      9004
+     ],
+     "status": "waiting",
+     "format": "commander",
+     "seatLimit": 4,
+     "autoRandomizeSeatOrder": true,
+     "gameState": {
+      "currentPlayer": 0,
+      "playerOrder": [
+       9004,
+       9001,
+       9003,
+       9002
+      ],
+      "monarchPlayerId": null,
+      "initiativePlayerId": null,
+      "format": "commander",
+      "turnStartedAt": "2026-11-18T02:44:33.833Z",
+      "timerPausedAt": null,
+      "turnTimerPausedAt": null,
+      "turnRound": 7,
+      "endedAt": null,
+      "winnerVotes": {},
+      "recordedWinnerId": null,
+      "mythicTrackDataSubmitted": false,
+      "playgroupDataSubmitted": false,
+      "playniceDataSubmitted": false,
+      "playniceEarlySnapshotSubmitted": false,
+      "mythicTrackEarlySnapshotSubmitted": false,
+      "mythicTrackAssignment": null
+     },
+     "participants": [
+      {
+       "id": 9004,
+       "name": "Player 4",
+       "lastCommanderSelection": {
+        "deckUrl": null,
+        "commanderId": "dc8eb325-75c9-4331-830d-3f7d62d77290",
+        "companionId": null,
+        "commanderPrintId": "dc8eb325-75c9-4331-830d-3f7d62d77290",
+        "companionPrintId": null,
+        "secondaryCommanderId": null,
+        "secondaryCommanderPrintId": null
+       }
+      },
+      {
+       "id": 9002,
+       "name": "Player 2",
+       "lastCommanderSelection": {
+        "deckUrl": "https://example.invalid/deck",
+        "commanderId": "2cfd4494-346c-4cbc-8072-e267254cefcc",
+        "companionId": null,
+        "commanderPrintId": "2cfd4494-346c-4cbc-8072-e267254cefcc",
+        "companionPrintId": null,
+        "secondaryCommanderId": null,
+        "secondaryCommanderPrintId": null
+       }
+      },
+      {
+       "id": 9001,
+       "name": "Player 1",
+       "lastCommanderSelection": {
+        "deckUrl": null,
+        "commanderId": "2c3549f6-25df-4ea7-84ad-922ccd4af6b2",
+        "companionId": null,
+        "commanderPrintId": "2c3549f6-25df-4ea7-84ad-922ccd4af6b2",
+        "companionPrintId": null,
+        "secondaryCommanderId": null,
+        "secondaryCommanderPrintId": null
+       }
+      },
+      {
+       "id": 9003,
+       "name": "Player 3",
+       "lastCommanderSelection": {
+        "deckUrl": "https://example.invalid/deck",
+        "commanderId": "568aa70a-6765-486a-bd37-5d38b16c46de",
+        "companionId": null,
+        "commanderPrintId": "568aa70a-6765-486a-bd37-5d38b16c46de",
+        "companionPrintId": null,
+        "secondaryCommanderId": null,
+        "secondaryCommanderPrintId": null
+       }
+      }
+     ]
+    }
+   }
+  },
+  {
+   "at": "2026-11-18T02:44:57.185Z",
+   "method": "POST",
+   "path": "/api/match/71ac5c6e-020f-47af-bb34-4cc684b888a1/vote-winner",
+   "status": 200,
+   "requestBody": {
+    "winnerId": 9004,
+    "source": "end_modal"
+   },
+   "responseBody": {
+    "success": true,
+    "myVote": 9004,
+    "canVote": true,
+    "voteCounts": {
+     "9004": 1
+    },
+    "requiredVotes": 3,
+    "voteCount": 1,
+    "leadingWinnerId": 9004,
+    "votingStillOpen": true,
+    "winnerId": null,
+    "winnerRecorded": false,
+    "winnerIds": [],
+    "endedInDraw": false,
+    "resolutionReason": null
+   }
+  },
+  {
+   "at": "2026-11-18T02:51:06.346Z",
+   "method": "POST",
+   "path": "/api/match/3027c39c-dd29-4dd3-873d-ed218ab341bc/start",
+   "status": 200,
+   "requestBody": {},
+   "responseBody": {
+    "match": {
+     "id": "3027c39c-dd29-4dd3-873d-ed218ab341bc",
+     "gameId": "ec56d993-3e8c-4fb9-9cd5-45953fbaeb80",
+     "playerIds": [
+      9001,
+      9002,
+      9003,
+      9004
+     ],
+     "winnerIds": [],
+     "status": "in-progress",
+     "format": "commander",
+     "startedAt": "2026-11-18T02:51:06.175Z",
+     "endedAt": null,
+     "stateVersion": 239,
+     "state": {
+      "currentPlayer": 0,
+      "playerOrder": [
+       9002,
+       9004,
+       9003,
+       9001
+      ],
+      "freedSeatPlayerIds": [],
+      "format": "commander",
+      "startedAt": "2026-11-18T02:51:05.625Z",
+      "endedAt": null,
+      "turnRound": 0,
+      "turnStartedAt": "2026-11-18T02:51:05.625Z",
+      "winnerVotes": {},
+      "monarchPlayerId": null,
+      "initiativePlayerId": null,
+      "players": [
+       {
+        "id": 9001,
+        "name": "Player 1",
+        "life": 40,
+        "poison": 0,
+        "isEliminated": false,
+        "isConnected": false,
+        "turnNumber": 0,
+        "totalTurnTimeMs": 0,
+        "commanderDamageTaken": [],
+        "secondaryCommanderDamageTaken": [],
+        "commanderTax": 0,
+        "playerStatus": null,
+        "commander": {
+         "name": "Imotekh the Stormlord",
+         "oracle_id": "425fea06-76ec-4cd9-bd3b-750504fd7fd2",
+         "scryfall_id": "1287e69f-5e92-48f4-80de-d43cb5be21ce"
+        },
+        "secondaryCommander": null,
+        "deckSelectionStatus": "unset"
+       },
+       {
+        "id": 9002,
+        "name": "Player 2",
+        "life": 40,
+        "poison": 0,
+        "isEliminated": false,
+        "isConnected": true,
+        "turnNumber": 1,
+        "totalTurnTimeMs": 0,
+        "commanderDamageTaken": [],
+        "secondaryCommanderDamageTaken": [],
+        "commanderTax": 0,
+        "playerStatus": null,
+        "commander": {
+         "name": "Baba Lysaga, Night Witch",
+         "oracle_id": "d6cd4aa1-ff3a-4453-8735-e5ace5cbe386",
+         "scryfall_id": null
+        },
+        "secondaryCommander": null,
+        "deckSelectionStatus": "chosen"
+       },
+       {
+        "id": 9003,
+        "name": "Player 3",
+        "life": 40,
+        "poison": 0,
+        "isEliminated": false,
+        "isConnected": true,
+        "turnNumber": 0,
+        "totalTurnTimeMs": 0,
+        "commanderDamageTaken": [],
+        "secondaryCommanderDamageTaken": [],
+        "commanderTax": 0,
+        "playerStatus": null,
+        "commander": {
+         "name": "Doran, Besieged by Time",
+         "oracle_id": "dd35a377-0865-4b25-bd0f-aaead29a9f0e",
+         "scryfall_id": null
+        },
+        "secondaryCommander": null,
+        "deckSelectionStatus": "chosen"
+       },
+       {
+        "id": 9004,
+        "name": "Player 4",
+        "life": 40,
+        "poison": 0,
+        "isEliminated": false,
+        "isConnected": true,
+        "turnNumber": 0,
+        "totalTurnTimeMs": 0,
+        "commanderDamageTaken": [],
+        "secondaryCommanderDamageTaken": [],
+        "commanderTax": 0,
+        "playerStatus": null,
+        "commander": {
+         "name": "Astonishing Spider-Man",
+         "oracle_id": "24059283-edbd-4817-9f35-4be02f07b8f8",
+         "scryfall_id": "b5787d4b-ce1e-49d9-9669-307bda264b33"
+        },
+        "secondaryCommander": null,
+        "deckSelectionStatus": "unset"
+       }
+      ],
+      "eventTypes": []
+     },
+     "gameLog": []
+    },
+    "game": {
+     "id": "ec56d993-3e8c-4fb9-9cd5-45953fbaeb80",
+     "currentMatchId": "3027c39c-dd29-4dd3-873d-ed218ab341bc",
+     "participantIds": [
+      9001,
+      9002,
+      9003,
+      9004
+     ],
+     "status": "in-progress",
+     "format": "commander",
+     "seatLimit": 4,
+     "autoRandomizeSeatOrder": true,
+     "gameState": {
+      "currentPlayer": 0,
+      "playerOrder": [
+       9002,
+       9004,
+       9003,
+       9001
+      ],
+      "freedSeatPlayerIds": [],
+      "monarchPlayerId": null,
+      "initiativePlayerId": null,
+      "format": "commander",
+      "gameStatus": "waiting",
+      "startedAt": "2026-11-18T02:51:05.625Z",
+      "endedAt": null,
+      "turnStartedAt": "2026-11-18T02:51:05.625Z",
+      "timerPausedAt": null,
+      "turnTimerPausedAt": null,
+      "turnRound": 0,
+      "winnerVotes": {},
+      "mythicTrackAssignment": null,
+      "mythicTrackDataSubmitted": false,
+      "mythicTrackEarlySnapshotSubmitted": false,
+      "playgroupDataSubmitted": false,
+      "playniceDataSubmitted": false,
+      "playniceEarlySnapshotSubmitted": false
+     },
+     "participants": [
+      {
+       "id": 9004,
+       "name": "Player 4",
+       "lastCommanderSelection": {
+        "deckUrl": null,
+        "commanderId": "b5787d4b-ce1e-49d9-9669-307bda264b33",
+        "companionId": null,
+        "commanderPrintId": "b5787d4b-ce1e-49d9-9669-307bda264b33",
+        "companionPrintId": null,
+        "secondaryCommanderId": null,
+        "secondaryCommanderPrintId": null
+       }
+      },
+      {
+       "id": 9002,
+       "name": "Player 2",
+       "lastCommanderSelection": {
+        "deckUrl": "https://example.invalid/deck",
+        "commanderId": "2ef42c3f-f22e-4e99-adb0-9e8f8d442347",
+        "companionId": null,
+        "commanderPrintId": "2ef42c3f-f22e-4e99-adb0-9e8f8d442347",
+        "companionPrintId": null,
+        "secondaryCommanderId": null,
+        "secondaryCommanderPrintId": null
+       }
+      },
+      {
+       "id": 9001,
+       "name": "Player 1",
+       "lastCommanderSelection": {
+        "deckUrl": null,
+        "commanderId": "1287e69f-5e92-48f4-80de-d43cb5be21ce",
+        "companionId": null,
+        "commanderPrintId": "1287e69f-5e92-48f4-80de-d43cb5be21ce",
+        "companionPrintId": null,
+        "secondaryCommanderId": null,
+        "secondaryCommanderPrintId": null
+       }
+      },
+      {
+       "id": 9003,
+       "name": "Player 3",
+       "lastCommanderSelection": {
+        "deckUrl": "https://example.invalid/deck",
+        "commanderId": "568aa70a-6765-486a-bd37-5d38b16c46de",
+        "companionId": null,
+        "commanderPrintId": "568aa70a-6765-486a-bd37-5d38b16c46de",
+        "companionPrintId": null,
+        "secondaryCommanderId": null,
+        "secondaryCommanderPrintId": null
+       }
+      }
+     ]
+    }
+   }
+  },
+  {
+   "at": "2026-11-18T03:38:26.864Z",
+   "method": "POST",
+   "path": "/api/match/3027c39c-dd29-4dd3-873d-ed218ab341bc/end",
+   "status": 200,
+   "requestBody": {
+    "winnerIds": []
+   },
+   "responseBody": {
+    "match": {
+     "id": "3027c39c-dd29-4dd3-873d-ed218ab341bc",
+     "gameId": "ec56d993-3e8c-4fb9-9cd5-45953fbaeb80",
+     "playerIds": [
+      9001,
+      9002,
+      9003,
+      9004
+     ],
+     "winnerIds": [],
+     "status": "completed",
+     "format": "commander",
+     "startedAt": "2026-11-18T02:51:06.175Z",
+     "endedAt": "2026-11-18T03:38:26.392Z",
+     "stateVersion": 433,
+     "state": {
+      "currentPlayer": 3,
+      "playerOrder": [
+       9002,
+       9004,
+       9003,
+       9001
+      ],
+      "freedSeatPlayerIds": [],
+      "format": "commander",
+      "startedAt": "2026-11-18T02:51:23.851Z",
+      "endedAt": "2026-11-18T03:38:25.991Z",
+      "turnRound": 7,
+      "turnStartedAt": "2026-11-18T03:31:35.108Z",
+      "winnerVotes": {},
+      "monarchPlayerId": null,
+      "initiativePlayerId": null,
+      "players": [
+       {
+        "id": 9001,
+        "name": "Player 1",
+        "life": 5,
+        "poison": 0,
+        "isEliminated": false,
+        "isConnected": false,
+        "turnNumber": 7,
+        "totalTurnTimeMs": 1098840,
+        "commanderDamageTaken": [
+         {
+          "fromPlayerId": 9004,
+          "amount": 4
+         }
+        ],
+        "secondaryCommanderDamageTaken": [],
+        "commanderTax": 0,
+        "playerStatus": null,
+        "commander": {
+         "name": "Imotekh the Stormlord",
+         "oracle_id": "425fea06-76ec-4cd9-bd3b-750504fd7fd2",
+         "scryfall_id": "1287e69f-5e92-48f4-80de-d43cb5be21ce"
+        },
+        "secondaryCommander": null,
+        "deckSelectionStatus": "unset"
+       },
+       {
+        "id": 9002,
+        "name": "Player 2",
+        "life": 48,
+        "poison": 0,
+        "isEliminated": false,
+        "isConnected": true,
+        "turnNumber": 7,
+        "totalTurnTimeMs": 894263,
+        "commanderDamageTaken": [],
+        "secondaryCommanderDamageTaken": [],
+        "commanderTax": 0,
+        "playerStatus": null,
+        "commander": {
+         "name": "Baba Lysaga, Night Witch",
+         "oracle_id": "d6cd4aa1-ff3a-4453-8735-e5ace5cbe386",
+         "scryfall_id": null
+        },
+        "secondaryCommander": null,
+        "deckSelectionStatus": "chosen"
+       },
+       {
+        "id": 9003,
+        "name": "Player 3",
+        "life": 16,
+        "poison": 0,
+        "isEliminated": false,
+        "isConnected": true,
+        "turnNumber": 7,
+        "totalTurnTimeMs": 467953,
+        "commanderDamageTaken": [],
+        "secondaryCommanderDamageTaken": [],
+        "commanderTax": 0,
+        "playerStatus": null,
+        "commander": {
+         "name": "Doran, Besieged by Time",
+         "oracle_id": "dd35a377-0865-4b25-bd0f-aaead29a9f0e",
+         "scryfall_id": null
+        },
+        "secondaryCommander": null,
+        "deckSelectionStatus": "chosen"
+       },
+       {
+        "id": 9004,
+        "name": "Player 4",
+        "life": 13,
+        "poison": 0,
+        "isEliminated": false,
+        "isConnected": true,
+        "turnNumber": 7,
+        "totalTurnTimeMs": 361074,
+        "commanderDamageTaken": [],
+        "secondaryCommanderDamageTaken": [],
+        "commanderTax": 0,
+        "playerStatus": null,
+        "commander": {
+         "name": "Astonishing Spider-Man",
+         "oracle_id": "24059283-edbd-4817-9f35-4be02f07b8f8",
+         "scryfall_id": "b5787d4b-ce1e-49d9-9669-307bda264b33"
+        },
+        "secondaryCommander": null,
+        "deckSelectionStatus": "unset"
+       }
+      ],
+      "eventTypes": [
+       "counter",
+       "turn"
+      ]
+     },
+     "gameLog": [
+      {
+       "at": "2026-11-18T02:51:06.027Z",
+       "type": "turnOrder",
+       "by": 9001,
+       "data": {
+        "previousOrder": [
+         9004,
+         9001,
+         9003,
+         9002
+        ],
+        "nextOrder": [
+         9002,
+         9004,
+         9003,
+         9001
+        ]
+       }
+      },
+      {
+       "at": "2026-11-18T02:51:23.852Z",
+       "type": "turn",
+       "by": 9002,
+       "data": {
+        "playerId": 9002,
+        "turnNumber": 1,
+        "previousTurnNumber": 1,
+        "reason": "advance"
+       }
+      },
+      {
+       "at": "2026-11-18T02:51:28.752Z",
+       "type": "turn",
+       "by": 9002,
+       "data": {
+        "playerId": 9004,
+        "turnNumber": 1,
+        "previousTurnNumber": 0,
+        "reason": "advance"
+       }
+      },
+      {
+       "at": "2026-11-18T02:51:36.543Z",
+       "type": "turn",
+       "by": 9004,
+       "data": {
+        "playerId": 9003,
+        "turnNumber": 1,
+        "previousTurnNumber": 0,
+        "reason": "advance"
+       }
+      },
+      {
+       "at": "2026-11-18T02:51:56.423Z",
+       "type": "turn",
+       "by": 9003,
+       "data": {
+        "playerId": 9001,
+        "turnNumber": 1,
+        "previousTurnNumber": 0,
+        "reason": "advance"
+       }
+      },
+      {
+       "at": "2026-11-18T02:51:57.130Z",
+       "type": "turn",
+       "by": 9001,
+       "data": {
+        "playerId": 9002,
+        "turnNumber": 2,
+        "previousTurnNumber": 1,
+        "reason": "advance"
+       }
+      },
+      {
+       "at": "2026-11-18T02:52:12.254Z",
+       "type": "turn",
+       "by": 9002,
+       "data": {
+        "playerId": 9004,
+        "turnNumber": 2,
+        "previousTurnNumber": 1,
+        "reason": "advance"
+       }
+      },
+      {
+       "at": "2026-11-18T02:52:18.900Z",
+       "type": "turn",
+       "by": 9004,
+       "data": {
+        "playerId": 9003,
+        "turnNumber": 2,
+        "previousTurnNumber": 1,
+        "reason": "advance"
+       }
+      },
+      {
+       "at": "2026-11-18T02:52:43.958Z",
+       "type": "turn",
+       "by": 9003,
+       "data": {
+        "playerId": 9001,
+        "turnNumber": 2,
+        "previousTurnNumber": 1,
+        "reason": "advance"
+       }
+      },
+      {
+       "at": "2026-11-18T02:52:51.981Z",
+       "type": "turn",
+       "by": 9001,
+       "data": {
+        "playerId": 9002,
+        "turnNumber": 3,
+        "previousTurnNumber": 2,
+        "reason": "advance"
+       }
+      },
+      {
+       "at": "2026-11-18T02:53:08.972Z",
+       "type": "turn",
+       "by": 9002,
+       "data": {
+        "playerId": 9004,
+        "turnNumber": 3,
+        "previousTurnNumber": 2,
+        "reason": "advance"
+       }
+      },
+      {
+       "at": "2026-11-18T02:53:24.029Z",
+       "type": "turn",
+       "by": 9004,
+       "data": {
+        "playerId": 9003,
+        "turnNumber": 3,
+        "previousTurnNumber": 2,
+        "reason": "advance"
+       }
+      },
+      {
+       "at": "2026-11-18T02:53:54.828Z",
+       "type": "turn",
+       "by": 9003,
+       "data": {
+        "playerId": 9001,
+        "turnNumber": 3,
+        "previousTurnNumber": 2,
+        "reason": "advance"
+       }
+      },
+      {
+       "at": "2026-11-18T02:54:17.925Z",
+       "type": "turn",
+       "by": 9001,
+       "data": {
+        "playerId": 9002,
+        "turnNumber": 4,
+        "previousTurnNumber": 3,
+        "reason": "advance"
+       }
+      },
+      {
+       "at": "2026-11-18T02:55:44.888Z",
+       "type": "counter",
+       "by": 9004,
+       "data": {
+        "kind": "life",
+        "targetId": 9004,
+        "from": 40,
+        "to": 37,
+        "delta": -3
+       }
+      },
+      {
+       "at": "2026-11-18T02:55:50.594Z",
+       "type": "counter",
+       "by": 9003,
+       "data": {
+        "kind": "life",
+        "targetId": 9003,
+        "from": 40,
+        "to": 37,
+        "delta": -3
+       }
+      },
+      {
+       "at": "2026-11-18T02:55:48.022Z",
+       "type": "counter",
+       "by": 9002,
+       "data": {
+        "kind": "life",
+        "targetId": 9002,
+        "from": 40,
+        "to": 43,
+        "delta": 3
+       }
+      },
+      {
+       "at": "2026-11-18T02:55:48.180Z",
+       "type": "counter",
+       "by": 9001,
+       "data": {
+        "kind": "life",
+        "targetId": 9001,
+        "from": 40,
+        "to": 37,
+        "delta": -3
+       }
+      },
+      {
+       "at": "2026-11-18T02:56:01.969Z",
+       "type": "turn",
+       "by": 9002,
+       "data": {
+        "playerId": 9004,
+        "turnNumber": 4,
+        "previousTurnNumber": 3,
+        "reason": "advance"
+       }
+      },
+      {
+       "at": "2026-11-18T02:56:20.602Z",
+       "type": "turn",
+       "by": 9004,
+       "data": {
+        "playerId": 9003,
+        "turnNumber": 4,
+        "previousTurnNumber": 3,
+        "reason": "advance"
+       }
+      },
+      {
+       "at": "2026-11-18T02:56:54.254Z",
+       "type": "turn",
+       "by": 9003,
+       "data": {
+        "playerId": 9001,
+        "turnNumber": 4,
+        "previousTurnNumber": 3,
+        "reason": "advance"
+       }
+      },
+      {
+       "at": "2026-11-18T02:58:42.510Z",
+       "type": "turn",
+       "by": 9001,
+       "data": {
+        "playerId": 9002,
+        "turnNumber": 5,
+        "previousTurnNumber": 4,
+        "reason": "advance"
+       }
+      },
+      {
+       "at": "2026-11-18T02:59:45.618Z",
+       "type": "counter",
+       "by": 9004,
+       "data": {
+        "kind": "life",
+        "targetId": 9004,
+        "from": 37,
+        "to": 34,
+        "delta": -3
+       }
+      },
+      {
+       "at": "2026-11-18T02:59:45.430Z",
+       "type": "counter",
+       "by": 9002,
+       "data": {
+        "kind": "life",
+        "targetId": 9002,
+        "from": 43,
+        "to": 46,
+        "delta": 3
+       }
+      },
+      {
+       "at": "2026-11-18T02:59:46.314Z",
+       "type": "counter",
+       "by": 9001,
+       "data": {
+        "kind": "life",
+        "targetId": 9001,
+        "from": 37,
+        "to": 34,
+        "delta": -3
+       }
+      },
+      {
+       "at": "2026-11-18T02:59:57.170Z",
+       "type": "counter",
+       "by": 9003,
+       "data": {
+        "kind": "life",
+        "targetId": 9003,
+        "from": 37,
+        "to": 34,
+        "delta": -3
+       }
+      },
+      {
+       "at": "2026-11-18T03:00:29.157Z",
+       "type": "counter",
+       "by": 9002,
+       "data": {
+        "kind": "life",
+        "targetId": 9002,
+        "from": 46,
+        "to": 45,
+        "delta": -1
+       }
+      },
+      {
+       "at": "2026-11-18T03:00:59.191Z",
+       "type": "counter",
+       "by": 9001,
+       "data": {
+        "kind": "life",
+        "targetId": 9001,
+        "from": 34,
+        "to": 31,
+        "delta": -3
+       }
+      },
+      {
+       "at": "2026-11-18T03:01:00.566Z",
+       "type": "counter",
+       "by": 9004,
+       "data": {
+        "kind": "life",
+        "targetId": 9004,
+        "from": 34,
+        "to": 31,
+        "delta": -3
+       }
+      },
+      {
+       "at": "2026-11-18T03:00:59.610Z",
+       "type": "counter",
+       "by": 9002,
+       "data": {
+        "kind": "life",
+        "targetId": 9002,
+        "from": 45,
+        "to": 48,
+        "delta": 3
+       }
+      },
+      {
+       "at": "2026-11-18T03:01:06.825Z",
+       "type": "counter",
+       "by": 9003,
+       "data": {
+        "kind": "life",
+        "targetId": 9003,
+        "from": 34,
+        "to": 31,
+        "delta": -3
+       }
+      },
+      {
+       "at": "2026-11-18T03:01:24.852Z",
+       "type": "turn",
+       "by": 9002,
+       "data": {
+        "playerId": 9004,
+        "turnNumber": 5,
+        "previousTurnNumber": 4,
+        "reason": "advance"
+       }
+      },
+      {
+       "at": "2026-11-18T03:03:13.187Z",
+       "type": "counter",
+       "by": 9001,
+       "data": {
+        "kind": "life",
+        "targetId": 9001,
+        "from": 31,
+        "to": 27,
+        "delta": -4
+       }
+      },
+      {
+       "at": "2026-11-18T03:03:14.890Z",
+       "type": "counter",
+       "by": 9001,
+       "data": {
+        "kind": "life",
+        "targetId": 9001,
+        "from": 27,
+        "to": 31,
+        "delta": 4
+       }
+      },
+      {
+       "at": "2026-11-18T03:03:16.259Z",
+       "type": "counter",
+       "by": 9001,
+       "data": {
+        "kind": "life",
+        "targetId": 9001,
+        "from": 31,
+        "to": 32,
+        "delta": 1
+       }
+      },
+      {
+       "at": "2026-11-18T03:03:16.729Z",
+       "type": "counter",
+       "by": 9001,
+       "data": {
+        "kind": "life",
+        "targetId": 9001,
+        "from": 32,
+        "to": 31,
+        "delta": -1
+       }
+      },
+      {
+       "at": "2026-11-18T03:03:19.558Z",
+       "type": "counter",
+       "by": 9001,
+       "data": {
+        "kind": "commander",
+        "targetId": 9001,
+        "from": 0,
+        "to": 4,
+        "delta": 4,
+        "fromPlayerId": 9004,
+        "commanderSlot": "primary"
+       }
+      },
+      {
+       "at": "2026-11-18T03:03:37.648Z",
+       "type": "counter",
+       "by": 9002,
+       "data": {
+        "kind": "life",
+        "targetId": 9002,
+        "from": 48,
+        "to": 43,
+        "delta": -5
+       }
+      },
+      {
+       "at": "2026-11-18T03:03:42.999Z",
+       "type": "counter",
+       "by": 9002,
+       "data": {
+        "kind": "life",
+        "targetId": 9002,
+        "from": 48,
+        "to": 43,
+        "delta": -5
+       }
+      },
+      {
+       "at": "2026-11-18T03:03:20.896Z",
+       "type": "counter",
+       "by": 9001,
+       "data": {
+        "kind": "life",
+        "targetId": 9001,
+        "from": 31,
+        "to": 27,
+        "delta": -4
+       }
+      },
+      {
+       "at": "2026-11-18T03:03:20.896Z",
+       "type": "counter",
+       "by": 9001,
+       "data": {
+        "kind": "commander",
+        "targetId": 9001,
+        "from": 0,
+        "to": 4,
+        "delta": 4,
+        "fromPlayerId": 9004,
+        "commanderSlot": "primary"
+       }
+      },
+      {
+       "at": "2026-11-18T03:03:43.514Z",
+       "type": "counter",
+       "by": 9001,
+       "data": {
+        "kind": "life",
+        "targetId": 9001,
+        "from": 31,
+        "to": 27,
+        "delta": -4
+       }
+      },
+      {
+       "at": "2026-11-18T03:03:52.482Z",
+       "type": "turn",
+       "by": 9004,
+       "data": {
+        "playerId": 9003,
+        "turnNumber": 5,
+        "previousTurnNumber": 4,
+        "reason": "advance"
+       }
+      },
+      {
+       "at": "2026-11-18T03:04:35.809Z",
+       "type": "counter",
+       "by": 9002,
+       "data": {
+        "kind": "life",
+        "targetId": 9002,
+        "from": 43,
+        "to": 35,
+        "delta": -8
+       }
+      },
+      {
+       "at": "2026-11-18T03:04:36.386Z",
+       "type": "counter",
+       "by": 9002,
+       "data": {
+        "kind": "life",
+        "targetId": 9002,
+        "from": 35,
+        "to": 34,
+        "delta": -1
+       }
+      },
+      {
+       "at": "2026-11-18T03:06:05.392Z",
+       "type": "turn",
+       "by": 9003,
+       "data": {
+        "playerId": 9001,
+        "turnNumber": 5,
+        "previousTurnNumber": 4,
+        "reason": "advance"
+       }
+      },
+      {
+       "at": "2026-11-18T03:07:55.953Z",
+       "type": "turn",
+       "by": 9001,
+       "data": {
+        "playerId": 9002,
+        "turnNumber": 6,
+        "previousTurnNumber": 5,
+        "reason": "advance"
+       }
+      },
+      {
+       "at": "2026-11-18T03:10:06.643Z",
+       "type": "counter",
+       "by": 9004,
+       "data": {
+        "kind": "life",
+        "targetId": 9004,
+        "from": 31,
+        "to": 28,
+        "delta": -3
+       }
+      },
+      {
+       "at": "2026-11-18T03:10:07.487Z",
+       "type": "counter",
+       "by": 9001,
+       "data": {
+        "kind": "life",
+        "targetId": 9001,
+        "from": 27,
+        "to": 24,
+        "delta": -3
+       }
+      },
+      {
+       "at": "2026-11-18T03:10:12.034Z",
+       "type": "counter",
+       "by": 9002,
+       "data": {
+        "kind": "life",
+        "targetId": 9002,
+        "from": 34,
+        "to": 37,
+        "delta": 3
+       }
+      },
+      {
+       "at": "2026-11-18T03:10:12.556Z",
+       "type": "counter",
+       "by": 9002,
+       "data": {
+        "kind": "life",
+        "targetId": 9002,
+        "from": 37,
+        "to": 38,
+        "delta": 1
+       }
+      },
+      {
+       "at": "2026-11-18T03:10:13.524Z",
+       "type": "counter",
+       "by": 9002,
+       "data": {
+        "kind": "life",
+        "targetId": 9002,
+        "from": 38,
+        "to": 37,
+        "delta": -1
+       }
+      },
+      {
+       "at": "2026-11-18T03:10:19.385Z",
+       "type": "counter",
+       "by": 9003,
+       "data": {
+        "kind": "life",
+        "targetId": 9003,
+        "from": 31,
+        "to": 28,
+        "delta": -3
+       }
+      },
+      {
+       "at": "2026-11-18T03:11:39.688Z",
+       "type": "turn",
+       "by": 9002,
+       "data": {
+        "playerId": 9004,
+        "turnNumber": 6,
+        "previousTurnNumber": 5,
+        "reason": "advance"
+       }
+      },
+      {
+       "at": "2026-11-18T03:12:39.748Z",
+       "type": "turn",
+       "by": 9004,
+       "data": {
+        "playerId": 9003,
+        "turnNumber": 6,
+        "previousTurnNumber": 5,
+        "reason": "advance"
+       }
+      },
+      {
+       "at": "2026-11-18T03:14:12.953Z",
+       "type": "turn",
+       "by": 9003,
+       "data": {
+        "playerId": 9001,
+        "turnNumber": 6,
+        "previousTurnNumber": 5,
+        "reason": "advance"
+       }
+      },
+      {
+       "at": "2026-11-18T03:14:15.073Z",
+       "type": "counter",
+       "by": 9001,
+       "data": {
+        "kind": "life",
+        "targetId": 9001,
+        "from": 24,
+        "to": 23,
+        "delta": -1
+       }
+      },
+      {
+       "at": "2026-11-18T03:21:30.279Z",
+       "type": "turn",
+       "by": 9001,
+       "data": {
+        "playerId": 9002,
+        "turnNumber": 7,
+        "previousTurnNumber": 6,
+        "reason": "advance"
+       }
+      },
+      {
+       "at": "2026-11-18T03:21:48.923Z",
+       "type": "counter",
+       "by": 9004,
+       "data": {
+        "kind": "life",
+        "targetId": 9004,
+        "from": 28,
+        "to": 25,
+        "delta": -3
+       }
+      },
+      {
+       "at": "2026-11-18T03:22:02.293Z",
+       "type": "counter",
+       "by": 9003,
+       "data": {
+        "kind": "life",
+        "targetId": 9003,
+        "from": 28,
+        "to": 25,
+        "delta": -3
+       }
+      },
+      {
+       "at": "2026-11-18T03:22:01.323Z",
+       "type": "counter",
+       "by": 9001,
+       "data": {
+        "kind": "life",
+        "targetId": 9001,
+        "from": 23,
+        "to": 20,
+        "delta": -3
+       }
+      },
+      {
+       "at": "2026-11-18T03:22:01.952Z",
+       "type": "counter",
+       "by": 9002,
+       "data": {
+        "kind": "life",
+        "targetId": 9002,
+        "from": 37,
+        "to": 40,
+        "delta": 3
+       }
+      },
+      {
+       "at": "2026-11-18T03:24:48.236Z",
+       "type": "counter",
+       "by": 9004,
+       "data": {
+        "kind": "life",
+        "targetId": 9004,
+        "from": 25,
+        "to": 22,
+        "delta": -3
+       }
+      },
+      {
+       "at": "2026-11-18T03:24:48.044Z",
+       "type": "counter",
+       "by": 9001,
+       "data": {
+        "kind": "life",
+        "targetId": 9001,
+        "from": 20,
+        "to": 18,
+        "delta": -2
+       }
+      },
+      {
+       "at": "2026-11-18T03:24:53.583Z",
+       "type": "counter",
+       "by": 9003,
+       "data": {
+        "kind": "life",
+        "targetId": 9003,
+        "from": 25,
+        "to": 22,
+        "delta": -3
+       }
+      },
+      {
+       "at": "2026-11-18T03:24:48.395Z",
+       "type": "counter",
+       "by": 9001,
+       "data": {
+        "kind": "life",
+        "targetId": 9001,
+        "from": 18,
+        "to": 17,
+        "delta": -1
+       }
+      },
+      {
+       "at": "2026-11-18T03:24:51.000Z",
+       "type": "counter",
+       "by": 9002,
+       "data": {
+        "kind": "life",
+        "targetId": 9002,
+        "from": 40,
+        "to": 43,
+        "delta": 3
+       }
+      },
+      {
+       "at": "2026-11-18T03:25:17.148Z",
+       "type": "counter",
+       "by": 9004,
+       "data": {
+        "kind": "life",
+        "targetId": 9004,
+        "from": 22,
+        "to": 19,
+        "delta": -3
+       }
+      },
+      {
+       "at": "2026-11-18T03:25:21.050Z",
+       "type": "counter",
+       "by": 9004,
+       "data": {
+        "kind": "life",
+        "targetId": 9004,
+        "from": 19,
+        "to": 22,
+        "delta": 3
+       }
+      },
+      {
+       "at": "2026-11-18T03:26:12.547Z",
+       "type": "counter",
+       "by": 9001,
+       "data": {
+        "kind": "life",
+        "targetId": 9001,
+        "from": 17,
+        "to": 16,
+        "delta": -1
+       }
+      },
+      {
+       "at": "2026-11-18T03:26:12.862Z",
+       "type": "counter",
+       "by": 9001,
+       "data": {
+        "kind": "life",
+        "targetId": 9001,
+        "from": 16,
+        "to": 15,
+        "delta": -1
+       }
+      },
+      {
+       "at": "2026-11-18T03:26:14.275Z",
+       "type": "counter",
+       "by": 9004,
+       "data": {
+        "kind": "life",
+        "targetId": 9004,
+        "from": 22,
+        "to": 19,
+        "delta": -3
+       }
+      },
+      {
+       "at": "2026-11-18T03:26:13.176Z",
+       "type": "counter",
+       "by": 9001,
+       "data": {
+        "kind": "life",
+        "targetId": 9001,
+        "from": 15,
+        "to": 14,
+        "delta": -1
+       }
+      },
+      {
+       "at": "2026-11-18T03:26:13.813Z",
+       "type": "counter",
+       "by": 9002,
+       "data": {
+        "kind": "life",
+        "targetId": 9002,
+        "from": 43,
+        "to": 46,
+        "delta": 3
+       }
+      },
+      {
+       "at": "2026-11-18T03:26:20.808Z",
+       "type": "counter",
+       "by": 9003,
+       "data": {
+        "kind": "life",
+        "targetId": 9003,
+        "from": 22,
+        "to": 19,
+        "delta": -3
+       }
+      },
+      {
+       "at": "2026-11-18T03:26:46.632Z",
+       "type": "counter",
+       "by": 9001,
+       "data": {
+        "kind": "life",
+        "targetId": 9001,
+        "from": 14,
+        "to": 13,
+        "delta": -1
+       }
+      },
+      {
+       "at": "2026-11-18T03:26:47.261Z",
+       "type": "counter",
+       "by": 9001,
+       "data": {
+        "kind": "life",
+        "targetId": 9001,
+        "from": 13,
+        "to": 11,
+        "delta": -2
+       }
+      },
+      {
+       "at": "2026-11-18T03:26:48.456Z",
+       "type": "counter",
+       "by": 9004,
+       "data": {
+        "kind": "life",
+        "targetId": 9004,
+        "from": 19,
+        "to": 18,
+        "delta": -1
+       }
+      },
+      {
+       "at": "2026-11-18T03:26:49.024Z",
+       "type": "counter",
+       "by": 9004,
+       "data": {
+        "kind": "life",
+        "targetId": 9004,
+        "from": 17,
+        "to": 16,
+        "delta": -1
+       }
+      },
+      {
+       "at": "2026-11-18T03:27:37.404Z",
+       "type": "turn",
+       "by": 9002,
+       "data": {
+        "playerId": 9004,
+        "turnNumber": 7,
+        "previousTurnNumber": 6,
+        "reason": "advance"
+       }
+      },
+      {
+       "at": "2026-11-18T03:29:09.579Z",
+       "type": "counter",
+       "by": 9002,
+       "data": {
+        "kind": "life",
+        "targetId": 9002,
+        "from": 46,
+        "to": 45,
+        "delta": -1
+       }
+      },
+      {
+       "at": "2026-11-18T03:29:10.002Z",
+       "type": "counter",
+       "by": 9001,
+       "data": {
+        "kind": "life",
+        "targetId": 9001,
+        "from": 11,
+        "to": 10,
+        "delta": -1
+       }
+      },
+      {
+       "at": "2026-11-18T03:29:22.659Z",
+       "type": "turn",
+       "by": 9004,
+       "data": {
+        "playerId": 9003,
+        "turnNumber": 7,
+        "previousTurnNumber": 6,
+        "reason": "advance"
+       }
+      },
+      {
+       "at": "2026-11-18T03:29:33.069Z",
+       "type": "counter",
+       "by": 9004,
+       "data": {
+        "kind": "life",
+        "targetId": 9004,
+        "from": 16,
+        "to": 13,
+        "delta": -3
+       }
+      },
+      {
+       "at": "2026-11-18T03:29:32.260Z",
+       "type": "counter",
+       "by": 9001,
+       "data": {
+        "kind": "life",
+        "targetId": 9001,
+        "from": 10,
+        "to": 7,
+        "delta": -3
+       }
+      },
+      {
+       "at": "2026-11-18T03:29:53.975Z",
+       "type": "counter",
+       "by": 9002,
+       "data": {
+        "kind": "life",
+        "targetId": 9002,
+        "from": 45,
+        "to": 48,
+        "delta": 3
+       }
+      },
+      {
+       "at": "2026-11-18T03:30:37.382Z",
+       "type": "counter",
+       "by": 9003,
+       "data": {
+        "kind": "life",
+        "targetId": 9003,
+        "from": 19,
+        "to": 16,
+        "delta": -3
+       }
+      },
+      {
+       "at": "2026-11-18T03:30:41.705Z",
+       "type": "counter",
+       "by": 9003,
+       "data": {
+        "kind": "life",
+        "targetId": 9003,
+        "from": 16,
+        "to": 14,
+        "delta": -2
+       }
+      },
+      {
+       "at": "2026-11-18T03:30:42.108Z",
+       "type": "counter",
+       "by": 9003,
+       "data": {
+        "kind": "life",
+        "targetId": 9003,
+        "from": 14,
+        "to": 13,
+        "delta": -1
+       }
+      },
+      {
+       "at": "2026-11-18T03:30:58.442Z",
+       "type": "counter",
+       "by": 9003,
+       "data": {
+        "kind": "life",
+        "targetId": 9003,
+        "from": 13,
+        "to": 16,
+        "delta": 3
+       }
+      },
+      {
+       "at": "2026-11-18T03:30:58.889Z",
+       "type": "counter",
+       "by": 9003,
+       "data": {
+        "kind": "life",
+        "targetId": 9003,
+        "from": 16,
+        "to": 17,
+        "delta": 1
+       }
+      },
+      {
+       "at": "2026-11-18T03:30:59.459Z",
+       "type": "counter",
+       "by": 9003,
+       "data": {
+        "kind": "life",
+        "targetId": 9003,
+        "from": 17,
+        "to": 16,
+        "delta": -1
+       }
+      },
+      {
+       "at": "2026-11-18T03:31:35.108Z",
+       "type": "turn",
+       "by": 9003,
+       "data": {
+        "playerId": 9001,
+        "turnNumber": 7,
+        "previousTurnNumber": 6,
+        "reason": "advance"
+       }
+      },
+      {
+       "at": "2026-11-18T03:31:58.015Z",
+       "type": "counter",
+       "by": 9001,
+       "data": {
+        "kind": "life",
+        "targetId": 9001,
+        "from": 7,
+        "to": 5,
+        "delta": -2
+       }
+      }
+     ]
+    },
+    "game": {
+     "id": "ec56d993-3e8c-4fb9-9cd5-45953fbaeb80",
+     "currentMatchId": "b8404172-bf2a-4da7-b033-2d7d53769f90",
+     "participantIds": [
+      9001,
+      9002,
+      9003,
+      9004
+     ],
+     "status": "waiting",
+     "format": "commander",
+     "seatLimit": 4,
+     "autoRandomizeSeatOrder": true,
+     "gameState": {
+      "currentPlayer": 3,
+      "playerOrder": [
+       9002,
+       9004,
+       9003,
+       9001
+      ],
+      "monarchPlayerId": null,
+      "initiativePlayerId": null,
+      "format": "commander",
+      "gameStatus": "in-progress",
+      "turnStartedAt": "2026-11-18T03:31:35.108Z",
+      "timerPausedAt": null,
+      "turnTimerPausedAt": null,
+      "turnRound": 7,
+      "mythicTrackEarlySnapshotSubmitted": false,
+      "playniceDataSubmitted": false,
+      "playniceEarlySnapshotSubmitted": false,
+      "endedAt": null,
+      "winnerVotes": {},
+      "recordedWinnerId": null,
+      "mythicTrackDataSubmitted": false,
+      "playgroupDataSubmitted": false,
+      "mythicTrackAssignment": null
+     },
+     "participants": [
+      {
+       "id": 9004,
+       "name": "Player 4",
+       "lastCommanderSelection": {
+        "deckUrl": null,
+        "commanderId": "b5787d4b-ce1e-49d9-9669-307bda264b33",
+        "companionId": null,
+        "commanderPrintId": "b5787d4b-ce1e-49d9-9669-307bda264b33",
+        "companionPrintId": null,
+        "secondaryCommanderId": null,
+        "secondaryCommanderPrintId": null
+       }
+      },
+      {
+       "id": 9002,
+       "name": "Player 2",
+       "lastCommanderSelection": {
+        "deckUrl": "https://example.invalid/deck",
+        "commanderId": "2ef42c3f-f22e-4e99-adb0-9e8f8d442347",
+        "companionId": null,
+        "commanderPrintId": "2ef42c3f-f22e-4e99-adb0-9e8f8d442347",
+        "companionPrintId": null,
+        "secondaryCommanderId": null,
+        "secondaryCommanderPrintId": null
+       }
+      },
+      {
+       "id": 9001,
+       "name": "Player 1",
+       "lastCommanderSelection": {
+        "deckUrl": null,
+        "commanderId": "1287e69f-5e92-48f4-80de-d43cb5be21ce",
+        "companionId": null,
+        "commanderPrintId": "1287e69f-5e92-48f4-80de-d43cb5be21ce",
+        "companionPrintId": null,
+        "secondaryCommanderId": null,
+        "secondaryCommanderPrintId": null
+       }
+      },
+      {
+       "id": 9003,
+       "name": "Player 3",
+       "lastCommanderSelection": {
+        "deckUrl": "https://example.invalid/deck",
+        "commanderId": "568aa70a-6765-486a-bd37-5d38b16c46de",
+        "companionId": null,
+        "commanderPrintId": "568aa70a-6765-486a-bd37-5d38b16c46de",
+        "companionPrintId": null,
+        "secondaryCommanderId": null,
+        "secondaryCommanderPrintId": null
+       }
+      }
+     ]
+    }
+   }
+  },
+  {
+   "at": "2026-11-18T03:38:32.426Z",
+   "method": "POST",
+   "path": "/api/match/3027c39c-dd29-4dd3-873d-ed218ab341bc/vote-winner",
+   "status": 200,
+   "requestBody": {
+    "winnerId": 9001,
+    "source": "end_modal"
+   },
+   "responseBody": {
+    "success": true,
+    "myVote": 9001,
+    "canVote": true,
+    "voteCounts": {
+     "9001": 1
+    },
+    "requiredVotes": 3,
+    "voteCount": 1,
+    "leadingWinnerId": 9001,
+    "votingStillOpen": true,
+    "winnerId": null,
+    "winnerRecorded": false,
+    "winnerIds": [],
+    "endedInDraw": false,
+    "resolutionReason": null
+   }
+  }
+ ],
+ "statesPerMatch": {
+  "71ac5c6e-020f-47af-bb34-4cc684b888a1": {
+   "count": 486,
+   "first": {
+    "at": "2026-11-18T02:00:16.802Z",
+    "method": "GET",
+    "path": "/api/match/71ac5c6e-020f-47af-bb34-4cc684b888a1/state",
+    "status": 200,
+    "responseBody": {
+     "state": {
+      "currentPlayer": 0,
+      "playerOrder": [
+       9001,
+       9002,
+       9003,
+       9004
+      ],
+      "freedSeatPlayerIds": [],
+      "format": "commander",
+      "endedAt": null,
+      "winnerVotes": {},
+      "monarchPlayerId": null,
+      "initiativePlayerId": null,
+      "players": [
+       {
+        "id": 9001,
+        "name": "Player 1",
+        "life": 40,
+        "isConnected": false,
+        "playerStatus": "Ready",
+        "commander": {
+         "name": "Felothar the Steadfast",
+         "oracle_id": "2b3f791a-d672-46fb-a03a-96e19f2c3121",
+         "scryfall_id": "2c3549f6-25df-4ea7-84ad-922ccd4af6b2"
+        },
+        "secondaryCommander": null,
+        "deckSelectionStatus": "unset"
+       },
+       {
+        "id": 9002,
+        "name": "Player 2",
+        "life": 40,
+        "poison": 0,
+        "isEliminated": false,
+        "isConnected": true,
+        "turnNumber": 0,
+        "totalTurnTimeMs": 0,
+        "commanderDamageTaken": [],
+        "secondaryCommanderDamageTaken": [],
+        "commanderTax": 0,
+        "playerStatus": "Ready",
+        "commander": {
+         "name": "Tidus, Yuna's Guardian",
+         "oracle_id": "e8fbcafd-3617-4cd7-b55d-457fb7b60162",
+         "scryfall_id": null
+        },
+        "secondaryCommander": null,
+        "deckSelectionStatus": "chosen"
+       },
+       {
+        "id": 9003,
+        "name": "Player 3",
+        "life": 40,
+        "poison": 0,
+        "isEliminated": false,
+        "isConnected": true,
+        "turnNumber": 0,
+        "totalTurnTimeMs": 0,
+        "commanderDamageTaken": [],
+        "secondaryCommanderDamageTaken": [],
+        "commanderTax": 0,
+        "playerStatus": null,
+        "commander": {
+         "name": "Doran, Besieged by Time",
+         "oracle_id": "dd35a377-0865-4b25-bd0f-aaead29a9f0e",
+         "scryfall_id": null
+        },
+        "secondaryCommander": null,
+        "deckSelectionStatus": "chosen"
+       },
+       {
+        "id": 9004,
+        "name": "Player 4",
+        "life": 40,
+        "poison": 0,
+        "isEliminated": false,
+        "isConnected": true,
+        "turnNumber": 0,
+        "totalTurnTimeMs": 0,
+        "commanderDamageTaken": [],
+        "secondaryCommanderDamageTaken": [],
+        "commanderTax": 0,
+        "playerStatus": null,
+        "commander": {
+         "name": "Zurgo Stormrender",
+         "oracle_id": "0f93d88c-9d2e-416d-a10b-99483360b1fb",
+         "scryfall_id": "dc8eb325-75c9-4331-830d-3f7d62d77290"
+        },
+        "secondaryCommander": null,
+        "deckSelectionStatus": "unset"
+       }
+      ],
+      "eventTypes": []
+     },
+     "version": 19,
+     "playtestVersion": 0,
+     "playtestPrivate": {
+      "library": [],
+      "hand": []
+     }
+    }
+   },
+   "last": {
+    "at": "2026-11-18T02:44:57.236Z",
+    "method": "GET",
+    "path": "/api/match/71ac5c6e-020f-47af-bb34-4cc684b888a1/state",
+    "status": 200,
+    "responseBody": {
+     "state": {
+      "currentPlayer": 0,
+      "playerOrder": [
+       9004,
+       9001,
+       9003,
+       9002
+      ],
+      "freedSeatPlayerIds": [],
+      "format": "commander",
+      "startedAt": "2026-11-18T02:04:48.462Z",
+      "endedAt": "2026-11-18T02:44:53.436Z",
+      "turnRound": 7,
+      "turnStartedAt": "2026-11-18T02:44:33.833Z",
+      "winnerVotes": {
+       "9004": [
+        9001
+       ]
+      },
+      "monarchPlayerId": null,
+      "initiativePlayerId": null,
+      "players": [
+       {
+        "id": 9001,
+        "name": "Player 1",
+        "life": 0,
+        "poison": 0,
+        "isEliminated": true,
+        "isConnected": false,
+        "turnNumber": 6,
+        "totalTurnTimeMs": 628252,
+        "commanderDamageTaken": [
+         {
+          "fromPlayerId": 9004,
+          "amount": 5
+         }
+        ],
+        "secondaryCommanderDamageTaken": [],
+        "commanderTax": 0,
+        "playerStatus": null,
+        "commander": {
+         "name": "Felothar the Steadfast",
+         "oracle_id": "2b3f791a-d672-46fb-a03a-96e19f2c3121",
+         "scryfall_id": "2c3549f6-25df-4ea7-84ad-922ccd4af6b2"
+        },
+        "secondaryCommander": null,
+        "deckSelectionStatus": "unset"
+       },
+       {
+        "id": 9002,
+        "name": "Player 2",
+        "life": 0,
+        "poison": 0,
+        "isEliminated": true,
+        "isConnected": true,
+        "turnNumber": 6,
+        "totalTurnTimeMs": 407244,
+        "commanderDamageTaken": [
+         {
+          "fromPlayerId": 9001,
+          "amount": 5
+         }
+        ],
+        "secondaryCommanderDamageTaken": [],
+        "commanderTax": 0,
+        "playerStatus": null,
+        "commander": {
+         "name": "Tidus, Yuna's Guardian",
+         "oracle_id": "e8fbcafd-3617-4cd7-b55d-457fb7b60162",
+         "scryfall_id": null
+        },
+        "secondaryCommander": null,
+        "deckSelectionStatus": "chosen"
+       },
+       {
+        "id": 9003,
+        "name": "Player 3",
+        "life": 1,
+        "poison": 0,
+        "isEliminated": false,
+        "isConnected": true,
+        "turnNumber": 7,
+        "totalTurnTimeMs": 705043,
+        "commanderDamageTaken": [],
+        "secondaryCommanderDamageTaken": [],
+        "commanderTax": 0,
+        "playerStatus": null,
+        "commander": {
+         "name": "Doran, Besieged by Time",
+         "oracle_id": "dd35a377-0865-4b25-bd0f-aaead29a9f0e",
+         "scryfall_id": null
+        },
+        "secondaryCommander": null,
+        "deckSelectionStatus": "chosen"
+       },
+       {
+        "id": 9004,
+        "name": "Player 4",
+        "life": 24,
+        "poison": 0,
+        "isEliminated": false,
+        "isConnected": true,
+        "turnNumber": 8,
+        "totalTurnTimeMs": 664430,
+        "commanderDamageTaken": [
+         {
+          "fromPlayerId": 9001,
+          "amount": 10
+         }
+        ],
+        "secondaryCommanderDamageTaken": [],
+        "commanderTax": 0,
+        "playerStatus": null,
+        "commander": {
+         "name": "Zurgo Stormrender",
+         "oracle_id": "0f93d88c-9d2e-416d-a10b-99483360b1fb",
+         "scryfall_id": "dc8eb325-75c9-4331-830d-3f7d62d77290"
+        },
+        "secondaryCommander": null,
+        "deckSelectionStatus": "unset"
+       }
+      ],
+      "eventTypes": [
+       "counter",
+       "turn"
+      ]
+     },
+     "version": 222,
+     "playtestVersion": 0,
+     "playtestPrivate": {
+      "library": [],
+      "hand": []
+     }
+    }
+   }
+  },
+  "3027c39c-dd29-4dd3-873d-ed218ab341bc": {
+   "count": 582,
+   "first": {
+    "at": "2026-11-18T02:44:54.130Z",
+    "method": "GET",
+    "path": "/api/match/3027c39c-dd29-4dd3-873d-ed218ab341bc/state",
+    "status": 200,
+    "responseBody": {
+     "state": {
+      "currentPlayer": 0,
+      "playerOrder": [
+       9004,
+       9001,
+       9003,
+       9002
+      ],
+      "format": "commander",
+      "endedAt": null,
+      "turnRound": 7,
+      "turnStartedAt": "2026-11-18T02:44:33.833Z",
+      "recordedWinnerId": null,
+      "winnerVotes": {},
+      "monarchPlayerId": null,
+      "initiativePlayerId": null,
+      "players": [
+       {
+        "id": 9001,
+        "name": "Player 1",
+        "life": 40,
+        "poison": 0,
+        "isEliminated": false,
+        "isConnected": false,
+        "turnNumber": 0,
+        "totalTurnTimeMs": 0,
+        "commanderDamageTaken": [],
+        "secondaryCommanderDamageTaken": [],
+        "commanderTax": 0,
+        "playerStatus": null,
+        "commander": {
+         "name": "Felothar the Steadfast",
+         "oracle_id": "2b3f791a-d672-46fb-a03a-96e19f2c3121",
+         "scryfall_id": "2c3549f6-25df-4ea7-84ad-922ccd4af6b2"
+        },
+        "secondaryCommander": null,
+        "deckSelectionStatus": "unset"
+       },
+       {
+        "id": 9002,
+        "name": "Player 2",
+        "life": 40,
+        "poison": 0,
+        "isEliminated": false,
+        "isConnected": true,
+        "turnNumber": 0,
+        "totalTurnTimeMs": 0,
+        "commanderDamageTaken": [],
+        "secondaryCommanderDamageTaken": [],
+        "commanderTax": 0,
+        "playerStatus": null,
+        "commander": {
+         "name": "Tidus, Yuna's Guardian",
+         "oracle_id": "e8fbcafd-3617-4cd7-b55d-457fb7b60162",
+         "scryfall_id": null
+        },
+        "secondaryCommander": null,
+        "deckSelectionStatus": "chosen"
+       },
+       {
+        "id": 9003,
+        "name": "Player 3",
+        "life": 40,
+        "poison": 0,
+        "isEliminated": false,
+        "isConnected": true,
+        "turnNumber": 0,
+        "totalTurnTimeMs": 0,
+        "commanderDamageTaken": [],
+        "secondaryCommanderDamageTaken": [],
+        "commanderTax": 0,
+        "playerStatus": null,
+        "commander": {
+         "name": "Doran, Besieged by Time",
+         "oracle_id": "dd35a377-0865-4b25-bd0f-aaead29a9f0e",
+         "scryfall_id": null
+        },
+        "secondaryCommander": null,
+        "deckSelectionStatus": "chosen"
+       },
+       {
+        "id": 9004,
+        "name": "Player 4",
+        "life": 40,
+        "poison": 0,
+        "isEliminated": false,
+        "isConnected": true,
+        "turnNumber": 0,
+        "totalTurnTimeMs": 0,
+        "commanderDamageTaken": [],
+        "secondaryCommanderDamageTaken": [],
+        "commanderTax": 0,
+        "playerStatus": null,
+        "commander": {
+         "name": "Zurgo Stormrender",
+         "oracle_id": "0f93d88c-9d2e-416d-a10b-99483360b1fb",
+         "scryfall_id": "dc8eb325-75c9-4331-830d-3f7d62d77290"
+        },
+        "secondaryCommander": null,
+        "deckSelectionStatus": "unset"
+       }
+      ],
+      "eventTypes": []
+     },
+     "version": 221,
+     "playtestVersion": 0,
+     "playtestPrivate": {
+      "library": [],
+      "hand": []
+     }
+    }
+   },
+   "last": {
+    "at": "2026-11-18T03:38:32.499Z",
+    "method": "GET",
+    "path": "/api/match/3027c39c-dd29-4dd3-873d-ed218ab341bc/state",
+    "status": 200,
+    "responseBody": {
+     "state": {
+      "currentPlayer": 3,
+      "playerOrder": [
+       9002,
+       9004,
+       9003,
+       9001
+      ],
+      "freedSeatPlayerIds": [],
+      "format": "commander",
+      "startedAt": "2026-11-18T02:51:23.851Z",
+      "endedAt": "2026-11-18T03:38:25.991Z",
+      "turnRound": 7,
+      "turnStartedAt": "2026-11-18T03:31:35.108Z",
+      "winnerVotes": {
+       "9001": [
+        9001
+       ]
+      },
+      "monarchPlayerId": null,
+      "initiativePlayerId": null,
+      "players": [
+       {
+        "id": 9001,
+        "name": "Player 1",
+        "life": 5,
+        "poison": 0,
+        "isEliminated": false,
+        "isConnected": false,
+        "turnNumber": 7,
+        "totalTurnTimeMs": 1098840,
+        "commanderDamageTaken": [
+         {
+          "fromPlayerId": 9004,
+          "amount": 4
+         }
+        ],
+        "secondaryCommanderDamageTaken": [],
+        "commanderTax": 0,
+        "playerStatus": null,
+        "commander": {
+         "name": "Imotekh the Stormlord",
+         "oracle_id": "425fea06-76ec-4cd9-bd3b-750504fd7fd2",
+         "scryfall_id": "1287e69f-5e92-48f4-80de-d43cb5be21ce"
+        },
+        "secondaryCommander": null,
+        "deckSelectionStatus": "unset"
+       },
+       {
+        "id": 9002,
+        "name": "Player 2",
+        "life": 48,
+        "poison": 0,
+        "isEliminated": false,
+        "isConnected": true,
+        "turnNumber": 7,
+        "totalTurnTimeMs": 894263,
+        "commanderDamageTaken": [],
+        "secondaryCommanderDamageTaken": [],
+        "commanderTax": 0,
+        "playerStatus": null,
+        "commander": {
+         "name": "Baba Lysaga, Night Witch",
+         "oracle_id": "d6cd4aa1-ff3a-4453-8735-e5ace5cbe386",
+         "scryfall_id": null
+        },
+        "secondaryCommander": null,
+        "deckSelectionStatus": "chosen"
+       },
+       {
+        "id": 9003,
+        "name": "Player 3",
+        "life": 16,
+        "poison": 0,
+        "isEliminated": false,
+        "isConnected": true,
+        "turnNumber": 7,
+        "totalTurnTimeMs": 467953,
+        "commanderDamageTaken": [],
+        "secondaryCommanderDamageTaken": [],
+        "commanderTax": 0,
+        "playerStatus": null,
+        "commander": {
+         "name": "Doran, Besieged by Time",
+         "oracle_id": "dd35a377-0865-4b25-bd0f-aaead29a9f0e",
+         "scryfall_id": null
+        },
+        "secondaryCommander": null,
+        "deckSelectionStatus": "chosen"
+       },
+       {
+        "id": 9004,
+        "name": "Player 4",
+        "life": 13,
+        "poison": 0,
+        "isEliminated": false,
+        "isConnected": true,
+        "turnNumber": 7,
+        "totalTurnTimeMs": 361074,
+        "commanderDamageTaken": [],
+        "secondaryCommanderDamageTaken": [],
+        "commanderTax": 0,
+        "playerStatus": null,
+        "commander": {
+         "name": "Astonishing Spider-Man",
+         "oracle_id": "24059283-edbd-4817-9f35-4be02f07b8f8",
+         "scryfall_id": "b5787d4b-ce1e-49d9-9669-307bda264b33"
+        },
+        "secondaryCommander": null,
+        "deckSelectionStatus": "unset"
+       }
+      ],
+      "eventTypes": [
+       "counter",
+       "turn"
+      ]
+     },
+     "version": 434,
+     "playtestVersion": 0,
+     "playtestPrivate": {
+      "library": [],
+      "hand": []
+     }
+    }
+   }
+  },
+  "b8404172-bf2a-4da7-b033-2d7d53769f90": {
+   "count": 3,
+   "first": {
+    "at": "2026-11-18T03:38:26.865Z",
+    "method": "GET",
+    "path": "/api/match/b8404172-bf2a-4da7-b033-2d7d53769f90/state",
+    "status": 200,
+    "responseBody": {
+     "state": {
+      "currentPlayer": 3,
+      "playerOrder": [
+       9002,
+       9004,
+       9003,
+       9001
+      ],
+      "format": "commander",
+      "endedAt": null,
+      "turnRound": 7,
+      "turnStartedAt": "2026-11-18T03:31:35.108Z",
+      "recordedWinnerId": null,
+      "winnerVotes": {},
+      "monarchPlayerId": null,
+      "initiativePlayerId": null,
+      "players": [
+       {
+        "id": 9001,
+        "name": "Player 1",
+        "life": 40,
+        "poison": 0,
+        "isEliminated": false,
+        "isConnected": false,
+        "turnNumber": 0,
+        "totalTurnTimeMs": 0,
+        "commanderDamageTaken": [],
+        "secondaryCommanderDamageTaken": [],
+        "commanderTax": 0,
+        "playerStatus": null,
+        "commander": {
+         "name": "Imotekh the Stormlord",
+         "oracle_id": "425fea06-76ec-4cd9-bd3b-750504fd7fd2",
+         "scryfall_id": "1287e69f-5e92-48f4-80de-d43cb5be21ce"
+        },
+        "secondaryCommander": null,
+        "deckSelectionStatus": "unset"
+       },
+       {
+        "id": 9002,
+        "name": "Player 2",
+        "life": 40,
+        "poison": 0,
+        "isEliminated": false,
+        "isConnected": true,
+        "turnNumber": 0,
+        "totalTurnTimeMs": 0,
+        "commanderDamageTaken": [],
+        "secondaryCommanderDamageTaken": [],
+        "commanderTax": 0,
+        "playerStatus": null,
+        "commander": {
+         "name": "Baba Lysaga, Night Witch",
+         "oracle_id": "d6cd4aa1-ff3a-4453-8735-e5ace5cbe386",
+         "scryfall_id": null
+        },
+        "secondaryCommander": null,
+        "deckSelectionStatus": "chosen"
+       },
+       {
+        "id": 9003,
+        "name": "Player 3",
+        "life": 40,
+        "poison": 0,
+        "isEliminated": false,
+        "isConnected": true,
+        "turnNumber": 0,
+        "totalTurnTimeMs": 0,
+        "commanderDamageTaken": [],
+        "secondaryCommanderDamageTaken": [],
+        "commanderTax": 0,
+        "playerStatus": null,
+        "commander": {
+         "name": "Doran, Besieged by Time",
+         "oracle_id": "dd35a377-0865-4b25-bd0f-aaead29a9f0e",
+         "scryfall_id": null
+        },
+        "secondaryCommander": null,
+        "deckSelectionStatus": "chosen"
+       },
+       {
+        "id": 9004,
+        "name": "Player 4",
+        "life": 40,
+        "poison": 0,
+        "isEliminated": false,
+        "isConnected": true,
+        "turnNumber": 0,
+        "totalTurnTimeMs": 0,
+        "commanderDamageTaken": [],
+        "secondaryCommanderDamageTaken": [],
+        "commanderTax": 0,
+        "playerStatus": null,
+        "commander": {
+         "name": "Astonishing Spider-Man",
+         "oracle_id": "24059283-edbd-4817-9f35-4be02f07b8f8",
+         "scryfall_id": "b5787d4b-ce1e-49d9-9669-307bda264b33"
+        },
+        "secondaryCommander": null,
+        "deckSelectionStatus": "unset"
+       }
+      ],
+      "eventTypes": []
+     },
+     "version": 433,
+     "playtestVersion": 0,
+     "playtestPrivate": {
+      "library": [],
+      "hand": []
+     }
+    }
+   },
+   "last": {
+    "at": "2026-11-18T03:38:33.557Z",
+    "method": "GET",
+    "path": "/api/match/b8404172-bf2a-4da7-b033-2d7d53769f90/state",
+    "status": 200,
+    "responseBody": {
+     "state": {
+      "currentPlayer": 0,
+      "playerOrder": [
+       9002,
+       9004,
+       9003,
+       9001
+      ],
+      "freedSeatPlayerIds": [],
+      "format": "commander",
+      "startedAt": null,
+      "endedAt": null,
+      "turnRound": 7,
+      "turnStartedAt": null,
+      "winnerVotes": {},
+      "monarchPlayerId": null,
+      "initiativePlayerId": null,
+      "players": [
+       {
+        "id": 9001,
+        "name": "Player 1",
+        "life": 40,
+        "poison": 0,
+        "isEliminated": false,
+        "isConnected": false,
+        "turnNumber": 0,
+        "totalTurnTimeMs": 0,
+        "commanderDamageTaken": [],
+        "secondaryCommanderDamageTaken": [],
+        "commanderTax": 0,
+        "playerStatus": null,
+        "commander": {
+         "name": "Imotekh the Stormlord",
+         "oracle_id": "425fea06-76ec-4cd9-bd3b-750504fd7fd2",
+         "scryfall_id": "1287e69f-5e92-48f4-80de-d43cb5be21ce"
+        },
+        "secondaryCommander": null,
+        "deckSelectionStatus": "unset"
+       },
+       {
+        "id": 9002,
+        "name": "Player 2",
+        "life": 40,
+        "poison": 0,
+        "isEliminated": false,
+        "isConnected": true,
+        "turnNumber": 0,
+        "totalTurnTimeMs": 0,
+        "commanderDamageTaken": [],
+        "secondaryCommanderDamageTaken": [],
+        "commanderTax": 0,
+        "playerStatus": null,
+        "commander": {
+         "name": "Baba Lysaga, Night Witch",
+         "oracle_id": "d6cd4aa1-ff3a-4453-8735-e5ace5cbe386",
+         "scryfall_id": null
+        },
+        "secondaryCommander": null,
+        "deckSelectionStatus": "chosen"
+       },
+       {
+        "id": 9003,
+        "name": "Player 3",
+        "life": 40,
+        "poison": 0,
+        "isEliminated": false,
+        "isConnected": true,
+        "turnNumber": 0,
+        "totalTurnTimeMs": 0,
+        "commanderDamageTaken": [],
+        "secondaryCommanderDamageTaken": [],
+        "commanderTax": 0,
+        "playerStatus": null,
+        "commander": {
+         "name": "Doran, Besieged by Time",
+         "oracle_id": "dd35a377-0865-4b25-bd0f-aaead29a9f0e",
+         "scryfall_id": null
+        },
+        "secondaryCommander": null,
+        "deckSelectionStatus": "chosen"
+       },
+       {
+        "id": 9004,
+        "name": "Player 4",
+        "life": 40,
+        "poison": 0,
+        "isEliminated": false,
+        "isConnected": true,
+        "turnNumber": 0,
+        "totalTurnTimeMs": 0,
+        "commanderDamageTaken": [],
+        "secondaryCommanderDamageTaken": [],
+        "commanderTax": 0,
+        "playerStatus": null,
+        "commander": {
+         "name": "Astonishing Spider-Man",
+         "oracle_id": "24059283-edbd-4817-9f35-4be02f07b8f8",
+         "scryfall_id": "b5787d4b-ce1e-49d9-9669-307bda264b33"
+        },
+        "secondaryCommander": null,
+        "deckSelectionStatus": "unset"
+       }
+      ],
+      "eventTypes": []
+     },
+     "version": 434,
+     "playtestVersion": 0,
+     "playtestPrivate": {
+      "library": [],
+      "hand": []
+     }
+    }
+   }
+  }
+ },
+ "patchesPerMatch": {
+  "71ac5c6e-020f-47af-bb34-4cc684b888a1": {
+   "count": 53,
+   "bodyKeys": {
+    "players": 52,
+    "playerOrder": 1,
+    "recordedWinnerId": 2,
+    "startedAt": 1,
+    "timerPausedAt": 1,
+    "turnRound": 1,
+    "turnStartedAt": 7,
+    "turnTimerPausedAt": 1,
+    "events": 18,
+    "currentPlayer": 6,
+    "eventsRemove": 7,
+    "endedAt": 1
+   }
+  },
+  "3027c39c-dd29-4dd3-873d-ed218ab341bc": {
+   "count": 69,
+   "bodyKeys": {
+    "gameStatus": 1,
+    "players": 66,
+    "startedAt": 2,
+    "turnStartedAt": 8,
+    "endedAt": 6,
+    "leftBeforeEndUserIds": 7,
+    "voteEligibleUserIds": 7,
+    "voteModalDismissedByUserIds": 7,
+    "winnerVotes": 5,
+    "playerOrder": 1,
+    "recordedWinnerId": 2,
+    "turnRound": 7,
+    "events": 35,
+    "currentPlayer": 6,
+    "eventsRemove": 15
+   }
+  },
+  "b8404172-bf2a-4da7-b033-2d7d53769f90": {
+   "count": 2,
+   "bodyKeys": {
+    "currentPlayer": 1,
+    "events": 1,
+    "eventsRemove": 1,
+    "gameStatus": 1,
+    "players": 2,
+    "startedAt": 1,
+    "turnStartedAt": 1,
+    "endedAt": 1,
+    "leftBeforeEndUserIds": 1,
+    "voteEligibleUserIds": 1,
+    "voteModalDismissedByUserIds": 1,
+    "winnerVotes": 1
+   }
+  }
+ },
+ "winnerPatches": [
+  {
+   "at": "2026-11-18T02:04:48.805Z",
+   "method": "PATCH",
+   "path": "/api/match/71ac5c6e-020f-47af-bb34-4cc684b888a1/state",
+   "status": 200,
+   "requestBody": {
+    "recordedWinnerId": null
+   }
+  },
+  {
+   "at": "2026-11-18T02:04:49.339Z",
+   "method": "PATCH",
+   "path": "/api/match/71ac5c6e-020f-47af-bb34-4cc684b888a1/state",
+   "status": 200,
+   "requestBody": {
+    "recordedWinnerId": null
+   }
+  },
+  {
+   "at": "2026-11-18T02:44:53.692Z",
+   "method": "PATCH",
+   "path": "/api/match/71ac5c6e-020f-47af-bb34-4cc684b888a1/state",
+   "status": 200,
+   "requestBody": {
+    "endedAt": "2026-11-18T02:44:53.436Z"
+   }
+  },
+  {
+   "at": "2026-11-18T02:44:54.415Z",
+   "method": "PATCH",
+   "path": "/api/match/3027c39c-dd29-4dd3-873d-ed218ab341bc/state",
+   "status": 200,
+   "requestBody": {
+    "gameStatus": "waiting"
+   }
+  },
+  {
+   "at": "2026-11-18T02:47:15.175Z",
+   "method": "PATCH",
+   "path": "/api/match/3027c39c-dd29-4dd3-873d-ed218ab341bc/state",
+   "status": 200,
+   "requestBody": {
+    "winnerVotes": {
+     "9004": [
+      9001
+     ]
+    },
+    "endedAt": "2026-11-18T02:44:53.436Z",
+    "leftBeforeEndUserIds": [],
+    "voteEligibleUserIds": [
+     9001,
+     9002,
+     9003,
+     9004
+    ],
+    "voteModalDismissedByUserIds": [
+     9002
+    ]
+   }
+  },
+  {
+   "at": "2026-11-18T02:47:15.364Z",
+   "method": "PATCH",
+   "path": "/api/match/3027c39c-dd29-4dd3-873d-ed218ab341bc/state",
+   "status": 200,
+   "requestBody": {
+    "winnerVotes": {
+     "9004": [
+      9001
+     ]
+    },
+    "endedAt": "2026-11-18T02:44:53.436Z",
+    "leftBeforeEndUserIds": [],
+    "voteEligibleUserIds": [
+     9001,
+     9002,
+     9003,
+     9004
+    ],
+    "voteModalDismissedByUserIds": [
+     9002
+    ]
+   }
+  },
+  {
+   "at": "2026-11-18T02:47:21.003Z",
+   "method": "PATCH",
+   "path": "/api/match/3027c39c-dd29-4dd3-873d-ed218ab341bc/state",
+   "status": 200,
+   "requestBody": {
+    "winnerVotes": {
+     "9004": [
+      9001
+     ]
+    },
+    "endedAt": "2026-11-18T02:44:53.436Z",
+    "leftBeforeEndUserIds": [],
+    "voteEligibleUserIds": [
+     9001,
+     9002,
+     9003,
+     9004
+    ],
+    "voteModalDismissedByUserIds": [
+     9002
+    ]
+   }
+  },
+  {
+   "at": "2026-11-18T02:47:21.230Z",
+   "method": "PATCH",
+   "path": "/api/match/3027c39c-dd29-4dd3-873d-ed218ab341bc/state",
+   "status": 200,
+   "requestBody": {
+    "winnerVotes": {
+     "9004": [
+      9001
+     ]
+    },
+    "endedAt": "2026-11-18T02:44:53.436Z",
+    "leftBeforeEndUserIds": [],
+    "voteEligibleUserIds": [
+     9001,
+     9002,
+     9003,
+     9004
+    ],
+    "voteModalDismissedByUserIds": [
+     9002
+    ]
+   }
+  },
+  {
+   "at": "2026-11-18T02:49:40.797Z",
+   "method": "PATCH",
+   "path": "/api/match/3027c39c-dd29-4dd3-873d-ed218ab341bc/state",
+   "status": 200,
+   "requestBody": {
+    "winnerVotes": {
+     "9004": [
+      9001
+     ]
+    },
+    "endedAt": "2026-11-18T02:44:53.436Z",
+    "leftBeforeEndUserIds": [],
+    "voteEligibleUserIds": [
+     9001,
+     9002,
+     9003,
+     9004
+    ],
+    "voteModalDismissedByUserIds": [
+     9002
+    ]
+   }
+  },
+  {
+   "at": "2026-11-18T02:51:06.026Z",
+   "method": "PATCH",
+   "path": "/api/match/3027c39c-dd29-4dd3-873d-ed218ab341bc/state",
+   "status": 200,
+   "requestBody": {
+    "recordedWinnerId": null,
+    "leftBeforeEndUserIds": [],
+    "voteEligibleUserIds": [
+     9001,
+     9002,
+     9003,
+     9004
+    ],
+    "voteModalDismissedByUserIds": [
+     9002
+    ]
+   }
+  },
+  {
+   "at": "2026-11-18T02:51:06.566Z",
+   "method": "PATCH",
+   "path": "/api/match/3027c39c-dd29-4dd3-873d-ed218ab341bc/state",
+   "status": 200,
+   "requestBody": {
+    "recordedWinnerId": null,
+    "leftBeforeEndUserIds": [],
+    "voteEligibleUserIds": [
+     9001,
+     9002,
+     9003,
+     9004
+    ],
+    "voteModalDismissedByUserIds": [
+     9002
+    ]
+   }
+  },
+  {
+   "at": "2026-11-18T03:38:26.275Z",
+   "method": "PATCH",
+   "path": "/api/match/3027c39c-dd29-4dd3-873d-ed218ab341bc/state",
+   "status": 200,
+   "requestBody": {
+    "endedAt": "2026-11-18T03:38:25.991Z"
+   }
+  },
+  {
+   "at": "2026-11-18T03:38:27.174Z",
+   "method": "PATCH",
+   "path": "/api/match/b8404172-bf2a-4da7-b033-2d7d53769f90/state",
+   "status": 200,
+   "requestBody": {
+    "gameStatus": "waiting"
+   }
+  },
+  {
+   "at": "2026-11-18T03:41:37.511Z",
+   "method": "PATCH",
+   "path": "/api/match/b8404172-bf2a-4da7-b033-2d7d53769f90/state",
+   "status": 200,
+   "requestBody": {
+    "winnerVotes": {
+     "9001": [
+      9001,
+      9004
+     ]
+    },
+    "endedAt": "2026-11-18T03:38:25.991Z",
+    "leftBeforeEndUserIds": [],
+    "voteEligibleUserIds": [
+     9001,
+     9002,
+     9003,
+     9004
+    ],
+    "voteModalDismissedByUserIds": [
+     9002
+    ]
+   }
+  }
+ ]
+}

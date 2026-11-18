@@ -1,4 +1,10 @@
 import { storage } from "wxt/utils/storage";
+import type { MatchRecords } from "./convoke/match-records";
+
+// Convoke match records keyed by matchId (see src/shared/convoke/match-records.ts)
+export const convokeMatchesStorage = storage.defineItem<MatchRecords>("local:convoke-matches", {
+  fallback: {},
+});
 
 export interface PlayerData {
   name: string;
