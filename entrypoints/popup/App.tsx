@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { useGameData } from "../../src/shared/hooks/useGameData";
 import type { PlayerData, NotionConfig } from "../../src/shared/storage";
 import { notionConfigStorage, playerTimesStorage } from "../../src/shared/storage";
@@ -59,7 +59,7 @@ function getTokens(dark: boolean) {
 // ── CubeIcon ───────────────────────────────────────────────────────────────────
 function CubeIcon({ size = 40, dark }: { size?: number; dark: boolean }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 44 44" fill="none">
+    <svg aria-hidden="true" width={size} height={size} viewBox="0 0 44 44" fill="none">
       <rect width="44" height="44" rx="10" fill={dark ? "#2a2618" : "#e8e4d8"} />
       <polygon points="22,8 33,14.5 33,27.5 22,34 11,27.5 11,14.5" fill="none"
         stroke="#1c1e2a" strokeWidth="1.2" opacity={dark ? 0.12 : 0.2} />
@@ -121,7 +121,7 @@ function SettingsMenu({ open, onClose, themeOverride, onOverride, onSettings, t 
       <div style={{ padding: "7px 13px 5px", fontSize: 10, fontWeight: 700,
         letterSpacing: "0.12em", textTransform: "uppercase", color: t.muted }}>Appearance</div>
       {opts.map(o => (
-        <button key={o.value} onClick={() => { onOverride(o.value); onClose(); }} style={{
+        <button type="button" key={o.value} onClick={() => { onOverride(o.value); onClose(); }} style={{
           width: "100%", padding: "8px 13px", display: "flex", alignItems: "center", gap: 9,
           background: themeOverride === o.value ? "rgba(128,152,216,0.12)" : "transparent",
           border: "none", cursor: "pointer", fontFamily: "'DM Sans',sans-serif",
@@ -132,7 +132,7 @@ function SettingsMenu({ open, onClose, themeOverride, onOverride, onSettings, t 
           </span>
           <span style={{ fontSize: 13, fontWeight: 500, color: t.ink }}>{o.label}</span>
           {themeOverride === o.value && (
-            <svg style={{ marginLeft: "auto" }} width="13" height="13" viewBox="0 0 13 13" fill="none">
+            <svg aria-hidden="true" style={{ marginLeft: "auto" }} width="13" height="13" viewBox="0 0 13 13" fill="none">
               <circle cx="6.5" cy="6.5" r="6" fill={P.periwinkle} opacity="0.9" />
               <path d="M3.5 6.5l2 2 3.5-3.5" stroke="#fff" strokeWidth="1.5"
                 strokeLinecap="round" strokeLinejoin="round" />
@@ -141,11 +141,11 @@ function SettingsMenu({ open, onClose, themeOverride, onOverride, onSettings, t 
         </button>
       ))}
       <div style={{ height: 1, background: t.divider, margin: "5px 0" }} />
-      <button onClick={() => { onSettings(); onClose(); }} style={{
+      <button type="button" onClick={() => { onSettings(); onClose(); }} style={{
         width: "100%", padding: "8px 13px", display: "flex", alignItems: "center", gap: 9,
         background: "transparent", border: "none", cursor: "pointer", fontFamily: "'DM Sans',sans-serif",
       }}>
-        <svg width="13" height="13" viewBox="0 0 14 14" fill="none" style={{ width: 16, flexShrink: 0 }}>
+        <svg aria-hidden="true" width="13" height="13" viewBox="0 0 14 14" fill="none" style={{ width: 16, flexShrink: 0 }}>
           <circle cx="7" cy="7" r="5.5" stroke={t.muted} strokeWidth="1.3" />
           <circle cx="7" cy="7" r="1.8" stroke={t.muted} strokeWidth="1.3" />
         </svg>
@@ -164,16 +164,24 @@ function PlayerRow({ player, index, isWinner, isFirst, onSelectWinner, onSetFirs
   const col = PLAYER_COLORS[index % PLAYER_COLORS.length];
   const deck = player.commanders.join(" / ") || "Unknown commander";
   return (
-    <button onClick={winnerDisabled ? undefined : onSelectWinner} style={{
+    // A row with two sibling buttons (pick winner, set first player); nesting the crown inside
+    // the winner button made it unreachable by keyboard.
+    <div style={{
       width: "100%",
       background: isWinner ? (isDark ? t.rowSel : t.surface) : (isDark ? "rgba(255,255,255,0.03)" : "rgba(28,30,42,0.03)"),
       border: `1.5px solid ${isWinner ? col : t.border}`,
-      borderRadius: 10, padding: "5px 10px 5px 12px",
+      borderRadius: 10, paddingRight: 10,
       display: "flex", alignItems: "center", gap: 9,
-      cursor: winnerDisabled ? "default" : "pointer", textAlign: "left",
       boxShadow: isWinner ? `0 2px 10px ${col}44` : "none",
       opacity: winnerDisabled ? 0.55 : 1,
       transition: "all 0.15s",
+    }}>
+    <button type="button" onClick={winnerDisabled ? undefined : onSelectWinner}
+      aria-pressed={isWinner} disabled={winnerDisabled} style={{
+      flex: 1, minWidth: 0, background: "transparent", border: "none", borderRadius: 10,
+      padding: "5px 0 5px 12px", display: "flex", alignItems: "center", gap: 9,
+      cursor: winnerDisabled ? "default" : "pointer", textAlign: "left",
+      font: "inherit", color: "inherit",
     }}>
       <span style={{ width: 8, height: 8, borderRadius: "50%", background: col, flexShrink: 0,
         border: `1.5px solid ${t.swatchBorder}`,
@@ -208,22 +216,24 @@ function PlayerRow({ player, index, isWinner, isFirst, onSelectWinner, onSetFirs
         </span>
       )}
 
-      <span onClick={(e) => { e.stopPropagation(); onSetFirst(); }}
-        role="button" title="Set as first player"
-        style={{ width: 22, height: 22, borderRadius: 6, flexShrink: 0,
+    </button>
+
+      <button type="button" onClick={onSetFirst} title="Set as first player"
+        aria-label={`Set ${player.name} as first player`} aria-pressed={isFirst}
+        style={{ width: 22, height: 22, borderRadius: 6, flexShrink: 0, padding: 0,
           background: isFirst ? `${P.lemon}${isDark ? "44" : "55"}` : "transparent",
           border: `1px solid ${isFirst ? `${P.lemon}88` : t.border}`,
           cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
           transition: "all 0.15s" }}>
-        <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+        <svg aria-hidden="true" width="10" height="10" viewBox="0 0 10 10" fill="none">
           <path d="M1 7.5h8M1.5 7.5L2 4l2.5 2L5 2l.5 4L8 4l.5 3.5"
             stroke={isFirst ? P.lemon : t.muted}
             strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
-      </span>
+      </button>
 
       {isWinner ? (
-        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" style={{ flexShrink: 0 }}>
+        <svg aria-hidden="true" width="15" height="15" viewBox="0 0 16 16" fill="none" style={{ flexShrink: 0 }}>
           <circle cx="8" cy="8" r="7.5" fill={col} />
           <path d="M4.5 8l2.5 2.5 4.5-4.5" stroke="#fff" strokeWidth="1.8"
             strokeLinecap="round" strokeLinejoin="round"
@@ -232,7 +242,7 @@ function PlayerRow({ player, index, isWinner, isFirst, onSelectWinner, onSetFirs
       ) : (
         <span style={{ width: 15, flexShrink: 0 }} />
       )}
-    </button>
+    </div>
   );
 }
 
@@ -275,7 +285,7 @@ function KillEvent({ players, killer, victim, winner, onKiller, onVictim, t, isD
               <option key={p.name} value={p.name} disabled={isDisabled(p.name)}>{p.name}</option>
             ))}
           </select>
-          <svg width="8" height="8" viewBox="0 0 8 8" fill="none" style={{ position: "absolute", right: 8,
+          <svg aria-hidden="true" width="8" height="8" viewBox="0 0 8 8" fill="none" style={{ position: "absolute", right: 8,
             top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }}>
             <path d="M1 2.5l3 3 3-3" stroke={t.muted} strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
@@ -290,7 +300,7 @@ function KillEvent({ players, killer, victim, winner, onKiller, onVictim, t, isD
         background: isDark ? "rgba(255,255,255,0.02)" : "rgba(28,30,42,0.02)",
         opacity: 0.45, pointerEvents: "none" }}>
         <div style={{ padding: "9px 12px", display: "flex", alignItems: "center", gap: 7 }}>
-          <svg width="11" height="11" viewBox="0 0 14 14" fill="none" style={{ opacity: 0.5 }}>
+          <svg aria-hidden="true" width="11" height="11" viewBox="0 0 14 14" fill="none" style={{ opacity: 0.5 }}>
             <path d="M2 12L10 4M10 4H7M10 4V7" stroke={t.muted} strokeWidth="1.5"
               strokeLinecap="round" strokeLinejoin="round" />
           </svg>
@@ -313,11 +323,11 @@ function KillEvent({ players, killer, victim, winner, onKiller, onVictim, t, isD
     }}>
       <Picker label="Killer" value={killer} onChange={onKiller}
         isDisabled={(name) => name === victim}
-        icon={<svg width="10" height="10" viewBox="0 0 14 14" fill="none">
+        icon={<svg aria-hidden="true" width="10" height="10" viewBox="0 0 14 14" fill="none">
           <path d="M2 12L10 4M10 4H7M10 4V7" stroke={t.muted} strokeWidth="1.5"
             strokeLinecap="round" strokeLinejoin="round" />
         </svg>} />
-      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style={{ flexShrink: 0, marginBottom: 7, opacity: 0.8 }}>
+      <svg aria-hidden="true" width="14" height="14" viewBox="0 0 14 14" fill="none" style={{ flexShrink: 0, marginBottom: 7, opacity: 0.8 }}>
         <path d="M2 12L10 4M10 4H7M10 4V7" stroke={P.pink} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
         <circle cx="3" cy="11" r="1.2" fill={P.pink} opacity="0.7" />
       </svg>
@@ -340,7 +350,7 @@ function PillToggle({ options, value, onChange, t, isDark, disabledValues }: {
         const sel = value === o.value;
         const dis = disabledValues?.includes(o.value) ?? false;
         return (
-          <button key={o.value} onClick={() => !dis && onChange(o.value)} style={{
+          <button type="button" key={o.value} onClick={() => !dis && onChange(o.value)} style={{
             flex: 1, padding: "6px 0", borderRadius: 6, fontSize: 12, fontWeight: 600,
             background: sel ? (isDark ? "#2a2618" : t.surface) : "transparent",
             border: sel ? `1px solid ${t.border}` : "1px solid transparent",
@@ -361,7 +371,7 @@ function Stepper({ value, onChange, t }: { value: number; onChange: (v: number) 
   return (
     <div style={{ display: "flex", alignItems: "center",
       background: t.statBg, border: `1px solid ${t.border}`, borderRadius: 8, overflow: "hidden" }}>
-      <button onClick={() => onChange(Math.max(0, value - 1))} style={{
+      <button type="button" onClick={() => onChange(Math.max(0, value - 1))} style={{
         width: 26, height: 32, background: "transparent", border: "none",
         cursor: value <= 0 ? "default" : "pointer",
         color: value <= 0 ? t.muted : t.ink,
@@ -370,7 +380,7 @@ function Stepper({ value, onChange, t }: { value: number; onChange: (v: number) 
       }}>−</button>
       <span style={{ flex: 1, textAlign: "center", fontWeight: 700,
         fontSize: 14, color: t.ink, minWidth: 18 }}>{value}</span>
-      <button onClick={() => onChange(Math.min(20, value + 1))} style={{
+      <button type="button" onClick={() => onChange(Math.min(20, value + 1))} style={{
         width: 26, height: 32, background: "transparent", border: "none",
         cursor: value >= 20 ? "default" : "pointer",
         color: value >= 20 ? t.muted : t.ink,
@@ -384,7 +394,7 @@ function Stepper({ value, onChange, t }: { value: number; onChange: (v: number) 
 // ── ToggleSwitch ───────────────────────────────────────────────────────────────
 function ToggleSwitch({ value, onChange }: { value: boolean; onChange: (v: boolean) => void }) {
   return (
-    <button onClick={() => onChange(!value)} style={{
+    <button type="button" onClick={() => onChange(!value)} style={{
       width: 36, height: 20, borderRadius: 10, padding: 2, flexShrink: 0,
       background: value ? P.mint : "rgba(128,128,128,0.2)",
       border: "none", cursor: "pointer", transition: "background 0.2s",
@@ -608,7 +618,7 @@ function ConfirmScreen({ data, onConfirm, onBack, submitting, submitError, t }: 
         <div style={{ width: 36, height: 36, borderRadius: "50%", flexShrink: 0,
           background: `${P.periwinkle}22`, border: `2px solid ${P.periwinkle}55`,
           display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none">
             <path d="M8 2v5l3 2" stroke={P.periwinkle} strokeWidth="1.8"
               strokeLinecap="round" strokeLinejoin="round" />
             <circle cx="8" cy="8" r="6.5" stroke={P.periwinkle} strokeWidth="1.4" />
@@ -634,7 +644,7 @@ function ConfirmScreen({ data, onConfirm, onBack, submitting, submitError, t }: 
       )}
 
       <div style={{ display: "flex", gap: 8 }}>
-        <button onClick={onBack} disabled={submitting} style={{
+        <button type="button" onClick={onBack} disabled={submitting} style={{
           flex: 1, padding: "10px 0", borderRadius: 10,
           background: t.statBg, border: `1px solid ${t.border}`,
           color: t.muted, fontFamily: "'DM Sans',sans-serif",
@@ -644,13 +654,13 @@ function ConfirmScreen({ data, onConfirm, onBack, submitting, submitError, t }: 
           display: "flex", alignItems: "center", justifyContent: "center", gap: 5,
           transition: "all 0.15s",
         }}>
-          <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+          <svg aria-hidden="true" width="13" height="13" viewBox="0 0 13 13" fill="none">
             <path d="M8 3L4 6.5 8 10" stroke={t.muted} strokeWidth="1.5"
               strokeLinecap="round" strokeLinejoin="round" />
           </svg>
           Edit
         </button>
-        <button onClick={onConfirm} disabled={submitting} style={{
+        <button type="button" onClick={onConfirm} disabled={submitting} style={{
           flex: 2, padding: "10px 0", borderRadius: 10,
           background: submitting
             ? "rgba(60,160,100,0.6)"
@@ -664,7 +674,7 @@ function ConfirmScreen({ data, onConfirm, onBack, submitting, submitError, t }: 
         }}>
           {submitting ? (
             <>
-              <svg width="12" height="12" viewBox="0 0 13 13" fill="none"
+              <svg aria-hidden="true" width="12" height="12" viewBox="0 0 13 13" fill="none"
                 style={{ animation: "spin 0.7s linear infinite" }}>
                 <circle cx="6.5" cy="6.5" r="5.5" stroke="rgba(14,42,26,0.3)" strokeWidth="1.8" />
                 <path d="M6.5 1A5.5 5.5 0 0 1 12 6.5" stroke="#0e2a1a" strokeWidth="1.8" strokeLinecap="round" />
@@ -732,7 +742,7 @@ function SuccessScreen({ data, onReset, t, alreadyLogged }: {
         <SummaryGrid data={data} t={t} />
       )}
 
-      <button onClick={onReset} style={{
+      <button type="button" onClick={onReset} style={{
         width: "100%", padding: "11px", borderRadius: 10,
         background: `linear-gradient(135deg,${P.periwinkle},#6070c8)`,
         border: "none", color: "#fff", fontFamily: "'DM Sans',sans-serif",
@@ -750,14 +760,16 @@ function SettingsField({ label, value, onChange, password, t, isDark }: {
 }) {
   const [show, setShow] = useState(false);
   const [focused, setFocused] = useState(false);
+  const id = useId();
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
-      <label style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.1em",
+      <label htmlFor={id} style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.1em",
         textTransform: "uppercase", color: t.label }}>
         {label}
       </label>
       <div style={{ position: "relative" }}>
         <input
+          id={id}
           type={password && !show ? "password" : "text"}
           value={value}
           onChange={e => onChange(e.target.value)}
@@ -773,7 +785,7 @@ function SettingsField({ label, value, onChange, password, t, isDark }: {
           }}
         />
         {password && (
-          <button onClick={() => setShow(v => !v)} style={{
+          <button type="button" onClick={() => setShow(v => !v)} style={{
             position: "absolute", right: 8, top: "50%", transform: "translateY(-50%)",
             background: "none", border: "none", cursor: "pointer",
             color: t.muted, fontSize: 11, fontFamily: "'DM Sans',sans-serif", fontWeight: 600,
@@ -814,11 +826,11 @@ function SettingsScreen({ onBack, t, isDark }: { onBack: () => void; t: Tokens; 
         <div style={{ width: 36, height: 36, borderRadius: "50%", flexShrink: 0,
           background: `${P.periwinkle}22`, border: `2px solid ${P.periwinkle}55`,
           display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none">
             <circle cx="8" cy="8" r="6.5" stroke={P.periwinkle} strokeWidth="1.4" />
             <circle cx="8" cy="8" r="2" stroke={P.periwinkle} strokeWidth="1.4" />
-            {[0,60,120,180,240,300].map((deg, i) => (
-              <line key={i}
+            {[0,60,120,180,240,300].map((deg) => (
+              <line key={deg}
                 x1={8 + 4 * Math.cos(deg * Math.PI / 180)}
                 y1={8 + 4 * Math.sin(deg * Math.PI / 180)}
                 x2={8 + 6 * Math.cos(deg * Math.PI / 180)}
@@ -861,7 +873,7 @@ function SettingsScreen({ onBack, t, isDark }: { onBack: () => void; t: Tokens; 
       {saved && (
         <p style={{ color: P.mint, fontSize: 11.5, fontWeight: 600,
           display: "flex", alignItems: "center", gap: 5 }}>
-          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <svg aria-hidden="true" width="12" height="12" viewBox="0 0 12 12" fill="none">
             <circle cx="6" cy="6" r="5.5" fill={P.mint} opacity="0.2" />
             <path d="M3 6l2 2 4-4" stroke={P.mint} strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
@@ -870,7 +882,7 @@ function SettingsScreen({ onBack, t, isDark }: { onBack: () => void; t: Tokens; 
       )}
 
       <div style={{ display: "flex", gap: 8 }}>
-        <button onClick={onBack} style={{
+        <button type="button" onClick={onBack} style={{
           flex: 1, padding: "10px 0", borderRadius: 10,
           background: t.statBg, border: `1px solid ${t.border}`,
           color: t.muted, fontFamily: "'DM Sans',sans-serif",
@@ -878,13 +890,13 @@ function SettingsScreen({ onBack, t, isDark }: { onBack: () => void; t: Tokens; 
           display: "flex", alignItems: "center", justifyContent: "center", gap: 5,
           transition: "all 0.15s",
         }}>
-          <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+          <svg aria-hidden="true" width="13" height="13" viewBox="0 0 13 13" fill="none">
             <path d="M8 3L4 6.5 8 10" stroke={t.muted} strokeWidth="1.5"
               strokeLinecap="round" strokeLinejoin="round" />
           </svg>
           Back
         </button>
-        <button onClick={handleSave} disabled={saving || !loaded} style={{
+        <button type="button" onClick={handleSave} disabled={saving || !loaded} style={{
           flex: 2, padding: "10px 0", borderRadius: 10,
           background: saving ? "rgba(128,152,216,0.5)" : `linear-gradient(135deg,${P.periwinkle},#6070c8)`,
           border: "none", color: "#fff",
@@ -896,7 +908,7 @@ function SettingsScreen({ onBack, t, isDark }: { onBack: () => void; t: Tokens; 
         }}>
           {saving ? (
             <>
-              <svg width="12" height="12" viewBox="0 0 13 13" fill="none"
+              <svg aria-hidden="true" width="12" height="12" viewBox="0 0 13 13" fill="none"
                 style={{ animation: "spin 0.7s linear infinite" }}>
                 <circle cx="6.5" cy="6.5" r="5.5" stroke="rgba(255,255,255,0.3)" strokeWidth="1.8" />
                 <path d="M6.5 1A5.5 5.5 0 0 1 12 6.5" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" />
@@ -918,7 +930,7 @@ function PendingBar({ pending, selectedId, onSelect, t, isDark }: {
   const chip = (id: string, label: string, title?: string) => {
     const sel = selectedId === id || (id === "live" && selectedId === null);
     return (
-      <button key={id} title={title} onClick={() => onSelect(id)} style={{
+      <button type="button" key={id} title={title} onClick={() => onSelect(id)} style={{
         flexShrink: 0, padding: "3px 10px", borderRadius: 20, fontSize: 11.5, fontWeight: 600,
         fontFamily: "'DM Sans',sans-serif", cursor: "pointer", whiteSpace: "nowrap",
         background: sel ? `${P.periwinkle}${isDark ? "26" : "2e"}` : (isDark ? "rgba(255,255,255,0.04)" : "rgba(28,30,42,0.04)"),
@@ -994,7 +1006,7 @@ export default function App() {
   const t = getTokens(isDark);
   // Same colour as the card: Chrome's popup window is a plain rectangle, so a different body
   // colour shows as a square frame around the card's rounded corners (#25).
-  useEffect(() => { document.body.style.background = t.bg; }, [isDark]);
+  useEffect(() => { document.body.style.background = t.bg; }, [t.bg]);
 
   // Game state
   const [winner, setWinner]           = useState<string | null>(null);
@@ -1225,7 +1237,7 @@ export default function App() {
           </span>
         )}
 
-        <button onClick={handleRefresh} disabled={refreshing} title="Refresh player data" style={{
+        <button type="button" onClick={handleRefresh} disabled={refreshing} title="Refresh player data" style={{
           width: 28, height: 28, borderRadius: 7,
           background: isDark ? "rgba(255,255,255,0.05)" : "rgba(28,30,42,0.05)",
           border: `1px solid ${t.border}`,
@@ -1233,7 +1245,7 @@ export default function App() {
           display: "flex", alignItems: "center", justifyContent: "center",
           flexShrink: 0, transition: "all 0.15s", opacity: refreshing ? 0.5 : 1,
         }}>
-          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"
+          <svg aria-hidden="true" width="12" height="12" viewBox="0 0 12 12" fill="none"
             style={{ animation: refreshing ? "spin 0.7s linear infinite" : "none" }}>
             <path d="M1 6A5 5 0 1 1 2.5 9.5" stroke={t.muted} strokeWidth="1.4" strokeLinecap="round" />
             <polyline points="1,3.5 1,6 3.5,6" stroke={t.muted} strokeWidth="1.4"
@@ -1241,17 +1253,17 @@ export default function App() {
           </svg>
         </button>
 
-        <button onClick={() => setMenuOpen(o => !o)} style={{
+        <button type="button" onClick={() => setMenuOpen(o => !o)} style={{
           width: 28, height: 28, borderRadius: 7,
           background: menuOpen ? "rgba(128,152,216,0.15)" : (isDark ? "rgba(255,255,255,0.05)" : "rgba(28,30,42,0.05)"),
           border: `1px solid ${menuOpen ? "rgba(128,152,216,0.4)" : t.border}`,
           cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
           flexShrink: 0, transition: "all 0.15s",
         }}>
-          <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
+          <svg aria-hidden="true" width="13" height="13" viewBox="0 0 14 14" fill="none">
             <circle cx="7" cy="7" r="2" stroke={menuOpen ? P.periwinkle : t.muted} strokeWidth="1.4" />
-            {[0, 45, 90, 135, 180, 225, 270, 315].map((deg, i) => (
-              <line key={i}
+            {[0, 45, 90, 135, 180, 225, 270, 315].map((deg) => (
+              <line key={deg}
                 x1={7 + 3.8 * Math.cos((deg * Math.PI) / 180)}
                 y1={7 + 3.8 * Math.sin((deg * Math.PI) / 180)}
                 x2={7 + 5.4 * Math.cos((deg * Math.PI) / 180)}
@@ -1348,7 +1360,7 @@ export default function App() {
                   const sel = wincon === w;
                   const col = WIN_COLORS[i];
                   return (
-                    <button key={w} onClick={() => setWincon(v => v === w ? null : w)} style={{
+                    <button type="button" key={w} onClick={() => setWincon(v => v === w ? null : w)} style={{
                       background: sel ? `${col}${isDark ? "22" : "2a"}` : (isDark ? "rgba(255,255,255,0.04)" : "rgba(28,30,42,0.04)"),
                       border: `1.5px solid ${sel ? col : t.border}`,
                       borderRadius: 8, padding: "8px 4px",
@@ -1397,7 +1409,7 @@ export default function App() {
 
               <div style={{ flex: 1 }} />
 
-              <button onClick={handleReview} disabled={!canSubmit} style={{
+              <button type="button" onClick={handleReview} disabled={!canSubmit} style={{
                 width: "100%", padding: "11px 0", borderRadius: 10,
                 background: canSubmit ? `linear-gradient(135deg,${P.mint},#48b880)` : t.disabledBg,
                 border: canSubmit ? "none" : `1px solid ${t.border}`,

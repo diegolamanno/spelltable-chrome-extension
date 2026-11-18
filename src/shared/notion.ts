@@ -175,7 +175,7 @@ export async function createGameSeat(payload: GameSeatPayload): Promise<string> 
   const { gameSeatsDbId } = await notionConfigStorage.getValue();
   if (!gameSeatsDbId) throw new Error("Game Seats DB ID not configured — open extension settings.");
 
-  const { gameId, playerId, deckId, seat, playerName, date, rawTime } = payload;
+  const { gameId, playerId, deckId, seat, date, rawTime } = payload;
 
   const result = (await notionFetch("/pages", {
     parent: { database_id: gameSeatsDbId },
