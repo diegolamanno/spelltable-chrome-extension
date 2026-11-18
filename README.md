@@ -73,6 +73,7 @@ The `Owner` relation scopes deck lookups per player, preventing the wrong deck f
 | `First Blood Killer Deck` | Relation → Decks |
 | `First Blood Victim` | Relation → Players |
 | `First Blood Victim Deck` | Relation → Decks |
+| `Match ID` | Text, *optional*. Convoke match id. When present, the extension checks it before creating a game, so the same match can't be logged twice (even by different people in the pod). |
 
 Win Condition select options: `Combat`, `Commander Damage`, `Burn/Life Loss`, `Alt Win Con`, `Infect`, `Mill`, `Combo`, `Stolen`, `Draw`.
 

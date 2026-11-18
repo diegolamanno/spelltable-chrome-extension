@@ -1,5 +1,11 @@
 import { storage } from "wxt/utils/storage";
 import type { MatchRecords } from "./convoke/match-records";
+import type { SubmitProgress } from "./submit";
+
+// Unfinished submissions (Game created, some seats failed), keyed by submissionKey.
+export const submitProgressStorage = storage.defineItem<Record<string, SubmitProgress>>("local:submit-progress", {
+  fallback: {},
+});
 
 // Convoke match records keyed by matchId (see src/shared/convoke/match-records.ts)
 export const convokeMatchesStorage = storage.defineItem<MatchRecords>("local:convoke-matches", {
