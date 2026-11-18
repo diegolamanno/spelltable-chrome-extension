@@ -67,20 +67,16 @@ export default defineContentScript({
           const name = nameEl?.textContent?.trim().toLowerCase() ?? "";
 
           const commanderEls = Array.from(
-            seat.querySelectorAll(
-              ".text-xs.italic.text-gray-400.truncate.leading-snug.flex > div"
-            )
+            seat.querySelectorAll(".text-xs.italic.text-gray-400.truncate.leading-snug.flex > div")
           );
-          const commanders = commanderEls
-            .map((el) => el.textContent?.trim() ?? "")
-            .filter(Boolean);
+          const commanders = commanderEls.map((el) => el.textContent?.trim() ?? "").filter(Boolean);
 
           console.log(`[SpellTable] Seat ${index}:`, {
             seat,
             nameEl,
             name,
             commanderEls,
-            commanders
+            commanders,
           });
 
           return { name, commanders };

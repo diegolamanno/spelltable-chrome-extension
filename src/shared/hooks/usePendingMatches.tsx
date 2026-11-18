@@ -8,7 +8,9 @@ export function usePendingMatches(): MatchRecord[] {
 
   useEffect(() => {
     convokeMatchesStorage.getValue().then((records) => setPending(pendingMatches(records ?? {})));
-    const unwatch = convokeMatchesStorage.watch((records) => setPending(pendingMatches(records ?? {})));
+    const unwatch = convokeMatchesStorage.watch((records) =>
+      setPending(pendingMatches(records ?? {}))
+    );
     return () => unwatch();
   }, []);
 

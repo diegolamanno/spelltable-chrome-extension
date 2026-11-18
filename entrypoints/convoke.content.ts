@@ -20,7 +20,9 @@ export default defineContentScript({
       const h = str.match(/(\d+)h/);
       const m = str.match(/(\d+)m/);
       const s = str.match(/(\d+)s/);
-      return (h ? parseInt(h[1]) * 3600 : 0) + (m ? parseInt(m[1]) * 60 : 0) + (s ? parseInt(s[1]) : 0);
+      return (
+        (h ? parseInt(h[1]) * 3600 : 0) + (m ? parseInt(m[1]) * 60 : 0) + (s ? parseInt(s[1]) : 0)
+      );
     }
 
     // Scrapes player turn times from the game-end summary dialog.
@@ -40,7 +42,8 @@ export default defineContentScript({
         // uses a plain parent div — two levels up covers both.
         const container =
           span.closest<HTMLElement>("[data-slot='hover-card-trigger']") ??
-          span.parentElement?.parentElement ?? null;
+          span.parentElement?.parentElement ??
+          null;
         if (!container) continue;
 
         const nameEl = container.querySelector<HTMLElement>(".font-medium");
@@ -84,9 +87,7 @@ export default defineContentScript({
           const name = (slot.dataset.playerName ?? "").trim().toLowerCase();
 
           const commanderEls = Array.from(slot.querySelectorAll(".commander-name-part"));
-          const commanders = commanderEls
-            .map((el) => el.textContent?.trim() ?? "")
-            .filter(Boolean);
+          const commanders = commanderEls.map((el) => el.textContent?.trim() ?? "").filter(Boolean);
 
           console.log(`[Convoke] Slot ${index}:`, { name, commanders });
 

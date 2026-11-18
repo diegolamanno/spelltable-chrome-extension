@@ -3,11 +3,16 @@ import { applyMatchEvent, type MatchRecords, pendingMatches } from "./match-reco
 import { buildScenario, SCENARIOS, type ScenarioName } from "./mock-scenarios";
 import { suggestWinner } from "./suggestions";
 
-const replay = (name: ScenarioName, records: MatchRecords = {}, now = new Date("2026-12-01T20:00:00Z")) =>
-  buildScenario(name, now).reduce<MatchRecords>(applyMatchEvent, records);
+const replay = (
+  name: ScenarioName,
+  records: MatchRecords = {},
+  now = new Date("2026-12-01T20:00:00Z")
+) => buildScenario(name, now).reduce<MatchRecords>(applyMatchEvent, records);
 
 describe("buildScenario", () => {
-  it.each(Object.keys(SCENARIOS) as ScenarioName[])("%s produces at least one pending game", (name) => {
+  it.each(
+    Object.keys(SCENARIOS) as ScenarioName[]
+  )("%s produces at least one pending game", (name) => {
     expect(pendingMatches(replay(name)).length).toBeGreaterThan(0);
   });
 

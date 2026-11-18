@@ -74,7 +74,11 @@ export function applyMatchEvent(records: MatchRecords, event: ConvokeMatchEvent)
           startedAt: existing.startedAt ?? match.startedAt,
           players: existing.players.length
             ? existing.players
-            : summary.seats.map((s) => ({ id: s.playerId, name: s.name, commanders: s.commanders })),
+            : summary.seats.map((s) => ({
+                id: s.playerId,
+                name: s.name,
+                commanders: s.commanders,
+              })),
           summary,
           stateEndedAt: match.state.endedAt ?? null,
           updatedAt: event.at,
@@ -87,7 +91,10 @@ export function applyMatchEvent(records: MatchRecords, event: ConvokeMatchEvent)
         ? records[event.matchId]
         : Object.values(records).find((r) => r.stateEndedAt && r.stateEndedAt === event.endedAt);
       if (!target) return records;
-      return { ...records, [target.matchId]: { ...target, voteCounts: event.voteCounts, updatedAt: event.at } };
+      return {
+        ...records,
+        [target.matchId]: { ...target, voteCounts: event.voteCounts, updatedAt: event.at },
+      };
     }
   }
 }

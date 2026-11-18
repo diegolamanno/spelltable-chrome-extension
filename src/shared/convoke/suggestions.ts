@@ -141,7 +141,7 @@ export function summariseEndedMatch(res: ConvokeMatchResponse): EndedMatchSummar
 
 /** Leading candidate from a tally (candidate id → votes), or null when nobody voted or the top is tied. */
 export function suggestWinner(
-  voteCounts: Record<string, number> | undefined,
+  voteCounts: Record<string, number> | undefined
 ): { playerId: number; votes: number } | null {
   const ranked = Object.entries(voteCounts ?? {})
     .map(([id, votes]) => ({ playerId: Number(id), votes }))
@@ -154,9 +154,12 @@ export function suggestWinner(
 
 /** ISO timestamp → YYYY-MM-DD in the given (default: the browser's) time zone. */
 export function toLocalDate(iso: string, timeZone?: string): string {
-  return new Intl.DateTimeFormat("en-CA", { timeZone, year: "numeric", month: "2-digit", day: "2-digit" }).format(
-    new Date(iso),
-  );
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date(iso));
 }
 
 // ---------------------------------------------------------------------------
@@ -190,7 +193,7 @@ function lastCommanderDamageTo(log: ConvokeGameLogEntry[], victim: Elimination):
       e.data?.kind === "commander" &&
       e.data.targetId === victim.playerId &&
       e.data.fromPlayerId != null &&
-      e.at <= victim.at,
+      e.at <= victim.at
   );
   return hits.at(-1)?.data?.fromPlayerId ?? null;
 }

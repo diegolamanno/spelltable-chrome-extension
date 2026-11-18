@@ -29,14 +29,24 @@ describe("reviewDefaults", () => {
 
   it("marks winner, first victim and KO type in match 1 as suggestions", () => {
     const r = reviewDefaults(match1, TZ);
-    expect(r).toMatchObject({ winner: "player 4", firstVictim: "player 1", koType: "Staggered", winnerVotes: 1 });
+    expect(r).toMatchObject({
+      winner: "player 4",
+      firstVictim: "player 1",
+      koType: "Staggered",
+      winnerVotes: 1,
+    });
     expect(r?.suggested.sort()).toEqual(["firstVictim", "koType", "winner"]);
     expect(r?.killerHint).toBe("player 4");
   });
 
   it("suggests a simultaneous KO and no first victim for match 2", () => {
     const r = reviewDefaults(match2, TZ);
-    expect(r).toMatchObject({ winner: "player 1", firstVictim: null, koType: "Simultaneous", killerHint: null });
+    expect(r).toMatchObject({
+      winner: "player 1",
+      firstVictim: null,
+      koType: "Simultaneous",
+      killerHint: null,
+    });
     expect(r?.suggested.sort()).toEqual(["koType", "winner"]);
   });
 
@@ -60,7 +70,9 @@ describe("reviewDefaults", () => {
 describe("describeMatch", () => {
   it("shows the local end time and the first commanders", () => {
     const [match1] = pendingOf("full-session");
-    expect(describeMatch(match1, TZ)).toBe("9:44 PM · Zurgo Stormrender, Felothar the Steadfast +2");
+    expect(describeMatch(match1, TZ)).toBe(
+      "9:44 PM · Zurgo Stormrender, Felothar the Steadfast +2"
+    );
   });
 });
 

@@ -22,12 +22,14 @@ const replay = (evts: ConvokeMatchEvent[]) => evts.reduce<MatchRecords>(applyMat
 
 function findEvent<T extends ConvokeMatchEvent["type"]>(type: T, matchId?: string) {
   const e = events.find(
-    (x) => x.type === type && (!matchId || (x.type !== "votes" && x.response.match.id === matchId)),
+    (x) => x.type === type && (!matchId || (x.type !== "votes" && x.response.match.id === matchId))
   );
   if (!e) throw new Error(`no ${type} event in fixture`);
   return e as Extract<ConvokeMatchEvent, { type: T }>;
 }
-const [match1Id, match2Id] = fixture.milestones.filter((m) => m.path.endsWith("/start")).map((m) => m.path.split("/")[3]);
+const [match1Id, match2Id] = fixture.milestones
+  .filter((m) => m.path.endsWith("/start"))
+  .map((m) => m.path.split("/")[3]);
 
 describe("classifyRequest", () => {
   it("turns the session into start, end and vote events", () => {
@@ -50,11 +52,33 @@ describe("classifyRequest", () => {
   it("ignores state patches without votes and failed requests", () => {
     const base = { at: "2026-01-01T00:00:00Z", responseBody: null };
     const path = `/api/match/${match1Id}/state`;
-    expect(classifyRequest({ ...base, method: "PATCH", path, status: 200, requestBody: { turnRound: 3 } })).toBeNull();
     expect(
-      classifyRequest({ ...base, method: "POST", path: `/api/match/${match1Id}/end`, status: 500, requestBody: {} }),
+      classifyRequest({
+        ...base,
+        method: "PATCH",
+        path,
+        status: 200,
+        requestBody: { turnRound: 3 },
+      })
     ).toBeNull();
-    expect(classifyRequest({ ...base, method: "GET", path: "/api/game/x", status: 200, requestBody: null })).toBeNull();
+    expect(
+      classifyRequest({
+        ...base,
+        method: "POST",
+        path: `/api/match/${match1Id}/end`,
+        status: 500,
+        requestBody: {},
+      })
+    ).toBeNull();
+    expect(
+      classifyRequest({
+        ...base,
+        method: "GET",
+        path: "/api/game/x",
+        status: 200,
+        requestBody: null,
+      })
+    ).toBeNull();
   });
 
   it("produces events small enough to relay", () => {

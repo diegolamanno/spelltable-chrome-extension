@@ -63,7 +63,9 @@ export function reviewDefaults(record: MatchRecord, timeZone?: string): ReviewDe
     winner,
     firstVictim,
     playerTimes: Object.fromEntries(
-      summary.seats.filter((s) => s.totalTurnTimeSeconds > 0).map((s) => [s.name.toLowerCase(), s.totalTurnTimeSeconds]),
+      summary.seats
+        .filter((s) => s.totalTurnTimeSeconds > 0)
+        .map((s) => [s.name.toLowerCase(), s.totalTurnTimeSeconds])
     ),
     suggested,
     killerHint: firstVictim ? name(summary.firstBlood?.killerHintId) : null,
@@ -75,9 +77,13 @@ export function reviewDefaults(record: MatchRecord, timeZone?: string): ReviewDe
 export function describeMatch(record: MatchRecord, timeZone?: string): string {
   const endedAt = record.summary?.endedAt;
   const time = endedAt
-    ? new Intl.DateTimeFormat("en-US", { hour: "numeric", minute: "2-digit", timeZone }).format(new Date(endedAt))
+    ? new Intl.DateTimeFormat("en-US", { hour: "numeric", minute: "2-digit", timeZone }).format(
+        new Date(endedAt)
+      )
     : "in progress";
-  const commanders = (record.summary?.seats ?? []).map((s) => s.commanders[0]?.split(",")[0]).filter(Boolean);
+  const commanders = (record.summary?.seats ?? [])
+    .map((s) => s.commanders[0]?.split(",")[0])
+    .filter(Boolean);
   const shown = commanders.slice(0, 2).join(", ");
   const more = commanders.length > 2 ? ` +${commanders.length - 2}` : "";
   return `${time} · ${shown}${more}`;

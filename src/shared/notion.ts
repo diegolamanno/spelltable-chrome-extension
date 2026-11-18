@@ -4,15 +4,15 @@ const NOTION_VERSION = "2022-06-28";
 
 // Maps WIN_CONDITIONS button labels → Notion "Win Condition" select option names
 const WINCON_MAP: Record<string, string> = {
-  Combat:        "Combat",
-  "Cmdr Dmg":    "Commander Damage",
-  "Burn/Life":   "Burn/Life Loss",
+  Combat: "Combat",
+  "Cmdr Dmg": "Commander Damage",
+  "Burn/Life": "Burn/Life Loss",
   "Alt Win Con": "Alt Win Con",
-  Infect:        "Infect",
-  Mill:          "Mill",
-  Combo:         "Combo",
-  Stolen:        "Stolen",
-  Draw:          "Draw",
+  Infect: "Infect",
+  Mill: "Mill",
+  Combo: "Combo",
+  Stolen: "Stolen",
+  Draw: "Draw",
 };
 
 // Maps extension KO type values → Notion "Type of KO" select option names
@@ -67,9 +67,11 @@ export function gamesSupportMatchId(): Promise<boolean> {
   return notionConfigStorage.getValue().then(({ gamesDbId }) => {
     if (!gamesDbId) return false;
     if (matchIdSupport?.dbId !== gamesDbId) {
-      const supported = (notionFetch(`/databases/${gamesDbId}`) as Promise<{
-        properties?: Record<string, { type?: string }>;
-      }>)
+      const supported = (
+        notionFetch(`/databases/${gamesDbId}`) as Promise<{
+          properties?: Record<string, { type?: string }>;
+        }>
+      )
         .then((db) => db.properties?.[MATCH_ID_PROPERTY]?.type === "rich_text")
         .catch(() => false);
       matchIdSupport = { dbId: gamesDbId, supported };
@@ -113,7 +115,9 @@ export async function findPlayerByName(name: string): Promise<string> {
   });
   if (byConvoke.results.length > 0) return byConvoke.results[0].id;
 
-  throw new Error(`Player not found: "${name}" (checked Username - Spelltable and Username - Convoke)`);
+  throw new Error(
+    `Player not found: "${name}" (checked Username - Spelltable and Username - Convoke)`
+  );
 }
 
 /**
@@ -141,7 +145,7 @@ export async function findDeckByCommander(commanderName: string): Promise<string
  */
 export async function findDeckByPlayerAndCommander(
   commanderName: string,
-  playerId: string,
+  playerId: string
 ): Promise<string> {
   const { decksDbId } = await notionConfigStorage.getValue();
   if (!decksDbId) throw new Error("Decks DB ID not configured — open extension settings.");
@@ -236,8 +240,21 @@ export async function createGame(payload: GamePayload): Promise<string> {
   if (!gamesDbId) throw new Error("Games DB ID not configured — open extension settings.");
 
   const {
-    playerIds, deckIds, winnerId, winnerDeckId, wincon, date,
-    firstPlayerId, firstKillerId, firstKillerDeckId, firstVictimId, firstVictimDeckId, koType, boardWipes, rounds, solRing,
+    playerIds,
+    deckIds,
+    winnerId,
+    winnerDeckId,
+    wincon,
+    date,
+    firstPlayerId,
+    firstKillerId,
+    firstKillerDeckId,
+    firstVictimId,
+    firstVictimDeckId,
+    koType,
+    boardWipes,
+    rounds,
+    solRing,
   } = payload;
 
   const notionWincon = WINCON_MAP[wincon];
@@ -284,9 +301,12 @@ export async function createGame(payload: GamePayload): Promise<string> {
       "Sol Ring": {
         checkbox: solRing,
       },
-      ...(payload.matchId && (await gamesSupportMatchId()) && {
-        [MATCH_ID_PROPERTY]: { rich_text: [{ type: "text", text: { content: payload.matchId } }] },
-      }),
+      ...(payload.matchId &&
+        (await gamesSupportMatchId()) && {
+          [MATCH_ID_PROPERTY]: {
+            rich_text: [{ type: "text", text: { content: payload.matchId } }],
+          },
+        }),
       ...(firstPlayerId && {
         "Starting Player": { relation: [{ id: firstPlayerId }] },
       }),
