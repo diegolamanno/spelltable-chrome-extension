@@ -1,7 +1,8 @@
 import { convokeMatchesStorage, gameStorage, playerTimesStorage } from "../src/shared/storage";
 import type { PlayerData } from "../src/shared/storage";
 import type { ConvokeMatchEvent } from "../src/shared/convoke/events";
-import { applyMatchEvent, type MatchRecords, pendingMatches } from "../src/shared/convoke/match-records";
+import { applyMatchEvent, type MatchRecords, markSubmitted, pendingMatches } from "../src/shared/convoke/match-records";
+import { toLocalDate } from "../src/shared/convoke/suggestions";
 import {
   findPlayerByName,
   findDeckByPlayerAndCommander,
@@ -20,6 +21,12 @@ interface SubmitGameData {
   boardWipes: number;
   rounds: number;
   solRing: boolean;
+  /** Set when logging a pending Convoke match; it's marked as submitted afterwards. */
+  matchId?: string;
+  /** YYYY-MM-DD the game was played (local). Defaults to today, local. */
+  date?: string;
+  /** lowercased player name → turn time in seconds. Defaults to the scraped end-screen times. */
+  playerTimes?: Record<string, number>;
 }
 
 interface SubmitGameResponse {
@@ -31,7 +38,8 @@ interface SubmitGameResponse {
 async function handleSubmitGame(data: SubmitGameData): Promise<SubmitGameResponse> {
   const { players, winner, wincon, firstPlayer, firstKiller, firstVictim, koType, boardWipes, rounds, solRing } = data;
 
-  const date = new Date().toISOString().slice(0, 10); // "YYYY-MM-DD"
+  // Local date: toISOString() would put evening games (after 7–8 pm Eastern) on the next day.
+  const date = data.date ?? toLocalDate(new Date().toISOString());
 
   const playerNames = players.map((p) => p.name);
 
@@ -79,7 +87,7 @@ async function handleSubmitGame(data: SubmitGameData): Promise<SubmitGameRespons
     solRing,
   });
 
-  const playerTimes = await playerTimesStorage.getValue();
+  const playerTimes = data.playerTimes ?? (await playerTimesStorage.getValue());
 
   // Create one Game Seat entry per player, preserving seat order from scrape
   await Promise.all(
@@ -96,6 +104,19 @@ async function handleSubmitGame(data: SubmitGameData): Promise<SubmitGameRespons
       });
     }),
   );
+
+  if (data.matchId) {
+    const matchId = data.matchId;
+    // The game is already in Notion; a failure here must not turn the submit into an error.
+    matchQueue = matchQueue
+      .then(async () => {
+        const records = markSubmitted(await convokeMatchesStorage.getValue(), matchId, new Date().toISOString());
+        await convokeMatchesStorage.setValue(records);
+        await updateBadge(records);
+      })
+      .catch((err: unknown) => console.error("[Background] Failed to mark match submitted", err));
+    await matchQueue;
+  }
 
   return { success: true, gameId };
 }

@@ -71,7 +71,12 @@ Commanders differ between the matches. For example, Player 1 plays *Felothar the
 
 ## Checking the results
 
-Until the "Ready to log" popup screen exists (#12), check the results here:
+**0. The popup.** Open the extension popup. A **To log (N)** bar lists the pending games (end time and commanders), plus **Live table** for the scrape-based flow. The oldest pending game is selected and the form is filled in:
+- **Filled:** players in seat order, first player (crown), rounds, turn times.
+- **Suggested** (labelled until you change them): winner ("suggested from N votes"), first kill victim (with a killer hint), KO type.
+- **Blank:** win condition, first killer, board wipes, Sol Ring.
+
+The confirm screen marks the suggested values. With a dev build and the **dev** Notion databases, submitting creates real rows there. The fixture players (`Player 1`–`4`) must exist in the dev Players DB, or the submit fails with "Player not found" (see #24). After a successful submit, the game leaves the bar and the badge goes down.
 
 **1. The badge.** The extension icon shows the number of pending games (indigo badge). `clear()` removes it.
 

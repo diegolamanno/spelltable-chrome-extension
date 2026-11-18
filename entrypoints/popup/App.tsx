@@ -2,6 +2,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useGameData } from "../../src/shared/hooks/useGameData";
 import type { PlayerData, NotionConfig } from "../../src/shared/storage";
 import { notionConfigStorage, playerTimesStorage } from "../../src/shared/storage";
+import { usePendingMatches } from "../../src/shared/hooks/usePendingMatches";
+import type { MatchRecord } from "../../src/shared/convoke/match-records";
+import { describeMatch, reviewDefaults, type SuggestedField } from "../../src/shared/convoke/review";
 
 const DEBUG_SINGLE_PLAYER =
   import.meta.env.MODE !== "prod" &&
@@ -443,16 +446,22 @@ type SummaryData = {
   winner: string | null; wincon: string | null; firstPlayer: string | null;
   firstKiller: string | null; firstVictim: string | null;
   koType: string; boardWipes: number; rounds: number; solRing: boolean;
+  /** Values that came from Convoke suggestions and weren't changed by the person submitting. */
+  suggested?: SuggestedField[];
+  /** e.g. "Convoke match · 9:44 PM · Zurgo, Felothar +2" */
+  sourceLabel?: string;
 };
 
 function buildRows(data: SummaryData) {
+  const tag = (field: SuggestedField, value: string | null) =>
+    value && data.suggested?.includes(field) ? `${value} · suggested` : value;
   return [
-    { label: "Winner",        value: data.winner ?? "—",  accent: true },
+    { label: "Winner",        value: tag("winner", data.winner) ?? "—",  accent: true },
     { label: "Win condition", value: data.wincon ?? "—" },
     { label: "First player",  value: data.firstPlayer ?? "—" },
     { label: "First killer",  value: data.firstKiller ?? "None" },
-    { label: "First victim",  value: data.firstVictim ?? "None" },
-    { label: "KO type",       value: data.koType },
+    { label: "First victim",  value: tag("firstVictim", data.firstVictim) ?? "None" },
+    { label: "KO type",       value: tag("koType", data.koType) ?? data.koType },
     { label: "Board wipes",   value: String(data.boardWipes) },
     { label: "Rounds played", value: String(data.rounds) },
     { label: "Sol Ring T1",   value: data.solRing ? "Yes ✦" : "No" },
@@ -653,8 +662,13 @@ function ConfirmScreen({ data, onConfirm, onBack, submitting, submitError, t }: 
         <div>
           <p style={{ fontWeight: 700, fontSize: 14, color: t.ink }}>Confirm submission</p>
           <p style={{ fontSize: 11.5, color: t.muted, marginTop: 1 }}>
-            Double-check before logging to the platform
+            {data.suggested?.length
+              ? "Values marked “suggested” came from Convoke. Check them before logging."
+              : "Double-check before logging to the platform"}
           </p>
+          {data.sourceLabel && (
+            <p style={{ fontSize: 10.5, color: t.muted, marginTop: 2, opacity: 0.8 }}>{data.sourceLabel}</p>
+          )}
         </div>
       </div>
 
@@ -907,6 +921,36 @@ function SettingsScreen({ onBack, t, isDark }: { onBack: () => void; t: Tokens; 
   );
 }
 
+// ── PendingBar — pick a pending Convoke match or the live table ───────────────
+function PendingBar({ pending, selectedId, onSelect, t, isDark }: {
+  pending: MatchRecord[]; selectedId: string | null; onSelect: (id: string) => void;
+  t: Tokens; isDark: boolean;
+}) {
+  const chip = (id: string, label: string, title?: string) => {
+    const sel = selectedId === id || (id === "live" && selectedId === null);
+    return (
+      <button key={id} title={title} onClick={() => onSelect(id)} style={{
+        flexShrink: 0, padding: "5px 10px", borderRadius: 20, fontSize: 11.5, fontWeight: 600,
+        fontFamily: "'DM Sans',sans-serif", cursor: "pointer", whiteSpace: "nowrap",
+        background: sel ? `${P.periwinkle}${isDark ? "26" : "2e"}` : (isDark ? "rgba(255,255,255,0.04)" : "rgba(28,30,42,0.04)"),
+        border: `1.5px solid ${sel ? P.periwinkle : t.border}`,
+        color: sel ? t.ink : t.muted, transition: "all 0.15s",
+      }}>{label}</button>
+    );
+  };
+  return (
+    <div style={{ padding: "8px 16px", borderBottom: `1px solid ${t.colDivider}`,
+      display: "flex", alignItems: "center", gap: 6, overflowX: "auto" }}>
+      <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.13em", textTransform: "uppercase",
+        color: t.label, flexShrink: 0, marginRight: 2 }}>
+        To log ({pending.length})
+      </span>
+      {pending.map((m) => chip(m.matchId, describeMatch(m), "Convoke match waiting to be logged"))}
+      {chip("live", "Live table", "Players scraped from the open game tab")}
+    </div>
+  );
+}
+
 function formatSeconds(total: number): string {
   const h = Math.floor(total / 3600);
   const m = Math.floor((total % 3600) / 60);
@@ -928,12 +972,24 @@ function debugShuffled(arr: PlayerData[]): PlayerData[] {
 // ── App ────────────────────────────────────────────────────────────────────────
 export default function App() {
   const { players: detectedPlayers } = useGameData();
-  const players = useMemo(
+  const livePlayers = useMemo(
     () => DEBUG_SINGLE_PLAYER
       ? debugShuffled([...detectedPlayers, ...DEBUG_PLAYERS])
       : detectedPlayers,
     [detectedPlayers],
   );
+
+  // Source of the form: a pending Convoke match (default: oldest) or the live scraped table.
+  const pending = usePendingMatches();
+  const [source, setSource] = useState<string | null>(null); // null = automatic, "live" = live table
+  const selectedMatch = source === "live"
+    ? undefined
+    : (pending.find((m) => m.matchId === source) ?? pending[0]);
+  const review = useMemo(() => (selectedMatch ? reviewDefaults(selectedMatch) : null), [selectedMatch]);
+  const players = review?.players ?? livePlayers;
+  const [resetNonce, setResetNonce] = useState(0);
+  // Changes only when the form should start over: a different match, or new live players.
+  const sourceKey = `${resetNonce}:${review ? `match:${review.matchId}` : `live:${JSON.stringify(livePlayers)}`}`;
 
   // Theme
   const [themeOverride, setThemeOverride] = useState(localStorage.getItem("ba_theme") || "system");
@@ -968,19 +1024,52 @@ export default function App() {
   const [menuOpen, setMenuOpen]         = useState(false);
   const [formKey, setFormKey]           = useState(0);
   const [playerTimes, setPlayerTimes]   = useState<Record<string, string>>({});
+  const [suggested, setSuggested]       = useState<SuggestedField[]>([]);
+  const [loggedSummary, setLoggedSummary] = useState<SummaryData | null>(null);
+  const winnerTouched = useRef(false);
+  const unsuggest = (f: SuggestedField) => setSuggested((s) => s.filter((x) => x !== f));
 
+  // Start the form over when the source changes. Pending matches are pre-filled from Convoke.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: reset only when sourceKey changes, not on every vote update
   useEffect(() => {
-    setFirstPlayer(players.length > 0 ? players[0].name : null);
-    setWinner(null);
+    winnerTouched.current = false;
+    if (review) {
+      setFirstPlayer(review.firstPlayer ?? review.players[0]?.name ?? null);
+      setWinner(review.winner);
+      setFirstVictim(review.firstVictim);
+      setKoType(review.koType);
+      setRounds(review.rounds);
+      setSuggested(review.suggested);
+    } else {
+      setFirstPlayer(players.length > 0 ? players[0].name : null);
+      setWinner(null);
+      setFirstVictim(null);
+      setKoType("Staggered");
+      setRounds(0);
+      setSuggested([]);
+    }
     setWincon(null);
     setFirstKiller(null);
-    setFirstVictim(null);
-    setKoType("Staggered");
     setBoardWipes(0);
-    setRounds(0);
     setSolRing(false);
     setFormKey(k => k + 1);
-  }, [players]);
+  }, [sourceKey]);
+
+  // Votes keep arriving after the end. Update the winner suggestion until the person picks one.
+  const suggestedWinner = review?.winner ?? null;
+  // biome-ignore lint/correctness/useExhaustiveDependencies: only react to a new suggestion, not to wincon edits
+  useEffect(() => {
+    if (winnerTouched.current || !suggestedWinner || wincon === "Draw") return;
+    setWinner(suggestedWinner);
+    setSuggested((s) => (s.includes("winner") ? s : [...s, "winner"]));
+  }, [suggestedWinner]);
+
+  const chooseWinner = (name: string) => {
+    winnerTouched.current = true;
+    unsuggest("winner");
+    setWinner((v) => (v === name ? null : name));
+  };
+  const chooseVictim = (name: string | null) => { unsuggest("firstVictim"); setFirstVictim(name); };
 
   useEffect(() => {
     const toDisplay = (raw: Record<string, number> | null) => {
@@ -1002,6 +1091,7 @@ export default function App() {
   // Two-way KO type ↔ kill event constraint
   const killEventActive = firstKiller !== null || firstVictim !== null;
   const handleKoTypeChange = (v: string) => {
+    unsuggest("koType");
     setKoType(v);
     if (v === "Simultaneous") { setFirstKiller(null); setFirstVictim(null); }
   };
@@ -1014,6 +1104,8 @@ export default function App() {
 
   const summaryData: SummaryData = {
     winner, wincon, firstPlayer, firstKiller, firstVictim, koType, boardWipes, rounds, solRing,
+    suggested,
+    sourceLabel: selectedMatch && review ? `Convoke match · ${describeMatch(selectedMatch)}` : undefined,
   };
 
   const handleRefresh = async () => {
@@ -1041,15 +1133,22 @@ export default function App() {
     if (submitting) return;
     setSubmitting(true);
     setSubmitError(null);
+    const data = {
+      players, winner, wincon, firstPlayer, firstKiller, firstVictim, koType, boardWipes, rounds, solRing,
+      // Pending Convoke match: its own date and turn times, and mark it logged afterwards.
+      ...(review && { matchId: review.matchId, date: review.date, playerTimes: review.playerTimes }),
+    };
+    const snapshot = summaryData;
     chrome.runtime.sendMessage(
-      { action: "SUBMIT_GAME", data: { players, winner, wincon, firstPlayer, firstKiller, firstVictim, koType, boardWipes, rounds, solRing } },
+      { action: "SUBMIT_GAME", data },
       (response: { success: boolean; error?: string } | undefined) => {
         setSubmitting(false);
         if (chrome.runtime.lastError) {
           setSubmitError(chrome.runtime.lastError.message ?? "Extension error");
           return;
         }
-        if (response?.success) { setConfirming(false); setSubmitted(true); }
+        // Keep what was logged on screen: the match leaves the pending list, which resets the form.
+        if (response?.success) { setLoggedSummary(snapshot); setConfirming(false); setSubmitted(true); }
         else { setSubmitError(response?.error ?? "Submission failed"); }
       },
     );
@@ -1057,14 +1156,14 @@ export default function App() {
 
   const handleBack = () => { setConfirming(false); setSubmitError(null); };
 
+  // "Log Another Game": back to the next pending match (or the live table) with a fresh form.
   const handleReset = () => {
-    setSubmitted(false); setConfirming(false); setSubmitError(null);
-    setWinner(null); setWincon(null);
-    setFirstPlayer(players.length > 0 ? players[0].name : null);
-    setFirstKiller(null); setFirstVictim(null);
-    setKoType("Staggered"); setBoardWipes(0); setRounds(0); setSolRing(false);
-    setFormKey(k => k + 1);
+    setSubmitted(false); setConfirming(false); setSubmitError(null); setLoggedSummary(null);
+    setSource(null);
+    setResetNonce(n => n + 1);
   };
+
+  const fmtTime = (secs: number | undefined) => (secs ? formatSeconds(secs) : undefined);
 
   return (
     <div style={{ width: 560, background: t.bg, borderRadius: 18, overflow: "visible",
@@ -1155,6 +1254,11 @@ export default function App() {
           t={t} />
       </div>
 
+      {!showSettings && !submitted && !confirming && pending.length > 0 && (
+        <PendingBar pending={pending} selectedId={review?.matchId ?? null}
+          onSelect={(id) => { setSubmitError(null); setSource(id); }} t={t} isDark={isDark} />
+      )}
+
       {/* ── Body ── */}
       <div key={formKey} style={{ display: "flex", animation: "fadeUp 0.18s ease" }}>
 
@@ -1164,7 +1268,7 @@ export default function App() {
           </div>
         ) : submitted ? (
           <div style={{ flex: 1, padding: "18px 20px 16px" }}>
-            <SuccessScreen data={summaryData} onReset={handleReset} t={t} />
+            <SuccessScreen data={loggedSummary ?? summaryData} onReset={handleReset} t={t} />
           </div>
         ) : confirming ? (
           <div style={{ flex: 1, padding: "18px 20px 16px" }}>
@@ -1178,7 +1282,11 @@ export default function App() {
             <div style={{ width: 272, flexShrink: 0, padding: "11px 16px 13px",
               borderRight: `1px solid ${t.colDivider}` }}>
 
-              <SectionLabel t={t} note={isDraw ? "· draw — no winner" : "· crown = first player"}>
+              <SectionLabel t={t} note={
+                isDraw ? "· draw — no winner"
+                : winner && suggested.includes("winner") && review
+                  ? `· suggested from ${review.winnerVotes} vote${review.winnerVotes === 1 ? "" : "s"}, tap to change`
+                  : "· crown = first player"}>
                 Select Winner
               </SectionLabel>
 
@@ -1194,9 +1302,10 @@ export default function App() {
                   {players.map((p, i) => (
                     <PlayerRow key={p.name} player={p} index={i}
                       isWinner={winner === p.name} isFirst={firstPlayer === p.name}
-                      onSelectWinner={() => setWinner(v => v === p.name ? null : p.name)}
+                      onSelectWinner={() => chooseWinner(p.name)}
                       onSetFirst={() => setFirstPlayer(p.name)}
-                      t={t} isDark={isDark} time={playerTimes[p.name.toLowerCase()]}
+                      t={t} isDark={isDark}
+                      time={review ? fmtTime(review.playerTimes[p.name]) : playerTimes[p.name.toLowerCase()]}
                       winnerDisabled={isDraw} />
                   ))}
                 </div>
@@ -1204,10 +1313,15 @@ export default function App() {
 
               <Divider t={t} />
 
-              <SectionLabel t={t}>First Kill Event</SectionLabel>
+              <SectionLabel t={t} note={
+                firstVictim && suggested.includes("firstVictim")
+                  ? `· victim suggested${review?.killerHint ? `; hint: ${review.killerHint} dealt cmdr dmg` : ""}`
+                  : undefined}>
+                First Kill Event
+              </SectionLabel>
               <KillEvent players={players}
                 killer={firstKiller} victim={firstVictim} winner={winner}
-                onKiller={setFirstKiller} onVictim={setFirstVictim}
+                onKiller={setFirstKiller} onVictim={chooseVictim}
                 t={t} isDark={isDark}
                 disabled={isDraw || koType === "Simultaneous"}
                 disabledReason={isDraw ? "N/A — draw game" : "N/A — simultaneous KO"} />
@@ -1237,7 +1351,7 @@ export default function App() {
 
               <Divider t={t} />
 
-              <SectionLabel t={t}>KO Type</SectionLabel>
+              <SectionLabel t={t} note={suggested.includes("koType") ? "· suggested" : undefined}>KO Type</SectionLabel>
               <div style={{ marginBottom: 13 }}>
                 <PillToggle
                   options={[{ value: "Simultaneous", label: "Simultaneous" }, { value: "Staggered", label: "Staggered" }]}

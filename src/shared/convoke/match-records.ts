@@ -92,6 +92,13 @@ export function applyMatchEvent(records: MatchRecords, event: ConvokeMatchEvent)
   }
 }
 
+/** Called after Notion accepted the game. Unknown ids are ignored. */
+export function markSubmitted(records: MatchRecords, matchId: string, at: string): MatchRecords {
+  const r = records[matchId];
+  if (!r) return records;
+  return { ...records, [matchId]: { ...r, submittedAt: at, updatedAt: at } };
+}
+
 /** Ended matches not yet logged to Notion, oldest first. */
 export function pendingMatches(records: MatchRecords): MatchRecord[] {
   return Object.values(records)
