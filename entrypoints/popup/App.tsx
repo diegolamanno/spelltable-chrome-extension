@@ -39,7 +39,7 @@ function getTokens(dark: boolean) {
     rowSel: "#2a2618", shadow: "0 20px 60px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.06)",
     swatchBorder: "rgba(255,255,255,0.18)", menuBg: "#2a2618",
     menuBorder: "rgba(255,255,255,0.1)", disabledBg: "rgba(255,255,255,0.06)",
-    disabledFg: "rgba(240,237,230,0.22)", bodyBg: "#141210",
+    disabledFg: "rgba(240,237,230,0.22)",
     statBg: "rgba(255,255,255,0.04)", toggleTrack: "rgba(255,255,255,0.1)",
     divider: "rgba(255,255,255,0.06)",
   } : {
@@ -50,7 +50,7 @@ function getTokens(dark: boolean) {
     rowSel: "#fffefb", shadow: "0 12px 40px rgba(0,0,0,0.10), 0 0 0 1.5px rgba(28,30,42,0.07)",
     swatchBorder: "rgba(28,30,42,0.15)", menuBg: "#fffefb",
     menuBorder: "rgba(28,30,42,0.1)", disabledBg: "rgba(28,30,42,0.06)",
-    disabledFg: "rgba(28,30,42,0.22)", bodyBg: "#e8e4de",
+    disabledFg: "rgba(28,30,42,0.22)",
     statBg: "rgba(28,30,42,0.04)", toggleTrack: "rgba(28,30,42,0.1)",
     divider: "rgba(28,30,42,0.07)",
   };
@@ -77,7 +77,7 @@ function CubeIcon({ size = 40, dark }: { size?: number; dark: boolean }) {
 function SectionLabel({ children, note, t }: { children: React.ReactNode; note?: string; t: Tokens }) {
   return (
     <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.13em",
-      textTransform: "uppercase", color: t.label, marginBottom: 7 }}>
+      textTransform: "uppercase", color: t.label, marginBottom: 6 }}>
       {children}
       {note && (
         <span style={{ marginLeft: 5, fontWeight: 400, letterSpacing: 0,
@@ -89,7 +89,7 @@ function SectionLabel({ children, note, t }: { children: React.ReactNode; note?:
 
 // ── Divider ────────────────────────────────────────────────────────────────────
 function Divider({ t }: { t: Tokens }) {
-  return <div style={{ height: 1, background: t.divider, margin: "8px 0" }} />;
+  return <div style={{ height: 1, background: t.divider, margin: "6px 0" }} />;
 }
 
 // ── SettingsMenu ───────────────────────────────────────────────────────────────
@@ -168,7 +168,7 @@ function PlayerRow({ player, index, isWinner, isFirst, onSelectWinner, onSetFirs
       width: "100%",
       background: isWinner ? (isDark ? t.rowSel : t.surface) : (isDark ? "rgba(255,255,255,0.03)" : "rgba(28,30,42,0.03)"),
       border: `1.5px solid ${isWinner ? col : t.border}`,
-      borderRadius: 10, padding: "9px 10px 9px 12px",
+      borderRadius: 10, padding: "5px 10px 5px 12px",
       display: "flex", alignItems: "center", gap: 9,
       cursor: winnerDisabled ? "default" : "pointer", textAlign: "left",
       boxShadow: isWinner ? `0 2px 10px ${col}44` : "none",
@@ -181,7 +181,8 @@ function PlayerRow({ player, index, isWinner, isFirst, onSelectWinner, onSetFirs
 
       <span style={{ flex: 1, minWidth: 0 }}>
         <span style={{ display: "flex", alignItems: "center", gap: 5 }}>
-          <span style={{ color: t.ink, fontWeight: 600, fontSize: 13 }}>{player.name}</span>
+          <span style={{ color: t.ink, fontWeight: 600, fontSize: 13, minWidth: 0,
+            overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{player.name}</span>
           {isFirst && (
             <span style={{ padding: "1px 5px", borderRadius: 20, fontSize: 9, fontWeight: 700,
               background: `${P.lemon}${isDark ? "33" : "44"}`,
@@ -242,25 +243,44 @@ function KillEvent({ players, killer, victim, winner, onKiller, onVictim, t, isD
   t: Tokens; isDark: boolean; disabled?: boolean; disabledReason?: string;
 }) {
   const both = killer !== null && victim !== null;
-  const killerIdx = players.findIndex(p => p.name === killer);
-  const victimIdx = players.findIndex(p => p.name === victim);
 
-  function Chip({ player, index, selected, onSelect, disabled: chipDisabled }: {
-    player: PlayerData; index: number; selected: boolean;
-    onSelect: (name: string | null) => void; disabled: boolean;
+  // Two compact pickers on one row instead of a chip per player (twice): the chips grew
+  // with the table and pushed the popup past Chrome's 600 px limit (#25).
+  function Picker({ label, icon, value, onChange, isDisabled }: {
+    label: string; icon: React.ReactNode; value: string | null;
+    onChange: (name: string | null) => void; isDisabled: (name: string) => boolean;
   }) {
-    const col = PLAYER_COLORS[index % PLAYER_COLORS.length];
+    const idx = players.findIndex(p => p.name === value);
+    const col = idx >= 0 ? PLAYER_COLORS[idx % PLAYER_COLORS.length] : null;
     return (
-      <button onClick={() => !chipDisabled && onSelect(selected ? null : player.name)} style={{
-        padding: "3px 8px", borderRadius: 20, fontSize: 11, fontWeight: 600,
-        background: selected ? `${col}${isDark ? "44" : "55"}` : t.statBg,
-        border: `1.5px solid ${selected ? col : t.border}`,
-        color: selected ? t.ink : t.muted,
-        cursor: chipDisabled ? "default" : "pointer",
-        fontFamily: "'DM Sans',sans-serif", transition: "all 0.15s",
-        opacity: chipDisabled ? 0.35 : 1,
-        boxShadow: selected ? `0 2px 6px ${col}44` : "none",
-      }}>{player.name}</button>
+      <label style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 3 }}>
+        <span style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase",
+          color: t.muted, display: "flex", alignItems: "center", gap: 4 }}>
+          {icon}{label}
+        </span>
+        <span style={{ position: "relative", display: "block" }}>
+          {col && (
+            <span style={{ position: "absolute", left: 8, top: "50%", transform: "translateY(-50%)",
+              width: 7, height: 7, borderRadius: "50%", background: col, pointerEvents: "none" }} />
+          )}
+          <select value={value ?? ""} onChange={(e) => onChange(e.target.value || null)} style={{
+            width: "100%", appearance: "none", padding: `5px 20px 5px ${col ? 20 : 8}px`, borderRadius: 7,
+            fontSize: 11.5, fontWeight: 600, fontFamily: "'DM Sans',sans-serif", cursor: "pointer",
+            background: col ? `${col}${isDark ? "22" : "2a"}` : t.statBg,
+            border: `1.5px solid ${col ?? t.border}`, color: value ? t.ink : t.muted,
+            textOverflow: "ellipsis", whiteSpace: "nowrap", overflow: "hidden", outline: "none",
+          }}>
+            <option value="">—</option>
+            {players.map(p => (
+              <option key={p.name} value={p.name} disabled={isDisabled(p.name)}>{p.name}</option>
+            ))}
+          </select>
+          <svg width="8" height="8" viewBox="0 0 8 8" fill="none" style={{ position: "absolute", right: 8,
+            top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }}>
+            <path d="M1 2.5l3 3 3-3" stroke={t.muted} strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </span>
+      </label>
     );
   }
 
@@ -269,7 +289,7 @@ function KillEvent({ players, killer, victim, winner, onKiller, onVictim, t, isD
       <div style={{ borderRadius: 10, border: `1.5px solid ${t.border}`, overflow: "hidden",
         background: isDark ? "rgba(255,255,255,0.02)" : "rgba(28,30,42,0.02)",
         opacity: 0.45, pointerEvents: "none" }}>
-        <div style={{ padding: "11px 12px", display: "flex", alignItems: "center", gap: 7 }}>
+        <div style={{ padding: "9px 12px", display: "flex", alignItems: "center", gap: 7 }}>
           <svg width="11" height="11" viewBox="0 0 14 14" fill="none" style={{ opacity: 0.5 }}>
             <path d="M2 12L10 4M10 4H7M10 4V7" stroke={t.muted} strokeWidth="1.5"
               strokeLinecap="round" strokeLinejoin="round" />
@@ -284,94 +304,26 @@ function KillEvent({ players, killer, victim, winner, onKiller, onVictim, t, isD
 
   return (
     <div style={{
-      borderRadius: 10,
+      borderRadius: 10, padding: "7px 10px 9px",
       border: `1.5px solid ${both ? `${P.pink}55` : t.border}`,
       background: both
         ? (isDark ? `${P.pink}0d` : `${P.pink}0a`)
         : (isDark ? "rgba(255,255,255,0.02)" : "rgba(28,30,42,0.02)"),
-      overflow: "hidden", transition: "all 0.2s",
+      display: "flex", alignItems: "flex-end", gap: 6, transition: "all 0.2s",
     }}>
-      {both ? (
-        <div style={{ padding: "9px 12px", display: "flex", alignItems: "center", gap: 8 }}>
-          <span style={{ width: 7, height: 7, borderRadius: "50%", flexShrink: 0,
-            background: PLAYER_COLORS[killerIdx % PLAYER_COLORS.length],
-            boxShadow: `0 0 6px ${PLAYER_COLORS[killerIdx % PLAYER_COLORS.length]}` }} />
-          <span style={{ fontSize: 12.5, fontWeight: 700, color: t.ink }}>{killer}</span>
-
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style={{ flexShrink: 0, opacity: 0.7 }}>
-            <path d="M2 12L10 4M10 4H7M10 4V7" stroke={P.pink} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-            <circle cx="3" cy="11" r="1" fill={P.pink} opacity="0.6" />
-          </svg>
-
-          <span style={{ width: 7, height: 7, borderRadius: "50%", flexShrink: 0,
-            background: PLAYER_COLORS[victimIdx % PLAYER_COLORS.length], opacity: 0.5 }} />
-          <span style={{ fontSize: 12.5, fontWeight: 600, color: t.muted,
-            textDecoration: "line-through", textDecorationColor: `${P.pink}88` }}>
-            {victim}
-          </span>
-
-          <button onClick={() => { onKiller(null); onVictim(null); }}
-            style={{ marginLeft: "auto", width: 18, height: 18, borderRadius: 5,
-              background: "transparent", border: `1px solid ${t.border}`,
-              cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
-              color: t.muted, fontSize: 12, lineHeight: "1", flexShrink: 0,
-              fontFamily: "'DM Sans',sans-serif" }}>×</button>
-        </div>
-      ) : (
-        <>
-          <div style={{ padding: "9px 10px 7px" }}>
-            <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: "0.1em",
-              textTransform: "uppercase", color: t.muted, marginBottom: 6,
-              display: "flex", alignItems: "center", gap: 5 }}>
-              <svg width="10" height="10" viewBox="0 0 14 14" fill="none">
-                <path d="M2 12L10 4M10 4H7M10 4V7" stroke={t.muted} strokeWidth="1.5"
-                  strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-              Killer
-            </div>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
-              {players.map((p, i) => (
-                <Chip key={p.name} player={p} index={i}
-                  selected={killer === p.name} disabled={victim === p.name}
-                  onSelect={onKiller} />
-              ))}
-            </div>
-          </div>
-
-          <div style={{ position: "relative", height: 18, margin: "0 10px" }}>
-            <div style={{ position: "absolute", top: "50%", left: 0, right: 0,
-              height: 1, background: t.divider }} />
-            <div style={{ position: "absolute", top: "50%", left: "50%",
-              transform: "translate(-50%,-50%)",
-              width: 22, height: 22, borderRadius: 6,
-              background: t.bg, border: `1px solid ${t.border}`,
-              display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <svg width="11" height="11" viewBox="0 0 14 14" fill="none">
-                <path d="M2 12L10 4M10 4H7M10 4V7" stroke={P.pink} strokeWidth="1.6"
-                  strokeLinecap="round" strokeLinejoin="round" />
-                <circle cx="3" cy="11" r="1.2" fill={P.pink} opacity="0.7" />
-              </svg>
-            </div>
-          </div>
-
-          <div style={{ padding: "7px 10px 9px" }}>
-            <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: "0.1em",
-              textTransform: "uppercase", color: t.muted, marginBottom: 6,
-              display: "flex", alignItems: "center", gap: 5 }}>
-              <span style={{ fontSize: 10 }}>💀</span>
-              Victim
-            </div>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
-              {players.map((p, i) => (
-                <Chip key={p.name} player={p} index={i}
-                  selected={victim === p.name}
-                  disabled={killer === p.name || p.name === winner}
-                  onSelect={onVictim} />
-              ))}
-            </div>
-          </div>
-        </>
-      )}
+      <Picker label="Killer" value={killer} onChange={onKiller}
+        isDisabled={(name) => name === victim}
+        icon={<svg width="10" height="10" viewBox="0 0 14 14" fill="none">
+          <path d="M2 12L10 4M10 4H7M10 4V7" stroke={t.muted} strokeWidth="1.5"
+            strokeLinecap="round" strokeLinejoin="round" />
+        </svg>} />
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style={{ flexShrink: 0, marginBottom: 7, opacity: 0.8 }}>
+        <path d="M2 12L10 4M10 4H7M10 4V7" stroke={P.pink} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+        <circle cx="3" cy="11" r="1.2" fill={P.pink} opacity="0.7" />
+      </svg>
+      <Picker label="Victim" value={victim} onChange={onVictim}
+        isDisabled={(name) => name === killer || name === winner}
+        icon={<span style={{ fontSize: 10 }}>💀</span>} />
     </div>
   );
 }
@@ -410,16 +362,16 @@ function Stepper({ value, onChange, t }: { value: number; onChange: (v: number) 
     <div style={{ display: "flex", alignItems: "center",
       background: t.statBg, border: `1px solid ${t.border}`, borderRadius: 8, overflow: "hidden" }}>
       <button onClick={() => onChange(Math.max(0, value - 1))} style={{
-        width: 30, height: 32, background: "transparent", border: "none",
+        width: 26, height: 32, background: "transparent", border: "none",
         cursor: value <= 0 ? "default" : "pointer",
         color: value <= 0 ? t.muted : t.ink,
         fontSize: 17, lineHeight: "1", opacity: value <= 0 ? 0.35 : 1, transition: "opacity 0.15s",
         fontFamily: "'DM Sans',sans-serif",
       }}>−</button>
       <span style={{ flex: 1, textAlign: "center", fontWeight: 700,
-        fontSize: 14, color: t.ink, minWidth: 26 }}>{value}</span>
+        fontSize: 14, color: t.ink, minWidth: 18 }}>{value}</span>
       <button onClick={() => onChange(Math.min(20, value + 1))} style={{
-        width: 30, height: 32, background: "transparent", border: "none",
+        width: 26, height: 32, background: "transparent", border: "none",
         cursor: value >= 20 ? "default" : "pointer",
         color: value >= 20 ? t.muted : t.ink,
         fontSize: 17, lineHeight: "1", opacity: value >= 20 ? 0.35 : 1, transition: "opacity 0.15s",
@@ -967,7 +919,7 @@ function PendingBar({ pending, selectedId, onSelect, t, isDark }: {
     const sel = selectedId === id || (id === "live" && selectedId === null);
     return (
       <button key={id} title={title} onClick={() => onSelect(id)} style={{
-        flexShrink: 0, padding: "5px 10px", borderRadius: 20, fontSize: 11.5, fontWeight: 600,
+        flexShrink: 0, padding: "3px 10px", borderRadius: 20, fontSize: 11.5, fontWeight: 600,
         fontFamily: "'DM Sans',sans-serif", cursor: "pointer", whiteSpace: "nowrap",
         background: sel ? `${P.periwinkle}${isDark ? "26" : "2e"}` : (isDark ? "rgba(255,255,255,0.04)" : "rgba(28,30,42,0.04)"),
         border: `1.5px solid ${sel ? P.periwinkle : t.border}`,
@@ -976,8 +928,8 @@ function PendingBar({ pending, selectedId, onSelect, t, isDark }: {
     );
   };
   return (
-    <div style={{ padding: "8px 16px", borderBottom: `1px solid ${t.colDivider}`,
-      display: "flex", alignItems: "center", gap: 6, overflowX: "auto" }}>
+    <div style={{ padding: "6px 16px", borderBottom: `1px solid ${t.colDivider}`,
+      display: "flex", alignItems: "center", gap: 6, overflowX: "auto", scrollbarWidth: "thin", scrollbarColor: `${t.border} transparent` }}>
       <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.13em", textTransform: "uppercase",
         color: t.label, flexShrink: 0, marginRight: 2 }}>
         To log ({pending.length})
@@ -1040,7 +992,9 @@ export default function App() {
   const isDark = themeOverride === "system" ? sysDark : themeOverride === "dark";
   const handleOverride = (v: string) => { setThemeOverride(v); localStorage.setItem("ba_theme", v); };
   const t = getTokens(isDark);
-  useEffect(() => { document.body.style.background = t.bodyBg; }, [isDark]);
+  // Same colour as the card: Chrome's popup window is a plain rectangle, so a different body
+  // colour shows as a square frame around the card's rounded corners (#25).
+  useEffect(() => { document.body.style.background = t.bg; }, [isDark]);
 
   // Game state
   const [winner, setWinner]           = useState<string | null>(null);
@@ -1345,20 +1299,20 @@ export default function App() {
               <SectionLabel t={t} note={
                 isDraw ? "· draw — no winner"
                 : winner && suggested.includes("winner") && review
-                  ? `· suggested from ${review.winnerVotes} vote${review.winnerVotes === 1 ? "" : "s"}, tap to change`
+                  ? `· suggested, ${review.winnerVotes} vote${review.winnerVotes === 1 ? "" : "s"}`
                   : "· crown = first player"}>
                 Select Winner
               </SectionLabel>
 
               {players.length === 0 ? (
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "center",
-                  height: 80, borderRadius: 10, border: `1.5px dashed ${t.border}`, marginBottom: 13 }}>
+                  height: 80, borderRadius: 10, border: `1.5px dashed ${t.border}`, marginBottom: 10 }}>
                   <p style={{ color: t.muted, fontSize: 11.5, textAlign: "center", lineHeight: 1.5 }}>
                     No players detected.<br />Open a SpellTable game and click ↺.
                   </p>
                 </div>
               ) : (
-                <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 13 }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: 5, marginBottom: 10 }}>
                   {players.map((p, i) => (
                     <PlayerRow key={p.name} player={p} index={i}
                       isWinner={winner === p.name} isFirst={firstPlayer === p.name}
@@ -1374,9 +1328,7 @@ export default function App() {
               <Divider t={t} />
 
               <SectionLabel t={t} note={
-                firstVictim && suggested.includes("firstVictim")
-                  ? `· victim suggested${review?.killerHint ? `; hint: ${review.killerHint} dealt cmdr dmg` : ""}`
-                  : undefined}>
+                firstVictim && suggested.includes("firstVictim") ? "· victim suggested" : undefined}>
                 First Kill Event
               </SectionLabel>
               <KillEvent players={players}
@@ -1391,7 +1343,7 @@ export default function App() {
             <div style={{ flex: 1, padding: "11px 16px 13px", display: "flex", flexDirection: "column" }}>
 
               <SectionLabel t={t}>Win Condition</SectionLabel>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 5, marginBottom: 13 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 5, marginBottom: 10 }}>
                 {WIN_CONDITIONS.map((w, i) => {
                   const sel = wincon === w;
                   const col = WIN_COLORS[i];
@@ -1412,7 +1364,7 @@ export default function App() {
               <Divider t={t} />
 
               <SectionLabel t={t} note={suggested.includes("koType") ? "· suggested" : undefined}>KO Type</SectionLabel>
-              <div style={{ marginBottom: 13 }}>
+              <div style={{ marginBottom: 10 }}>
                 <PillToggle
                   options={[{ value: "Simultaneous", label: "Simultaneous" }, { value: "Staggered", label: "Staggered" }]}
                   value={koType} onChange={handleKoTypeChange} t={t} isDark={isDark}
@@ -1421,38 +1373,27 @@ export default function App() {
 
               <Divider t={t} />
 
-              <div style={{ display: "flex", gap: 10, marginBottom: 13, alignItems: "flex-start" }}>
-                <div style={{ flex: 1 }}>
-                  <SectionLabel t={t}>Board Wipes</SectionLabel>
+              {/* One row for the three small inputs, to keep the popup under 600 px (#25). */}
+              <div style={{ display: "flex", gap: 8, marginBottom: 10, alignItems: "flex-start" }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <SectionLabel t={t}>Wipes</SectionLabel>
                   <Stepper value={boardWipes} onChange={setBoardWipes} t={t} />
                 </div>
-                <div style={{ flex: 1 }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
                   <SectionLabel t={t}>Rounds</SectionLabel>
                   <Stepper value={rounds} onChange={setRounds} t={t} />
                 </div>
+                <div style={{ flexShrink: 0 }}>
+                  <SectionLabel t={t}>T1 Sol</SectionLabel>
+                  <div title={solRing ? "Sol Ring played turn 1" : "No turn-1 Sol Ring"} style={{
+                    height: 34, padding: "0 8px", borderRadius: 8,
+                    background: solRing ? `${P.mint}${isDark ? "18" : "22"}` : t.statBg,
+                    border: `1.5px solid ${solRing ? `${P.mint}66` : t.border}`,
+                    display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.2s" }}>
+                    <ToggleSwitch value={solRing} onChange={setSolRing} />
+                  </div>
+                </div>
               </div>
-
-              <Divider t={t} />
-
-              <SectionLabel t={t}>Sol Ring T1</SectionLabel>
-              <div style={{ marginBottom: 13, padding: "7px 10px", borderRadius: 8,
-                background: solRing ? `${P.mint}${isDark ? "18" : "22"}` : t.statBg,
-                border: `1.5px solid ${solRing ? `${P.mint}66` : t.border}`,
-                display: "flex", alignItems: "center", justifyContent: "space-between",
-                transition: "all 0.2s" }}>
-                <span style={{ fontSize: 12, color: solRing ? t.ink : t.muted, fontWeight: 600 }}>
-                  {solRing ? "Yes — played" : "No"}
-                </span>
-                <ToggleSwitch value={solRing} onChange={setSolRing} />
-              </div>
-
-              {!canSubmit && (
-                <p style={{ fontSize: 11, color: t.muted, marginBottom: 8 }}>
-                  {wincon === null && winner === null ? "Select a winner and win condition to submit"
-                    : wincon === null ? "Select a win condition to continue"
-                    : "Select a winner to continue"}
-                </p>
-              )}
 
               <div style={{ flex: 1 }} />
 
@@ -1466,7 +1407,10 @@ export default function App() {
                 boxShadow: canSubmit ? `0 4px 14px ${P.mint}44` : "none",
                 transition: "all 0.2s",
               }}>
-                Submit Score
+                {canSubmit ? "Submit Score"
+                  : wincon === null && winner === null ? "Pick a winner & win condition"
+                  : wincon === null ? "Pick a win condition"
+                  : "Pick a winner"}
               </button>
             </div>
           </>
