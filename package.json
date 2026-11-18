@@ -9,7 +9,8 @@
     "build:dev": "op run --env-file=.env.op -- wxt build --mode dev",
     "build:prod": "op run --env-file=.env.op -- wxt build --mode prod",
     "build:firefox": "op run --env-file=.env.op -- wxt build -b firefox",
-    "check": "wxt check",
+    "check": "wxt prepare && tsc --noEmit",
+    "postinstall": "wxt prepare",
     "lint": "biome lint .",
     "format": "biome format --write .",
     "test": "vitest run",
@@ -20,11 +21,12 @@
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
-    "@biomejs/biome": "latest",
+    "@biomejs/biome": "2.4.6",
     "@tailwindcss/vite": "^4.0.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.2.0",
     "@testing-library/user-event": "^14.5.2",
+    "@types/chrome": "^0.3.7",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@vitejs/plugin-react": "^4.3.4",
@@ -33,7 +35,7 @@
     "tailwindcss": "^4.0.0",
     "typescript": "^5.7.3",
     "vitest": "^3.0.0",
-    "wxt": "latest"
+    "wxt": "0.20.18"
   },
   "config": {
     "commitizen": {
