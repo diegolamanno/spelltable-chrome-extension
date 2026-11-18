@@ -87,7 +87,7 @@ One entry per player per game, linking seat position and turn-time data.
 | `Player` | Relation → Players |
 | `Deck` | Relation → Decks |
 | `Seat` | Number (clockwise seat order, 1-based) |
-| `Raw time` | Number (total turn time in seconds, Convoke only) |
+| `Raw Time` | Number (total turn time in seconds, Convoke only) |
 
 ## Environment variables
 
