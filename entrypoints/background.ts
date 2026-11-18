@@ -1,111 +1,44 @@
-import { convokeMatchesStorage, gameStorage, playerTimesStorage } from "../src/shared/storage";
-import type { PlayerData } from "../src/shared/storage";
+import { convokeMatchesStorage, gameStorage, playerTimesStorage, submitProgressStorage } from "../src/shared/storage";
 import type { ConvokeMatchEvent } from "../src/shared/convoke/events";
 import { applyMatchEvent, type MatchRecords, markSubmitted, pendingMatches } from "../src/shared/convoke/match-records";
 import { toLocalDate } from "../src/shared/convoke/suggestions";
 import {
   findPlayerByName,
   findDeckByPlayerAndCommander,
+  findGameByMatchId,
   createGame,
   createGameSeat,
 } from "../src/shared/notion";
+import { type SubmitDeps, type SubmitGameData, type SubmitResult, submitGame } from "../src/shared/submit";
 
-interface SubmitGameData {
-  players: PlayerData[];
-  winner: string | null;
-  wincon: string;
-  firstPlayer: string | null;
-  firstKiller: string | null;
-  firstVictim: string | null;
-  koType: string;
-  boardWipes: number;
-  rounds: number;
-  solRing: boolean;
-  /** Set when logging a pending Convoke match; it's marked as submitted afterwards. */
-  matchId?: string;
-  /** YYYY-MM-DD the game was played (local). Defaults to today, local. */
-  date?: string;
-  /** lowercased player name → turn time in seconds. Defaults to the scraped end-screen times. */
-  playerTimes?: Record<string, number>;
-}
+/** Sent back to the popup for SUBMIT_GAME. */
+type SubmitGameResponse = SubmitResult & { success: boolean };
 
-interface SubmitGameResponse {
-  success: boolean;
-  gameId?: string;
-  error?: string;
-}
+const submitDeps: SubmitDeps = {
+  findPlayerByName,
+  findDeckByPlayerAndCommander,
+  findGameByMatchId,
+  createGame,
+  createGameSeat,
+  loadProgress: async (key) => (await submitProgressStorage.getValue())[key] ?? null,
+  saveProgress: async (key, progress) => {
+    await submitProgressStorage.setValue({ ...(await submitProgressStorage.getValue()), [key]: progress });
+  },
+  clearProgress: async (key) => {
+    const { [key]: _done, ...rest } = await submitProgressStorage.getValue();
+    await submitProgressStorage.setValue(rest);
+  },
+  fallbackPlayerTimes: () => playerTimesStorage.getValue(),
+  // Local date: toISOString() would put evening games (after 7–8 pm Eastern) on the next day.
+  today: () => toLocalDate(new Date().toISOString()),
+  now: () => new Date().toISOString(),
+};
 
 async function handleSubmitGame(data: SubmitGameData): Promise<SubmitGameResponse> {
-  const { players, winner, wincon, firstPlayer, firstKiller, firstVictim, koType, boardWipes, rounds, solRing } = data;
+  const result = await submitGame(data, submitDeps);
 
-  // Local date: toISOString() would put evening games (after 7–8 pm Eastern) on the next day.
-  const date = data.date ?? toLocalDate(new Date().toISOString());
-
-  const playerNames = players.map((p) => p.name);
-
-  // Step 1: resolve all player IDs (needed to scope deck lookups by owner)
-  const playerIds = await Promise.all(playerNames.map((name) => findPlayerByName(name)));
-
-  // Step 2: resolve deck IDs scoped to each player's owned deck
-  const deckIds = await Promise.all(
-    players.map((p, i) => findDeckByPlayerAndCommander(p.commanders.join(" / "), playerIds[i])),
-  );
-
-  const winnerIndex = winner ? players.findIndex((p) => p.name === winner) : -1;
-  if (winner && winnerIndex === -1) throw new Error(`Winner "${winner}" not in players list`);
-
-  const winnerId = winnerIndex !== -1 ? playerIds[winnerIndex] : null;
-  const winnerDeckId = winnerIndex !== -1 ? deckIds[winnerIndex] : null;
-
-  // Derive first player and first killer IDs from already-resolved arrays
-  const firstPlayerIndex = firstPlayer ? players.findIndex((p) => p.name === firstPlayer) : -1;
-  const firstPlayerId = firstPlayerIndex !== -1 ? playerIds[firstPlayerIndex] : null;
-
-  const firstKillerIndex = firstKiller ? players.findIndex((p) => p.name === firstKiller) : -1;
-  const firstKillerId = firstKillerIndex !== -1 ? playerIds[firstKillerIndex] : null;
-  const firstKillerDeckId = firstKillerIndex !== -1 ? deckIds[firstKillerIndex] : null;
-
-  const firstVictimIndex = firstVictim ? players.findIndex((p) => p.name === firstVictim) : -1;
-  const firstVictimId = firstVictimIndex !== -1 ? playerIds[firstVictimIndex] : null;
-  const firstVictimDeckId = firstVictimIndex !== -1 ? deckIds[firstVictimIndex] : null;
-
-  const gameId = await createGame({
-    playerIds,
-    deckIds,
-    winnerId,
-    winnerDeckId,
-    wincon,
-    date,
-    firstPlayerId,
-    firstKillerId,
-    firstKillerDeckId,
-    firstVictimId,
-    firstVictimDeckId,
-    koType,
-    boardWipes,
-    rounds,
-    solRing,
-  });
-
-  const playerTimes = data.playerTimes ?? (await playerTimesStorage.getValue());
-
-  // Create one Game Seat entry per player, preserving seat order from scrape
-  await Promise.all(
-    players.map((p, i) => {
-      const rawTime = playerTimes[p.name.toLowerCase()];
-      return createGameSeat({
-        gameId,
-        playerId: playerIds[i],
-        deckId: deckIds[i],
-        seat: i + 1,
-        playerName: p.name,
-        date,
-        ...(rawTime !== undefined && { rawTime }),
-      });
-    }),
-  );
-
-  if (data.matchId) {
+  // Logged now, or already logged by someone else: either way this match is done.
+  if (data.matchId && (result.status === "logged" || result.status === "already-logged")) {
     const matchId = data.matchId;
     // The game is already in Notion; a failure here must not turn the submit into an error.
     matchQueue = matchQueue
@@ -118,7 +51,7 @@ async function handleSubmitGame(data: SubmitGameData): Promise<SubmitGameRespons
     await matchQueue;
   }
 
-  return { success: true, gameId };
+  return { ...result, success: result.status === "logged" || result.status === "already-logged" };
 }
 
 // Badge on the extension icon = number of ended Convoke matches waiting to be logged.
@@ -158,11 +91,20 @@ export default defineBackground(() => {
       message.action === "CONVOKE_DEV_CLEAR" &&
       (import.meta.env.MODE === "dev" || import.meta.env.MODE === "development")
     ) {
-      matchQueue = matchQueue.then(async () => {
-        await convokeMatchesStorage.setValue({});
-        await updateBadge({});
-        console.log("[Background] Cleared Convoke match records (dev)");
-      });
+      // Without matchIds: forget every record. With matchIds: forget only those (replayLast).
+      const matchIds = (message.data?.matchIds ?? null) as string[] | null;
+      matchQueue = matchQueue
+        .then(async () => {
+          let records: MatchRecords = {};
+          if (matchIds) {
+            records = { ...(await convokeMatchesStorage.getValue()) };
+            for (const id of matchIds) delete records[id];
+          }
+          await convokeMatchesStorage.setValue(records);
+          await updateBadge(records);
+          console.log(`[Background] Cleared ${matchIds ? matchIds.length : "all"} Convoke match records (dev)`);
+        })
+        .catch((err: unknown) => console.error("[Background] Failed to clear Convoke match records", err));
       return false;
     }
 
@@ -184,7 +126,7 @@ export default defineBackground(() => {
         .then((result) => sendResponse(result))
         .catch((err: unknown) => {
           const msg = err instanceof Error ? err.message : String(err);
-          sendResponse({ success: false, error: msg });
+          sendResponse({ success: false, status: "failed", error: msg } satisfies SubmitGameResponse);
         });
       return true; // keep message channel open for async sendResponse
     }

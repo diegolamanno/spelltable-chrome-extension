@@ -5,6 +5,9 @@ import { notionConfigStorage, playerTimesStorage } from "../../src/shared/storag
 import { usePendingMatches } from "../../src/shared/hooks/usePendingMatches";
 import type { MatchRecord } from "../../src/shared/convoke/match-records";
 import { describeMatch, reviewDefaults, type SuggestedField } from "../../src/shared/convoke/review";
+import type { SubmitResult } from "../../src/shared/submit";
+
+type SubmitResponse = SubmitResult & { success: boolean };
 
 const DEBUG_SINGLE_PLAYER =
   import.meta.env.MODE !== "prod" &&
@@ -724,24 +727,58 @@ function ConfirmScreen({ data, onConfirm, onBack, submitting, submitError, t }: 
 }
 
 // ── SuccessScreen ──────────────────────────────────────────────────────────────
-function SuccessScreen({ data, onReset, t }: {
+function SuccessScreen({ data, onReset, t, alreadyLogged }: {
   data: SummaryData; onReset: () => void; t: Tokens;
+  /** Someone already logged this match: nothing new was created. */
+  alreadyLogged?: boolean;
 }) {
+  // Already logged looks different on purpose: blue, a "copy" icon that stacks into place
+  // instead of a check that draws itself, and the summary dimmed because it wasn't saved.
+  const accent = alreadyLogged ? P.sky : P.mint;
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center",
       gap: 12, padding: "8px 0", animation: "successIn 0.3s ease" }}>
       <div style={{ width: 52, height: 52, borderRadius: "50%",
-        background: `${P.mint}22`, border: `2px solid ${P.mint}88`,
-        display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-          <path d="M5 12l5 5 9-9" stroke={P.mint} strokeWidth="2.2"
-            strokeLinecap="round" strokeLinejoin="round"
-            style={{ strokeDasharray: 40, animation: "checkIn 0.4s 0.1s ease both" }} />
-        </svg>
+        background: `${accent}22`, border: `2px ${alreadyLogged ? "dashed" : "solid"} ${accent}88`,
+        display: "flex", alignItems: "center", justifyContent: "center",
+        animation: alreadyLogged ? "dupNudge 0.5s 0.35s ease both" : undefined }}>
+        {alreadyLogged ? (
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            {/* The copy already in Notion… */}
+            <rect x="8" y="3" width="12" height="14" rx="2.5" stroke={accent} strokeWidth="2"
+              opacity="0.55" />
+            {/* …and this one, sliding onto it. */}
+            <rect x="4" y="7" width="12" height="14" rx="2.5" stroke={accent} strokeWidth="2.2"
+              fill={`${accent}33`} style={{ animation: "dupStack 0.4s 0.1s ease both" }} />
+          </svg>
+        ) : (
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M5 12l5 5 9-9" stroke={accent} strokeWidth="2.2"
+              strokeLinecap="round" strokeLinejoin="round"
+              style={{ strokeDasharray: 40, animation: "checkIn 0.4s 0.1s ease both" }} />
+          </svg>
+        )}
       </div>
-      <p style={{ color: P.mint, fontWeight: 700, fontSize: 15 }}>Score Logged!</p>
+      <p style={{ color: accent, fontWeight: 700, fontSize: 15 }}>
+        {alreadyLogged ? "Already logged" : "Score Logged!"}
+      </p>
+      {alreadyLogged && (
+        <p style={{ color: t.muted, fontSize: 11.5, marginTop: -6, textAlign: "center" }}>
+          Someone in the pod logged this match first. Nothing new was added to Notion.
+        </p>
+      )}
 
-      <SummaryGrid data={data} t={t} />
+      {alreadyLogged ? (
+        <div style={{ width: "100%", opacity: 0.5 }}>
+          <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase",
+            color: t.label, marginBottom: 6 }}>
+            Your entry (not saved)
+          </p>
+          <SummaryGrid data={data} t={t} />
+        </div>
+      ) : (
+        <SummaryGrid data={data} t={t} />
+      )}
 
       <button onClick={onReset} style={{
         width: "100%", padding: "11px", borderRadius: 10,
@@ -1026,6 +1063,9 @@ export default function App() {
   const [playerTimes, setPlayerTimes]   = useState<Record<string, string>>({});
   const [suggested, setSuggested]       = useState<SuggestedField[]>([]);
   const [loggedSummary, setLoggedSummary] = useState<SummaryData | null>(null);
+  const [alreadyLogged, setAlreadyLogged] = useState(false);
+  // Identifies a live-table submission across retries (Convoke matches use their matchId).
+  const [liveSubmissionKey, setLiveSubmissionKey] = useState(() => crypto.randomUUID());
   const winnerTouched = useRef(false);
   const unsuggest = (f: SuggestedField) => setSuggested((s) => s.filter((x) => x !== f));
 
@@ -1052,6 +1092,7 @@ export default function App() {
     setFirstKiller(null);
     setBoardWipes(0);
     setSolRing(false);
+    setLiveSubmissionKey(crypto.randomUUID());
     setFormKey(k => k + 1);
   }, [sourceKey]);
 
@@ -1137,19 +1178,37 @@ export default function App() {
       players, winner, wincon, firstPlayer, firstKiller, firstVictim, koType, boardWipes, rounds, solRing,
       // Pending Convoke match: its own date and turn times, and mark it logged afterwards.
       ...(review && { matchId: review.matchId, date: review.date, playerTimes: review.playerTimes }),
+      // Same key on retry → the background resumes instead of creating a second Game.
+      submissionKey: review?.matchId ?? liveSubmissionKey,
     };
     const snapshot = summaryData;
     chrome.runtime.sendMessage(
       { action: "SUBMIT_GAME", data },
-      (response: { success: boolean; error?: string } | undefined) => {
+      (response: SubmitResponse | undefined) => {
         setSubmitting(false);
         if (chrome.runtime.lastError) {
           setSubmitError(chrome.runtime.lastError.message ?? "Extension error");
           return;
         }
-        // Keep what was logged on screen: the match leaves the pending list, which resets the form.
-        if (response?.success) { setLoggedSummary(snapshot); setConfirming(false); setSubmitted(true); }
-        else { setSubmitError(response?.error ?? "Submission failed"); }
+        switch (response?.status) {
+          case "logged":
+          case "already-logged":
+            // Keep what was logged on screen: the match leaves the pending list, which resets the form.
+            setLoggedSummary(snapshot);
+            setAlreadyLogged(response.status === "already-logged");
+            setConfirming(false);
+            setSubmitted(true);
+            break;
+          case "partial":
+            setSubmitError(
+              `The game was saved, but seat${response.missingSeats.length === 1 ? "" : "s"} ` +
+              `${response.missingSeats.join(", ")} failed (${response.error}). ` +
+              "Tap “Log it” again to add only the missing seats.",
+            );
+            break;
+          default:
+            setSubmitError(response?.error ?? "Submission failed");
+        }
       },
     );
   };
@@ -1158,7 +1217,7 @@ export default function App() {
 
   // "Log Another Game": back to the next pending match (or the live table) with a fresh form.
   const handleReset = () => {
-    setSubmitted(false); setConfirming(false); setSubmitError(null); setLoggedSummary(null);
+    setSubmitted(false); setConfirming(false); setSubmitError(null); setLoggedSummary(null); setAlreadyLogged(false);
     setSource(null);
     setResetNonce(n => n + 1);
   };
@@ -1268,7 +1327,8 @@ export default function App() {
           </div>
         ) : submitted ? (
           <div style={{ flex: 1, padding: "18px 20px 16px" }}>
-            <SuccessScreen data={loggedSummary ?? summaryData} onReset={handleReset} t={t} />
+            <SuccessScreen data={loggedSummary ?? summaryData} onReset={handleReset} t={t}
+              alreadyLogged={alreadyLogged} />
           </div>
         ) : confirming ? (
           <div style={{ flex: 1, padding: "18px 20px 16px" }}>

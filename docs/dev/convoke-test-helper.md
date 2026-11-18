@@ -48,6 +48,17 @@ Run these in the Convoke tab's console:
 | `__edhMock.play()` | Plays `full-session` |
 | `__edhMock.play("single-game")` | Plays one scenario. Returns the number of events sent. |
 | `__edhMock.clear()` | Deletes **all** stored Convoke match records (mock and real) and clears the badge |
+| `__edhMock.replayLast()` | Re-sends the last `play()` from this tab with the **same** match IDs. Those matches become pending again, even if already submitted, as if another person in the pod were logging them. Survives a tab reload. |
+
+### Testing duplicate submits (#7)
+
+Needs a text property **`Match ID`** on the Games database.
+
+1. `__edhMock.play("single-game")`, then submit it from the popup ("Score Logged!").
+2. `__edhMock.replayLast()`. The same match is pending again (the badge comes back).
+3. Submit it again. The popup should show **"Already logged"**, and no new Games row is created.
+
+A seat that fails halfway is covered by `src/shared/submit.test.ts`. A retry ("Log it" again) creates only the missing seats.
 
 Each `play` gives the matches **new IDs** and moves all timestamps so the scenario ends at the current time. Playing a scenario twice adds two more pending games without overwriting the first ones, and votes stay attached to the right match.
 
@@ -112,6 +123,7 @@ Object.values((await chrome.storage.local.get("convoke-matches"))["convoke-match
 |---|---|
 | `__edhMock is not defined` | The page was loaded before the extension was (re)loaded, so reload the tab. Or the console context isn't **top**. Or you loaded a prod build (`.output/chrome-mv3-prod`), which doesn't have the helper. |
 | No `[EDH-Mock] Ready` line | First type `__edhMock` in the console. If it returns an object, the helper is loaded and the line was only hidden. The console filter may be set to something like `EDH-Logger` (use `EDH` to see both), or the line was printed early in the page load and then cleared. If it's `undefined`, the dev extension is off or wasn't rebuilt. Check `chrome://extensions`. |
+| `[EDH-Mock] The extension was reloaded` | The tab was loaded before the extension was reloaded or rebuilt, so its messages can't reach the extension. Reload the tab. |
 | `play()` runs but the badge doesn't change | The service worker may be asleep or erroring. Open its console (see above). If you just rebuilt, reload the extension *and* the Convoke tab. |
 | Badge count looks too high | Records from earlier runs (and real games) build up. Run `__edhMock.clear()`. |
 | Votes attached to the wrong match | This shouldn't happen, since times and IDs are fresh on every play. If it does, it's a bug in `freshen()`. Add a failing test to `mock-scenarios.test.ts`. |

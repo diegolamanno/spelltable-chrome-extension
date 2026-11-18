@@ -25,18 +25,18 @@ const KO_TYPE_MAP: Record<string, string> = {
 // Internal helpers
 // ---------------------------------------------------------------------------
 
-async function notionFetch(path: string, body: object): Promise<unknown> {
+async function notionFetch(path: string, body?: object): Promise<unknown> {
   const cfg = await notionConfigStorage.getValue();
   if (!cfg.apiKey) throw new Error("Notion API key not configured — open extension settings.");
 
   const res = await fetch(`https://api.notion.com/v1${path}`, {
-    method: "POST",
+    method: body === undefined ? "GET" : "POST",
     headers: {
       Authorization: `Bearer ${cfg.apiKey}`,
       "Notion-Version": NOTION_VERSION,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify(body),
+    ...(body !== undefined && { body: JSON.stringify(body) }),
   });
 
   if (!res.ok) {
@@ -51,6 +51,42 @@ function queryDatabase(databaseId: string, filter: object) {
   return notionFetch(`/databases/${databaseId}/query`, { filter }) as Promise<{
     results: Array<{ id: string }>;
   }>;
+}
+
+// ---------------------------------------------------------------------------
+// Match ID (optional Games property, used to block duplicate submits)
+// ---------------------------------------------------------------------------
+
+export const MATCH_ID_PROPERTY = "Match ID";
+
+// Cached per service-worker lifetime and per Games database.
+let matchIdSupport: { dbId: string; supported: Promise<boolean> } | null = null;
+
+/** True when the Games database has a text property named "Match ID". */
+export function gamesSupportMatchId(): Promise<boolean> {
+  return notionConfigStorage.getValue().then(({ gamesDbId }) => {
+    if (!gamesDbId) return false;
+    if (matchIdSupport?.dbId !== gamesDbId) {
+      const supported = (notionFetch(`/databases/${gamesDbId}`) as Promise<{
+        properties?: Record<string, { type?: string }>;
+      }>)
+        .then((db) => db.properties?.[MATCH_ID_PROPERTY]?.type === "rich_text")
+        .catch(() => false);
+      matchIdSupport = { dbId: gamesDbId, supported };
+    }
+    return matchIdSupport.supported;
+  });
+}
+
+/** Notion page id of a Game already logged for this match, or null (also when Match ID isn't set up). */
+export async function findGameByMatchId(matchId: string): Promise<string | null> {
+  if (!(await gamesSupportMatchId())) return null;
+  const { gamesDbId } = await notionConfigStorage.getValue();
+  const result = await queryDatabase(gamesDbId, {
+    property: MATCH_ID_PROPERTY,
+    rich_text: { equals: matchId },
+  });
+  return result.results[0]?.id ?? null;
 }
 
 // ---------------------------------------------------------------------------
@@ -187,6 +223,8 @@ export interface GamePayload {
   boardWipes: number;
   rounds: number;
   solRing: boolean;
+  /** Convoke match id; written to "Match ID" when the Games database has that property. */
+  matchId?: string;
 }
 
 /**
@@ -246,6 +284,9 @@ export async function createGame(payload: GamePayload): Promise<string> {
       "Sol Ring": {
         checkbox: solRing,
       },
+      ...(payload.matchId && (await gamesSupportMatchId()) && {
+        [MATCH_ID_PROPERTY]: { rich_text: [{ type: "text", text: { content: payload.matchId } }] },
+      }),
       ...(firstPlayerId && {
         "Starting Player": { relation: [{ id: firstPlayerId }] },
       }),

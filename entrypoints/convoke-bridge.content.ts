@@ -16,12 +16,20 @@ export default defineContentScript({
 
     window.addEventListener("message", (e: MessageEvent) => {
       if (e.source !== window || e.origin !== location.origin) return;
-      const data = e.data as { source?: unknown; event?: unknown; command?: unknown } | null;
+      const data = e.data as { source?: unknown; event?: unknown; command?: unknown; matchIds?: unknown } | null;
       if (data?.source !== RELAY_SOURCE) return;
 
-      // Dev-only: __edhMock.clear()
+      // The extension was reloaded or rebuilt after this tab loaded: this script can no longer
+      // reach it, and messages would be dropped silently.
+      if (!chrome.runtime?.id) {
+        if (isDev) console.warn("[EDH-Mock] The extension was reloaded. Reload this tab, then try again.");
+        return;
+      }
+
+      // Dev-only: __edhMock.clear() (all records) and replayLast() (only the replayed matches)
       if (isDev && data.command === "clear-matches") {
-        chrome.runtime.sendMessage({ action: "CONVOKE_DEV_CLEAR" }).catch(() => {});
+        const matchIds = Array.isArray(data.matchIds) ? data.matchIds.filter((id) => typeof id === "string") : null;
+        chrome.runtime.sendMessage({ action: "CONVOKE_DEV_CLEAR", data: { matchIds } }).catch(() => {});
         return;
       }
 

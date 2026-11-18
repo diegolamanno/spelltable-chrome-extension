@@ -29,6 +29,7 @@ declare global {
     __edhMock?: {
       scenarios: Record<string, string>;
       play: (name?: string) => number;
+      replayLast: () => number;
       clear: () => void;
     };
   }
@@ -46,6 +47,23 @@ const IS_DEV = import.meta.env.MODE === "dev" || import.meta.env.MODE === "devel
 async function installMockHelper(): Promise<void> {
   const { buildScenario, SCENARIOS } = await import("../src/shared/convoke/mock-scenarios");
   type Name = keyof typeof SCENARIOS;
+  type Events = ReturnType<typeof buildScenario>;
+  // Kept in this tab's sessionStorage so replayLast() still works after a page reload.
+  const LAST_KEY = "__edhMock:lastEvents";
+  const saveLast = (events: Events) => {
+    try {
+      sessionStorage.setItem(LAST_KEY, JSON.stringify(events));
+    } catch {
+      // Storage blocked or full: replayLast() just won't survive a reload.
+    }
+  };
+  const loadLast = (): Events => {
+    try {
+      return JSON.parse(sessionStorage.getItem(LAST_KEY) ?? "[]") as Events;
+    } catch {
+      return [];
+    }
+  };
   window.__edhMock = {
     scenarios: { ...SCENARIOS },
     play(name = "full-session") {
@@ -54,8 +72,24 @@ async function installMockHelper(): Promise<void> {
         return 0;
       }
       const events = buildScenario(name as Name);
+      saveLast(events);
       for (const event of events) window.postMessage({ source: RELAY_SOURCE, event }, location.origin);
       console.log(`[EDH-Mock] Sent ${events.length} events for "${name}". Check the extension badge.`);
+      return events.length;
+    },
+    // Same match ids as the last play() in this tab. The extension first forgets those matches
+    // (even if already submitted), so they come back as pending, like another pod member's
+    // copy. Submitting again tests the "already logged" check against Notion.
+    replayLast() {
+      const events = loadLast();
+      if (events.length === 0) {
+        console.warn("[EDH-Mock] Nothing to replay: run __edhMock.play(...) in this tab first.");
+        return 0;
+      }
+      const matchIds = [...new Set(events.flatMap((e) => (e.type === "votes" ? [] : [e.response.match.id])))];
+      window.postMessage({ source: RELAY_SOURCE, command: "clear-matches", matchIds }, location.origin);
+      for (const event of events) window.postMessage({ source: RELAY_SOURCE, event }, location.origin);
+      console.log(`[EDH-Mock] Re-sent ${events.length} events with the same match ids.`);
       return events.length;
     },
     clear() {
