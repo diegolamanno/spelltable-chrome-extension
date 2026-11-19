@@ -14,7 +14,13 @@ export type ConvokeMatchEvent =
    * Full vote tally (candidate id → votes). It comes either from a vote-winner reply
    * (`matchId` known) or from the next match's state (`endedAt` of the ended match).
    */
-  | { type: "votes"; at: string; matchId?: string; endedAt?: string | null; voteCounts: Record<string, number> };
+  | {
+      type: "votes";
+      at: string;
+      matchId?: string;
+      endedAt?: string | null;
+      voteCounts: Record<string, number>;
+    };
 
 const MATCH_PATH = /^\/api\/match\/([0-9a-f-]{36})\/(start|end|vote-winner|state)$/;
 
@@ -74,7 +80,9 @@ export function slimMatchResponse(raw: unknown): ConvokeMatchResponse | null {
         turnRound: typeof state.turnRound === "number" ? state.turnRound : 0,
         endedAt: str(state.endedAt),
       },
-      gameLog: Array.isArray(match.gameLog) ? match.gameLog.map(slimLogEntry).filter(isLogEntry) : [],
+      gameLog: Array.isArray(match.gameLog)
+        ? match.gameLog.map(slimLogEntry).filter(isLogEntry)
+        : [],
     },
     game: { currentMatchId: game.currentMatchId },
   };
@@ -145,7 +153,9 @@ function isLogEntry(e: ConvokeGameLogEntry | null): e is ConvokeGameLogEntry {
 }
 
 function asRecord(x: unknown): Record<string, unknown> | null {
-  return typeof x === "object" && x !== null && !Array.isArray(x) ? (x as Record<string, unknown>) : null;
+  return typeof x === "object" && x !== null && !Array.isArray(x)
+    ? (x as Record<string, unknown>)
+    : null;
 }
 
 function str(x: unknown): string | null {

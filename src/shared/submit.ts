@@ -82,7 +82,9 @@ export async function submitGame(data: SubmitGameData, deps: SubmitDeps): Promis
     const { players } = data;
     const playerIds = await Promise.all(players.map((p) => deps.findPlayerByName(p.name)));
     const deckIds = await Promise.all(
-      players.map((p, i) => deps.findDeckByPlayerAndCommander(p.commanders.join(" / "), playerIds[i])),
+      players.map((p, i) =>
+        deps.findDeckByPlayerAndCommander(p.commanders.join(" / "), playerIds[i])
+      )
     );
     const date = data.date ?? deps.today();
 
@@ -94,7 +96,9 @@ export async function submitGame(data: SubmitGameData, deps: SubmitDeps): Promis
 
     const times = data.playerTimes ?? (await deps.fallbackPlayerTimes());
     const gameId = progress.gameId;
-    const missing = players.map((_, i) => i + 1).filter((seat) => !progress?.seatsCreated.includes(seat));
+    const missing = players
+      .map((_, i) => i + 1)
+      .filter((seat) => !progress?.seatsCreated.includes(seat));
 
     const results = await Promise.allSettled(
       missing.map((seat) => {
@@ -109,16 +113,22 @@ export async function submitGame(data: SubmitGameData, deps: SubmitDeps): Promis
           date,
           ...(rawTime !== undefined && { rawTime }),
         });
-      }),
+      })
     );
 
     const created = missing.filter((_, i) => results[i].status === "fulfilled");
     const stillMissing = missing.filter((_, i) => results[i].status === "rejected");
-    progress = { gameId, seatsCreated: [...progress.seatsCreated, ...created].sort((a, b) => a - b), updatedAt: deps.now() };
+    progress = {
+      gameId,
+      seatsCreated: [...progress.seatsCreated, ...created].sort((a, b) => a - b),
+      updatedAt: deps.now(),
+    };
 
     if (stillMissing.length > 0) {
       if (key) await deps.saveProgress(key, progress);
-      const firstError = results.find((r): r is PromiseRejectedResult => r.status === "rejected")?.reason;
+      const firstError = results.find(
+        (r): r is PromiseRejectedResult => r.status === "rejected"
+      )?.reason;
       return {
         status: "partial",
         gameId,
@@ -134,13 +144,19 @@ export async function submitGame(data: SubmitGameData, deps: SubmitDeps): Promis
   }
 }
 
-function gamePayload(data: SubmitGameData, playerIds: string[], deckIds: string[], date: string): GamePayload {
+function gamePayload(
+  data: SubmitGameData,
+  playerIds: string[],
+  deckIds: string[],
+  date: string
+): GamePayload {
   const { players } = data;
   const indexOf = (name: string | null) => (name ? players.findIndex((p) => p.name === name) : -1);
   const pick = (ids: string[], i: number) => (i !== -1 ? ids[i] : null);
 
   const winnerIndex = indexOf(data.winner);
-  if (data.winner && winnerIndex === -1) throw new Error(`Winner "${data.winner}" not in players list`);
+  if (data.winner && winnerIndex === -1)
+    throw new Error(`Winner "${data.winner}" not in players list`);
   const firstPlayerIndex = indexOf(data.firstPlayer);
   const killerIndex = indexOf(data.firstKiller);
   const victimIndex = indexOf(data.firstVictim);

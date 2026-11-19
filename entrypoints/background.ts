@@ -1,15 +1,30 @@
-import { convokeMatchesStorage, gameStorage, playerTimesStorage, submitProgressStorage } from "../src/shared/storage";
 import type { ConvokeMatchEvent } from "../src/shared/convoke/events";
-import { applyMatchEvent, type MatchRecords, markSubmitted, pendingMatches } from "../src/shared/convoke/match-records";
+import {
+  applyMatchEvent,
+  type MatchRecords,
+  markSubmitted,
+  pendingMatches,
+} from "../src/shared/convoke/match-records";
 import { toLocalDate } from "../src/shared/convoke/suggestions";
 import {
-  findPlayerByName,
-  findDeckByPlayerAndCommander,
-  findGameByMatchId,
   createGame,
   createGameSeat,
+  findDeckByPlayerAndCommander,
+  findGameByMatchId,
+  findPlayerByName,
 } from "../src/shared/notion";
-import { type SubmitDeps, type SubmitGameData, type SubmitResult, submitGame } from "../src/shared/submit";
+import {
+  convokeMatchesStorage,
+  gameStorage,
+  playerTimesStorage,
+  submitProgressStorage,
+} from "../src/shared/storage";
+import {
+  type SubmitDeps,
+  type SubmitGameData,
+  type SubmitResult,
+  submitGame,
+} from "../src/shared/submit";
 
 /** Sent back to the popup for SUBMIT_GAME. */
 type SubmitGameResponse = SubmitResult & { success: boolean };
@@ -22,7 +37,10 @@ const submitDeps: SubmitDeps = {
   createGameSeat,
   loadProgress: async (key) => (await submitProgressStorage.getValue())[key] ?? null,
   saveProgress: async (key, progress) => {
-    await submitProgressStorage.setValue({ ...(await submitProgressStorage.getValue()), [key]: progress });
+    await submitProgressStorage.setValue({
+      ...(await submitProgressStorage.getValue()),
+      [key]: progress,
+    });
   },
   clearProgress: async (key) => {
     const { [key]: _done, ...rest } = await submitProgressStorage.getValue();
@@ -43,7 +61,11 @@ async function handleSubmitGame(data: SubmitGameData): Promise<SubmitGameRespons
     // The game is already in Notion; a failure here must not turn the submit into an error.
     matchQueue = matchQueue
       .then(async () => {
-        const records = markSubmitted(await convokeMatchesStorage.getValue(), matchId, new Date().toISOString());
+        const records = markSubmitted(
+          await convokeMatchesStorage.getValue(),
+          matchId,
+          new Date().toISOString()
+        );
         await convokeMatchesStorage.setValue(records);
         await updateBadge(records);
       })
@@ -71,14 +93,20 @@ function handleConvokeMatchEvent(event: ConvokeMatchEvent): void {
       const records = applyMatchEvent(await convokeMatchesStorage.getValue(), event);
       await convokeMatchesStorage.setValue(records);
       await updateBadge(records);
-      console.log(`[Background] Convoke ${event.type} applied; pending:`, pendingMatches(records).length);
+      console.log(
+        `[Background] Convoke ${event.type} applied; pending:`,
+        pendingMatches(records).length
+      );
     })
     .catch((err: unknown) => console.error("[Background] Failed to apply Convoke event", err));
 }
 
 export default defineBackground(() => {
   // The service worker restarts often; restore the badge from storage each time.
-  convokeMatchesStorage.getValue().then(updateBadge).catch(() => {});
+  convokeMatchesStorage
+    .getValue()
+    .then(updateBadge)
+    .catch(() => {});
 
   chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     if (message.action === "CONVOKE_MATCH_EVENT") {
@@ -102,9 +130,13 @@ export default defineBackground(() => {
           }
           await convokeMatchesStorage.setValue(records);
           await updateBadge(records);
-          console.log(`[Background] Cleared ${matchIds ? matchIds.length : "all"} Convoke match records (dev)`);
+          console.log(
+            `[Background] Cleared ${matchIds ? matchIds.length : "all"} Convoke match records (dev)`
+          );
         })
-        .catch((err: unknown) => console.error("[Background] Failed to clear Convoke match records", err));
+        .catch((err: unknown) =>
+          console.error("[Background] Failed to clear Convoke match records", err)
+        );
       return false;
     }
 
@@ -126,7 +158,11 @@ export default defineBackground(() => {
         .then((result) => sendResponse(result))
         .catch((err: unknown) => {
           const msg = err instanceof Error ? err.message : String(err);
-          sendResponse({ success: false, status: "failed", error: msg } satisfies SubmitGameResponse);
+          sendResponse({
+            success: false,
+            status: "failed",
+            error: msg,
+          } satisfies SubmitGameResponse);
         });
       return true; // keep message channel open for async sendResponse
     }

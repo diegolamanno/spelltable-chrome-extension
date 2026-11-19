@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { gameStorage } from "../storage";
 import type { PlayerData } from "../storage";
+import { gameStorage } from "../storage";
 
 export function useGameData() {
   const [players, setPlayers] = useState<PlayerData[]>([]);

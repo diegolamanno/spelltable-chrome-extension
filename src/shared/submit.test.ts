@@ -3,7 +3,13 @@ import type { GamePayload, GameSeatPayload } from "./notion";
 import { type SubmitDeps, type SubmitGameData, type SubmitProgress, submitGame } from "./submit";
 
 /** In-memory Notion + progress store. `failSeats` makes those seat numbers fail once each. */
-function fakeNotion(opts: { existingMatchIds?: Record<string, string>; failSeats?: number[]; missingPlayer?: string } = {}) {
+function fakeNotion(
+  opts: {
+    existingMatchIds?: Record<string, string>;
+    failSeats?: number[];
+    missingPlayer?: string;
+  } = {}
+) {
   const games: GamePayload[] = [];
   const seats: GameSeatPayload[] = [];
   const progress = new Map<string, SubmitProgress>();
@@ -82,7 +88,10 @@ describe("submitGame", () => {
 
   it("reports a match someone already logged, without creating anything", async () => {
     const n = fakeNotion({ existingMatchIds: { "match-1": "game-by-someone-else" } });
-    expect(await submitGame(game, n.deps)).toEqual({ status: "already-logged", gameId: "game-by-someone-else" });
+    expect(await submitGame(game, n.deps)).toEqual({
+      status: "already-logged",
+      gameId: "game-by-someone-else",
+    });
     expect(n.games).toHaveLength(0);
     expect(n.seats).toHaveLength(0);
   });
@@ -133,7 +142,13 @@ describe("submitGame", () => {
 
   it("uses the popup's key for live-table games (no match id)", async () => {
     const n = fakeNotion({ failSeats: [1] });
-    const live = { ...game, matchId: undefined, submissionKey: "form-abc", date: undefined, playerTimes: undefined };
+    const live = {
+      ...game,
+      matchId: undefined,
+      submissionKey: "form-abc",
+      date: undefined,
+      playerTimes: undefined,
+    };
     await submitGame(live, n.deps);
     expect(n.progress.get("form-abc")?.gameId).toBe("game-1");
     expect(await submitGame(live, n.deps)).toEqual({ status: "logged", gameId: "game-1" });

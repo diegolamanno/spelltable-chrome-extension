@@ -1,6 +1,6 @@
-import { defineConfig } from "wxt";
-import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
+import react from "@vitejs/plugin-react";
+import { defineConfig } from "wxt";
 
 const DEV_MODES = new Set(["dev", "development"]);
 
@@ -8,8 +8,7 @@ export default defineConfig({
   manifest: ({ mode }) => ({
     name: DEV_MODES.has(mode) ? "EDH Score Recorder (Dev)" : "EDH Score Recorder",
     version: "0.1",
-    description:
-      "Allows you to easily record your games into a friend playground database",
+    description: "Allows you to easily record your games into a friend playground database",
     permissions: ["scripting", "storage", "activeTab"],
     host_permissions: [
       "https://spelltable.wizards.com/game/*",

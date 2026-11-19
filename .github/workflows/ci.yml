@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 26
+          cache: npm
+
+      # postinstall runs `wxt prepare`, which generates the types the type-check needs.
+      - run: npm ci
+
+      # Lint, formatting and import order. Fails on errors, not warnings.
+      - name: Biome
+        run: npx biome ci --reporter=github .
+
+      - name: Type-check
+        run: npm run check
+
+      - name: Tests
+        run: npm test
+
+      # The build scripts in package.json read secrets through 1Password (`op run`), which CI
+      # doesn't have. A CI build doesn't need a real Notion key, so build with placeholders.
+      - name: Build (prod)
+        run: npx wxt build --mode prod
+        env:
+          VITE_NOTION_API_KEY: ci-placeholder
+          VITE_NOTION_PLAYERS_DB_ID: ci-placeholder
+          VITE_NOTION_DECKS_DB_ID: ci-placeholder
+          VITE_NOTION_GAMES_DB_ID: ci-placeholder
+          VITE_NOTION_GAME_SEATS_DB_ID: ci-placeholder
+
+      # The Convoke mock helper (__edhMock) must only exist in dev builds.
+      - name: No dev helpers in the prod build
+        run: |
+          test -d .output/chrome-mv3-prod || { echo "::error::.output/chrome-mv3-prod not found"; exit 1; }
+          if grep -rl "__edhMock" .output/chrome-mv3-prod; then
+            echo "::error::__edhMock found in the prod build"
+            exit 1
+          fi

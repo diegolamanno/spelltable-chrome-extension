@@ -73,8 +73,11 @@ async function installMockHelper(): Promise<void> {
       }
       const events = buildScenario(name as Name);
       saveLast(events);
-      for (const event of events) window.postMessage({ source: RELAY_SOURCE, event }, location.origin);
-      console.log(`[EDH-Mock] Sent ${events.length} events for "${name}". Check the extension badge.`);
+      for (const event of events)
+        window.postMessage({ source: RELAY_SOURCE, event }, location.origin);
+      console.log(
+        `[EDH-Mock] Sent ${events.length} events for "${name}". Check the extension badge.`
+      );
       return events.length;
     },
     // Same match ids as the last play() in this tab. The extension first forgets those matches
@@ -86,9 +89,15 @@ async function installMockHelper(): Promise<void> {
         console.warn("[EDH-Mock] Nothing to replay: run __edhMock.play(...) in this tab first.");
         return 0;
       }
-      const matchIds = [...new Set(events.flatMap((e) => (e.type === "votes" ? [] : [e.response.match.id])))];
-      window.postMessage({ source: RELAY_SOURCE, command: "clear-matches", matchIds }, location.origin);
-      for (const event of events) window.postMessage({ source: RELAY_SOURCE, event }, location.origin);
+      const matchIds = [
+        ...new Set(events.flatMap((e) => (e.type === "votes" ? [] : [e.response.match.id]))),
+      ];
+      window.postMessage(
+        { source: RELAY_SOURCE, command: "clear-matches", matchIds },
+        location.origin
+      );
+      for (const event of events)
+        window.postMessage({ source: RELAY_SOURCE, event }, location.origin);
       console.log(`[EDH-Mock] Re-sent ${events.length} events with the same match ids.`);
       return events.length;
     },
@@ -97,14 +106,18 @@ async function installMockHelper(): Promise<void> {
       console.log("[EDH-Mock] Asked the extension to clear all Convoke match records.");
     },
   };
-  console.log("[EDH-Mock] Ready: __edhMock.play('full-session'). Scenarios:", Object.keys(SCENARIOS));
+  console.log(
+    "[EDH-Mock] Ready: __edhMock.play('full-session'). Scenarios:",
+    Object.keys(SCENARIOS)
+  );
 }
 
 const LOGGED = /\/api\/(match|game)\//;
 const RELAYED = /^\/api\/match\/[0-9a-f-]{36}\/(start|end|vote-winner|state)$/;
 
 function parseBody(body: BodyInit | null | undefined): unknown {
-  if (typeof body !== "string") return body == null ? null : `[${Object.prototype.toString.call(body)}]`;
+  if (typeof body !== "string")
+    return body == null ? null : `[${Object.prototype.toString.call(body)}]`;
   try {
     return JSON.parse(body);
   } catch {
@@ -133,7 +146,9 @@ export default defineContentScript({
         const relay = RELAYED.test(url.pathname);
         if (!relay && !(log && LOGGED.test(url.pathname))) return response;
 
-        const method = (init?.method ?? (input instanceof Request ? input.method : "GET")).toUpperCase();
+        const method = (
+          init?.method ?? (input instanceof Request ? input.method : "GET")
+        ).toUpperCase();
         if (!log && method === "GET") return response; // the relay never needs GETs
         const at = new Date().toISOString();
         const requestBody = parseBody(init?.body);
@@ -163,10 +178,20 @@ export default defineContentScript({
             }
 
             if (log) {
-              const entry = { at, method, path: url.pathname, status: response.status, requestBody, responseBody };
+              const entry = {
+                at,
+                method,
+                path: url.pathname,
+                status: response.status,
+                requestBody,
+                responseBody,
+              };
               log.push(entry);
               const highlight = /\/(start|end|vote-winner)$/.test(entry.path) ? "★ " : "";
-              console.log(`[EDH-Logger] ${highlight}${entry.method} ${entry.path} → ${entry.status}`, entry);
+              console.log(
+                `[EDH-Logger] ${highlight}${entry.method} ${entry.path} → ${entry.status}`,
+                entry
+              );
             }
           })
           .catch(() => {
@@ -181,7 +206,7 @@ export default defineContentScript({
 
     if (log) {
       console.log(
-        "[EDH-Logger] Watching Convoke /api/match and /api/game requests. Export with: copy(JSON.stringify(window.__edhLog, null, 2))",
+        "[EDH-Logger] Watching Convoke /api/match and /api/game requests. Export with: copy(JSON.stringify(window.__edhLog, null, 2))"
       );
     }
   },

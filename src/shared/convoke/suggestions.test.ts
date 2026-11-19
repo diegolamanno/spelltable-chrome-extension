@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 import fixture from "../../test/fixtures/convoke/two-match-session.json";
-import { type ConvokeMatchResponse, summariseEndedMatch, suggestWinner, toLocalDate } from "./suggestions";
+import {
+  type ConvokeMatchResponse,
+  suggestWinner,
+  summariseEndedMatch,
+  toLocalDate,
+} from "./suggestions";
 
 // Fixture players (anonymised): 9001 = Player 1, 9002 = Player 2, 9003 = Player 3, 9004 = Player 4
 const P1 = 9001;

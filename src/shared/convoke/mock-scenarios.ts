@@ -11,7 +11,8 @@ import { type ConvokeMatchEvent, classifyRequest } from "./events";
 
 export const SCENARIOS = {
   "full-session": "Two matches in one lobby: staggered KO, then simultaneous KO, with votes",
-  "single-game": "One match (staggered KO), then everyone leaves. Votes land in the next, unplayed match",
+  "single-game":
+    "One match (staggered KO), then everyone leaves. Votes land in the next, unplayed match",
   "simultaneous-ko": "Only match 2: game ended with everyone alive, winner suggestion from 2 votes",
   "no-votes": "Match 1 ends but nobody votes, so there's no winner suggestion",
   "player-left": "Match 1 where one player left before the end; they should keep their seat",
@@ -72,11 +73,14 @@ export function freshen(events: ConvokeMatchEvent[], now: Date): ConvokeMatchEve
         if (!ids.has(id)) ids.set(id, crypto.randomUUID());
         return ids.get(id) as string;
       })
-      .replace(ISO, (t) => new Date(Date.parse(t) + offset).toISOString()),
+      .replace(ISO, (t) => new Date(Date.parse(t) + offset).toISOString())
   ) as ConvokeMatchEvent[];
 }
 
-function withoutPlayer(e: Extract<ConvokeMatchEvent, { type: "end" }>, playerId: number): ConvokeMatchEvent {
+function withoutPlayer(
+  e: Extract<ConvokeMatchEvent, { type: "end" }>,
+  playerId: number
+): ConvokeMatchEvent {
   const state = e.response.match.state;
   return {
     ...e,
