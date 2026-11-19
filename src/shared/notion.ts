@@ -59,25 +59,33 @@ function queryDatabase(databaseId: string, filter: object) {
 
 export const MATCH_ID_PROPERTY = "Match ID";
 
-// Cached per service-worker lifetime and per Games database.
-let matchIdSupport: { dbId: string; supported: Promise<boolean> } | null = null;
+// Optional properties are checked once per service-worker lifetime and per database.
+const propertyChecks = new Map<string, Promise<boolean>>();
+
+/** True when the database has a property with this name and type. False on any error. */
+function databaseHasProperty(dbId: string, name: string, type: string): Promise<boolean> {
+  const key = `${dbId}:${name}:${type}`;
+  let check = propertyChecks.get(key);
+  if (!check) {
+    check = (
+      notionFetch(`/databases/${dbId}`) as Promise<{
+        properties?: Record<string, { type?: string }>;
+      }>
+    )
+      .then((db) => db.properties?.[name]?.type === type)
+      .catch(() => false);
+    propertyChecks.set(key, check);
+  }
+  return check;
+}
 
 /** True when the Games database has a text property named "Match ID". */
 export function gamesSupportMatchId(): Promise<boolean> {
-  return notionConfigStorage.getValue().then(({ gamesDbId }) => {
-    if (!gamesDbId) return false;
-    if (matchIdSupport?.dbId !== gamesDbId) {
-      const supported = (
-        notionFetch(`/databases/${gamesDbId}`) as Promise<{
-          properties?: Record<string, { type?: string }>;
-        }>
-      )
-        .then((db) => db.properties?.[MATCH_ID_PROPERTY]?.type === "rich_text")
-        .catch(() => false);
-      matchIdSupport = { dbId: gamesDbId, supported };
-    }
-    return matchIdSupport.supported;
-  });
+  return notionConfigStorage
+    .getValue()
+    .then(({ gamesDbId }) =>
+      gamesDbId ? databaseHasProperty(gamesDbId, MATCH_ID_PROPERTY, "rich_text") : false
+    );
 }
 
 /** Notion page id of a Game already logged for this match, or null (also when Match ID isn't set up). */
@@ -120,46 +128,130 @@ export async function findPlayerByName(name: string): Promise<string> {
   );
 }
 
-/**
- * Looks up a deck page ID in the Decks database by commander name.
- * Uses a "contains" match on the Commander rich_text property.
- */
-export async function findDeckByCommander(commanderName: string): Promise<string> {
-  const { decksDbId } = await notionConfigStorage.getValue();
-  if (!decksDbId) throw new Error("Decks DB ID not configured — open extension settings.");
+// ---------------------------------------------------------------------------
+// Decks
+// ---------------------------------------------------------------------------
 
-  const result = await queryDatabase(decksDbId, {
-    property: "Commander",
-    rich_text: { contains: commanderName },
-  });
+interface DeckPage {
+  id: string;
+  properties?: Record<string, { type?: string; title?: RichText[]; rich_text?: RichText[] }>;
+}
+type RichText = { plain_text?: string };
 
-  if (result.results.length > 0) return result.results[0].id;
+function plainText(prop?: { title?: RichText[]; rich_text?: RichText[] }): string {
+  return (prop?.title ?? prop?.rich_text ?? []).map((t) => t.plain_text ?? "").join("");
+}
 
-  throw new Error(`Deck not found for commander: "${commanderName}"`);
+function deckName(deck: DeckPage): string {
+  const title = Object.values(deck.properties ?? {}).find((p) => p.type === "title");
+  return plainText(title) || "Untitled deck";
 }
 
 /**
- * Looks up a deck page ID scoped to a specific player owner.
- * Uses a compound filter: Commander contains commanderName AND Owner relation contains playerId.
- * Falls back to commander-only lookup if no owner-scoped match is found.
+ * True when the deck's Commander text is exactly these commanders, in any order, with only
+ * separators between them ("A / B", "B & A", "A // B"...).
+ */
+export function commanderTextMatches(text: string, commanders: string[]): boolean {
+  let rest = text.toLowerCase();
+  // Longest first, so a name that contains another is removed whole.
+  for (const name of [...commanders].sort((a, b) => b.length - a.length)) {
+    const i = rest.indexOf(name.toLowerCase());
+    if (i === -1) return false;
+    rest = `${rest.slice(0, i)} ${rest.slice(i + name.length)}`;
+  }
+  return /^[\s/&+|,-]*$/.test(rest);
+}
+
+function listCommanders(commanders: string[]): string {
+  return commanders.map((c) => `"${c}"`).join(" + ");
+}
+
+/**
+ * Optional Decks text property for the second commander (partner, background, or any other
+ * card Convoke sends as the secondary commander). Notion matches property names exactly.
+ */
+export const PARTNER_PROPERTY = "Partner / Background";
+
+const contains = (property: string, value: string) => ({
+  property,
+  rich_text: { contains: value },
+});
+
+/** Notion filter for this player's decks with these commanders. */
+export function deckFilter(names: string[], playerId: string, partnerField: boolean): object {
+  const owner = { property: "Owner", relation: { contains: playerId } };
+  // Decks not split yet (or no Partner / Background field): every commander in the Commander text, "A / B".
+  const inCommander = { and: [owner, ...names.map((n) => contains("Commander", n))] };
+  if (!partnerField || names.length > 2) return inCommander;
+
+  const [first, second] = names;
+  if (!second) {
+    // A single commander must not match a partner deck that happens to include it.
+    return {
+      and: [
+        owner,
+        contains("Commander", first),
+        { property: PARTNER_PROPERTY, rich_text: { is_empty: true } },
+      ],
+    };
+  }
+  return {
+    or: [
+      { and: [owner, contains("Commander", first), contains(PARTNER_PROPERTY, second)] },
+      { and: [owner, contains("Commander", second), contains(PARTNER_PROPERTY, first)] },
+      inCommander,
+    ],
+  };
+}
+
+/**
+ * The deck owned by this player with these commanders: one in Commander and the other in
+ * Partner (either way round), or, for decks not split yet, all of them in the Commander text. Throws a message meant for the popup when there is no deck or
+ * when the match is ambiguous: a wrong deck must never be linked silently.
+ *
+ * Several matches are narrowed to the one whose Commander text is exactly these commanders;
+ * if that doesn't leave exactly one, the submit fails and names the candidates.
  */
 export async function findDeckByPlayerAndCommander(
-  commanderName: string,
-  playerId: string
+  commanders: string[],
+  playerId: string,
+  playerName: string
 ): Promise<string> {
   const { decksDbId } = await notionConfigStorage.getValue();
   if (!decksDbId) throw new Error("Decks DB ID not configured — open extension settings.");
 
-  const result = await queryDatabase(decksDbId, {
-    and: [
-      { property: "Commander", rich_text: { contains: commanderName } },
-      { property: "Owner", relation: { contains: playerId } },
-    ],
-  });
+  const names = commanders.map((c) => c.trim()).filter(Boolean);
+  if (names.length === 0)
+    throw new Error(`${playerName} has no commander, so no deck can be linked.`);
 
-  if (result.results.length > 0) return result.results[0].id;
+  const partnerField = await databaseHasProperty(decksDbId, PARTNER_PROPERTY, "rich_text");
+  const { results } = (await queryDatabase(
+    decksDbId,
+    deckFilter(names, playerId, partnerField)
+  )) as { results: DeckPage[] };
 
-  return findDeckByCommander(commanderName);
+  if (results.length === 1) return results[0].id;
+
+  if (results.length === 0) {
+    throw new Error(
+      `No deck found for ${playerName} with commander ${listCommanders(names)}. ` +
+        `In Notion Decks, set ${playerName} as the Owner and check the Commander text.`
+    );
+  }
+
+  const exact = results.filter((d) =>
+    commanderTextMatches(
+      `${plainText(d.properties?.Commander)} / ${plainText(d.properties?.[PARTNER_PROPERTY])}`,
+      names
+    )
+  );
+  if (exact.length === 1) return exact[0].id;
+
+  const candidates = (exact.length > 1 ? exact : results).map((d) => `"${deckName(d)}"`).join(", ");
+  throw new Error(
+    `${playerName} has ${exact.length > 1 ? exact.length : results.length} decks matching ` +
+      `${listCommanders(names)}: ${candidates}. Make their Commander text distinct in Notion.`
+  );
 }
 
 export interface GameSeatPayload {

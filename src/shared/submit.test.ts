@@ -8,6 +8,8 @@ function fakeNotion(
     existingMatchIds?: Record<string, string>;
     failSeats?: number[];
     missingPlayer?: string;
+    /** Players whose deck lookup fails. */
+    missingDecks?: string[];
   } = {}
 ) {
   const games: GamePayload[] = [];
@@ -20,7 +22,10 @@ function fakeNotion(
       if (name === opts.missingPlayer) throw new Error(`Player not found: "${name}"`);
       return `player:${name}`;
     },
-    findDeckByPlayerAndCommander: async (commander, playerId) => `deck:${playerId}:${commander}`,
+    findDeckByPlayerAndCommander: async (commanders, playerId, playerName) => {
+      if (opts.missingDecks?.includes(playerName)) throw new Error(`No deck for ${playerName}`);
+      return `deck:${playerId}:${commanders.join("+")}`;
+    },
     findGameByMatchId: async (matchId) => opts.existingMatchIds?.[matchId] ?? null,
     createGame: async (payload) => {
       games.push(payload);
@@ -129,6 +134,18 @@ describe("submitGame", () => {
     const result = await submitGame(game, n.deps);
 
     expect(result).toEqual({ status: "failed", error: 'Player not found: "player 3"' });
+    expect(n.games).toHaveLength(0);
+    expect(n.progress.size).toBe(0);
+  });
+
+  it("reports every missing deck at once and creates nothing", async () => {
+    const n = fakeNotion({ missingDecks: ["player 1", "player 3"] });
+    const result = await submitGame(game, n.deps);
+
+    expect(result).toEqual({
+      status: "failed",
+      error: "No deck for player 1\nNo deck for player 3",
+    });
     expect(n.games).toHaveLength(0);
     expect(n.progress.size).toBe(0);
   });
