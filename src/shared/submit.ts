@@ -55,7 +55,12 @@ export type SubmitResult =
 
 export interface SubmitDeps {
   findPlayerByName(name: string): Promise<string>;
-  findDeckByPlayerAndCommander(commander: string, playerId: string): Promise<string>;
+  /** Throws when the player has no matching deck, or more than one (see notion.ts). */
+  findDeckByPlayerAndCommander(
+    commanders: string[],
+    playerId: string,
+    playerName: string
+  ): Promise<string>;
   findGameByMatchId(matchId: string): Promise<string | null>;
   createGame(payload: GamePayload): Promise<string>;
   createGameSeat(payload: GameSeatPayload): Promise<string>;
@@ -81,11 +86,17 @@ export async function submitGame(data: SubmitGameData, deps: SubmitDeps): Promis
 
     const { players } = data;
     const playerIds = await Promise.all(players.map((p) => deps.findPlayerByName(p.name)));
-    const deckIds = await Promise.all(
-      players.map((p, i) =>
-        deps.findDeckByPlayerAndCommander(p.commanders.join(" / "), playerIds[i])
-      )
+    // Look up every deck before failing, so one attempt reports all the deck problems.
+    const decks = await Promise.allSettled(
+      players.map((p, i) => deps.findDeckByPlayerAndCommander(p.commanders, playerIds[i], p.name))
     );
+    const deckErrors = decks.flatMap((d) =>
+      d.status === "rejected"
+        ? [d.reason instanceof Error ? d.reason.message : String(d.reason)]
+        : []
+    );
+    if (deckErrors.length > 0) throw new Error(deckErrors.join("\n"));
+    const deckIds = decks.map((d) => (d as PromiseFulfilledResult<string>).value);
     const date = data.date ?? deps.today();
 
     if (!progress) {

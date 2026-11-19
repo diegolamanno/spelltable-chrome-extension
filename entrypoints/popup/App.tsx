@@ -1267,7 +1267,9 @@ function ConfirmScreen({
 
       <SummaryGrid data={data} t={t} />
 
-      {submitError && <p style={{ color: "#e05050", fontSize: 11 }}>⚠ {submitError}</p>}
+      {submitError && (
+        <p style={{ color: "#e05050", fontSize: 11, whiteSpace: "pre-line" }}>⚠ {submitError}</p>
+      )}
 
       <div style={{ display: "flex", gap: 8 }}>
         <button

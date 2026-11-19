@@ -40,4 +40,14 @@ describe("buildScenario", () => {
     const seats = pendingMatches(replay("player-left"))[0].summary?.seats ?? [];
     expect(seats.map((s) => s.playerId)).toContain(9002);
   });
+
+  it.each([
+    ["partners", ["Frodo, Adventurous Hobbit", "Sam, Loyal Attendant"]],
+    ["partners-swapped", ["Sam, Loyal Attendant", "Frodo, Adventurous Hobbit"]],
+  ] as const)("%s gives Player 3 both commanders, in that order", (name, commanders) => {
+    const record = pendingMatches(replay(name))[0];
+    const seat = record.summary?.seats.find((s) => s.playerId === 9003);
+    expect(seat?.commanders).toEqual(commanders);
+    expect(record.players.find((p) => p.id === 9003)?.commanders).toEqual(commanders);
+  });
 });

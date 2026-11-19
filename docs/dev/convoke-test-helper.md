@@ -75,6 +75,10 @@ All scenarios come from the anonymised real session in `src/test/fixtures/convok
 | `simultaneous-ko` | 1 | Same as match 2 above. Everyone was still alive when the game was ended. |
 | `no-votes` | 1 | Match 1 with **no winner suggestion** (`voteCounts` is `{}`) |
 | `player-left` | 1 | Match 1, but Player 2 is missing from the final state. **Player 2 must keep a seat** (added last, commander *Tidus, Yuna's Guardian*, turn time 0). |
+| `partners` | 1 | Match 1, but Player 3 plays partners: *Frodo, Adventurous Hobbit* + *Sam, Loyal Attendant*. Submitting must link the dev deck **[Mock] Frodo & Sam** (Commander: Frodo, Partner / Background: Sam). |
+| `partners-swapped` | 1 | Same as `partners`, but Convoke sends Sam first. It must still link **[Mock] Frodo & Sam**, so the order doesn't matter. |
+
+The dev Decks (Copy) database has a `[Mock]` deck for each fixture commander, owned by the matching `Player N`. That includes `[Mock] Frodo & Sam` for the partner scenarios, which needs the `Partner / Background` text property. To check a failure on purpose, clear a mock deck's Owner. The submit should then fail with "No deck found for …" and create nothing.
 
 Commanders differ between the matches. For example, Player 1 plays *Felothar the Steadfast* in match 1 and *Imotekh the Stormlord* in match 2. Each match record must keep its own.
 
