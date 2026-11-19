@@ -16,7 +16,15 @@ export const SCENARIOS = {
   "simultaneous-ko": "Only match 2: game ended with everyone alive, winner suggestion from 2 votes",
   "no-votes": "Match 1 ends but nobody votes, so there's no winner suggestion",
   "player-left": "Match 1 where one player left before the end; they should keep their seat",
+  partners:
+    "Match 1 where Player 3 plays partners: Frodo, Adventurous Hobbit + Sam, Loyal Attendant",
+  "partners-swapped":
+    "Same as partners, but Convoke sends Sam as the main commander and Frodo as the partner",
 } as const;
+
+// Matches the dev deck "[Mock] Frodo & Sam" (Commander: Frodo, Partner / Background: Sam), owned by Player 3.
+const FRODO = { name: "Frodo, Adventurous Hobbit" };
+const SAM = { name: "Sam, Loyal Attendant" };
 
 export type ScenarioName = keyof typeof SCENARIOS;
 
@@ -56,6 +64,12 @@ export function buildScenario(name: ScenarioName, now: Date = new Date()): Convo
     case "player-left":
       events = match1.map((e) => (e.type === "end" ? withoutPlayer(e, 9002) : e));
       break;
+    case "partners":
+      events = match1.map((e) => withCommanders(e, 9003, FRODO, SAM));
+      break;
+    case "partners-swapped":
+      events = match1.map((e) => withCommanders(e, 9003, SAM, FRODO));
+      break;
   }
   return freshen(events, now);
 }
@@ -92,6 +106,32 @@ function withoutPlayer(
           ...state,
           players: state.players.filter((p) => p.id !== playerId),
           playerOrder: state.playerOrder.filter((id) => id !== playerId),
+        },
+      },
+    },
+  };
+}
+
+/** Gives one player these commanders in every start/end event. */
+function withCommanders(
+  e: ConvokeMatchEvent,
+  playerId: number,
+  commander: { name: string },
+  secondaryCommander: { name: string }
+): ConvokeMatchEvent {
+  if (e.type === "votes") return e;
+  const state = e.response.match.state;
+  return {
+    ...e,
+    response: {
+      ...e.response,
+      match: {
+        ...e.response.match,
+        state: {
+          ...state,
+          players: state.players.map((p) =>
+            p.id === playerId ? { ...p, commander, secondaryCommander } : p
+          ),
         },
       },
     },
