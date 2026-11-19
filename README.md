@@ -13,9 +13,12 @@ A Chrome extension for logging Commander game results from [SpellTable](https://
 
 When playing on Convoke, the extension also scrapes each player's total turn time from the end-of-game screen and stores it alongside their seat record.
 
+Convoke matches are also recorded in the background as they end. The extension icon shows a badge with the number of ended matches not yet logged; the popup lists them and pre-fills the form (players, first player, winner, date) from Convoke's data, so you only review and submit.
+
 ## Requirements
 
 - Node.js v18+
+- The [1Password CLI](https://developer.1password.com/docs/cli/) (`op`): the `dev` and `build*` scripts read the Notion token from 1Password
 - A Notion workspace with four databases (see [Notion setup](#notion-setup))
 
 ## Setup
@@ -24,8 +27,10 @@ When playing on Convoke, the extension also scrapes each player's total turn tim
 npm install
 cp .env.example .env.dev    # dev databases
 cp .env.example .env.prod   # prod databases
-# Fill in Notion credentials in each file
+# Fill in the database IDs in each file
 ```
+
+The Notion token is not stored in these files. `.env.op` holds a 1Password secret reference, and the npm scripts run through `op run --env-file=.env.op`, which injects `VITE_NOTION_API_KEY` at build time. Point the reference in `.env.op` at your own 1Password item.
 
 Alternatively, configure credentials directly in the popup via **Settings → Notion Settings** — changes are saved to Chrome local storage and override the build-time values.
 
@@ -50,8 +55,11 @@ Player lookup first tries `Username - Spelltable`, then falls back to `Username 
 | `Name` | Title |
 | `Commander` | Rich text |
 | `Owner` | Relation → Players |
+| `Partner / Background` | Rich text, *optional*. The second commander (partner, background, or any other secondary commander) |
 
-The `Owner` relation scopes deck lookups per player, preventing the wrong deck from being selected when two players share the same commander. Falls back to commander-only lookup if `Owner` is not set.
+Deck lookups only consider decks whose `Owner` is the player, so set `Owner` on every deck. A deck matches when its commanders are the game's commanders, in either order across `Commander` and `Partner / Background`. Decks that list both commanders in `Commander` (e.g. `A / B`) also match. With a single commander, a deck with a filled `Partner / Background` doesn't match.
+
+If no deck matches, or several do and their `Commander` text doesn't tell them apart, the submit stops and the popup names the player and the candidate decks. A wrong deck is never linked.
 
 ### Games
 
@@ -92,30 +100,19 @@ One entry per player per game, linking seat position and turn-time data.
 
 ## Environment variables
 
-Create a Notion integration at [notion.so/my-integrations](https://www.notion.so/my-integrations), then populate each env file:
+Create a Notion integration at [notion.so/my-integrations](https://www.notion.so/my-integrations) and share the four databases with it. The variables are listed in `.env.example`:
 
-```
-VITE_NOTION_API_KEY=secret_...
-VITE_NOTION_PLAYERS_DB_ID=<id from database URL>
-VITE_NOTION_DECKS_DB_ID=<id from database URL>
-VITE_NOTION_GAMES_DB_ID=<id from database URL>
-VITE_NOTION_GAME_SEATS_DB_ID=<id from database URL>
-```
-
-Database IDs appear in the Notion URL: `notion.so/<workspace>/<DATABASE_ID>?v=...`
+- `VITE_NOTION_API_KEY`: the integration token. Injected from 1Password by `op run` (see [Setup](#setup)), not written in the env files.
+- `VITE_NOTION_PLAYERS_DB_ID`, `VITE_NOTION_DECKS_DB_ID`, `VITE_NOTION_GAMES_DB_ID`, `VITE_NOTION_GAME_SEATS_DB_ID`: the database IDs, from the Notion URL `notion.so/<workspace>/<DATABASE_ID>?v=...`.
+- `VITE_DEBUG_SINGLE_PLAYER`, `VITE_CONVOKE_LOGGER`: debug flags. Set them in `.env.dev` only: `.env` is loaded in every mode, so a flag there ends up in prod builds.
 
 ## Development
 
-```bash
-npm run dev          # WXT dev mode — reloads extension in Chrome on file changes
-npm run build        # Build using .env (legacy fallback)
-npm run build:dev    # Build using .env.dev  → .output/chrome-mv3/
-npm run build:prod   # Build using .env.prod → .output/chrome-mv3/
-npm run check        # TypeScript type-check
-npm run lint         # Biome lint
-npm run format       # Biome auto-format
-npm run test         # Vitest
-```
+The commands are the `scripts` in `package.json`. `dev` and `build*` run through `op run`. To build without 1Password, run `npx wxt build --mode prod` (CI does this) and enter the token in the popup under **Settings → Notion Settings**.
+
+Dev builds (`npm run dev`, `npm run build:dev`) include a helper for testing Convoke without playing a real game: see [docs/dev/convoke-test-helper.md](docs/dev/convoke-test-helper.md).
+
+CI (`.github/workflows/ci.yml`) runs lint, type-check, tests and a prod build on pushes to `main` and on pull requests.
 
 ## Loading the extension in Chrome
 
@@ -128,26 +125,21 @@ After code changes, rebuild and click the reload icon on the extension card.
 
 ## Architecture
 
-| Component | File | Role |
+| Part | Where | Role |
 |---|---|---|
-| SpellTable content script | `entrypoints/content.ts` | Runs on `spelltable.wizards.com/game/*`; scrapes player names and commander cards; sorts players clockwise by screen position; sends `UPDATE_STORAGE`; responds to `SCRAPE_NOW` |
-| Convoke content script | `entrypoints/convoke.content.ts` | Runs on `convoke.games/en/play/*`; scrapes player names and commanders from seat tiles; scrapes per-player turn times from the end-of-game dialog (`span.tabular-nums`); sends `UPDATE_STORAGE` and `UPDATE_TIMES` |
-| Background worker | `entrypoints/background.ts` | Handles `UPDATE_STORAGE`, `UPDATE_TIMES`, and `SUBMIT_GAME`; resolves Notion IDs for players and decks (owner-scoped); creates Game and Game Seat pages |
-| Popup UI | `entrypoints/popup/App.tsx` | React component — player/winner picker, first-player selector, win condition grid, KO type toggle, first kill event, board wipes stepper, rounds stepper, Sol Ring toggle, confirmation screen, success screen, Notion settings screen |
-| Storage | `src/shared/storage.ts` | `local:spelltable-game` (`PlayerData[]`) and `local:convoke-player-times` (`Record<string, number>`) |
-| Notion client | `src/shared/notion.ts` | `findPlayerByName`, `findDeckByPlayerAndCommander`, `createGame`, `createGameSeat` |
+| SpellTable scraper | `entrypoints/content.ts` | Scrapes players and commanders from the game page, in clockwise seat order |
+| Convoke scraper | `entrypoints/convoke.content.ts` | Scrapes players and commanders from the seat tiles, and turn times from the end-of-game dialog |
+| Convoke match watcher | `entrypoints/convoke-network.content.ts`, `entrypoints/convoke-bridge.content.ts` | Watches Convoke's match API from inside the page and relays match start, end and winner votes to the background |
+| Background worker | `entrypoints/background.ts` | Stores scraped data and match records, updates the badge, and runs submits |
+| Submit flow | `src/shared/submit.ts` | Looks up players and decks, creates the Game and its Game Seats, blocks duplicates and resumes a submit that failed halfway |
+| Notion client | `src/shared/notion.ts` | Notion queries and page creation |
+| Convoke match records | `src/shared/convoke/` | Turns match events into records and pre-fills the popup form from them |
+| Popup | `entrypoints/popup/App.tsx` | The game form, confirmation and Notion settings |
+| Storage | `src/shared/storage.ts` | Every `chrome.storage.local` key and its type |
 
-### Message flow
-
-```
-SpellTable content  ──UPDATE_STORAGE──▶  Background  ──writes──▶  chrome.storage.local
-Convoke content     ──UPDATE_STORAGE──▶  Background
-Convoke content     ──UPDATE_TIMES───▶   Background  ──writes──▶  chrome.storage.local
-Popup               ──SCRAPE_NOW────▶    Content script
-Popup               ──SUBMIT_GAME───▶    Background  ──POST───▶   Notion API
-```
+The message actions are the `message.action` checks in `entrypoints/background.ts` and the content scripts.
 
 ## Known limitations
 
-- DOM selectors in both content scripts rely on class names that can break if SpellTable or Convoke updates their markup.
-- No test coverage yet — Vitest + Testing Library infrastructure is set up but no test files exist.
+- DOM selectors in both scrapers rely on class names that can break if SpellTable or Convoke updates their markup.
+- The scraped game is shared by all tabs, so with two games open the popup shows whichever was scraped last ([#18](https://github.com/diegolamanno/spelltable-chrome-extension/issues/18)).
