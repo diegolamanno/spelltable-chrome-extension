@@ -1,8 +1,28 @@
+import { gameKeyFromUrl } from "../src/shared/live-games";
+
 export default defineContentScript({
-  matches: ["https://spelltable.wizards.com/game/*"],
+  // The whole site: SpellTable and Convoke open games from the lobby without a full page load,
+  // and content scripts only load on a full page load (#35). Scrapes run only on game pages.
+  matches: ["https://spelltable.wizards.com/*"],
 
   main() {
+    // The popup injects this script when ↺ gets no answer; don't start a second copy.
+    const flags = globalThis as { __edhScraperRunning?: boolean };
+    if (flags.__edhScraperRunning) return;
+    flags.__edhScraperRunning = true;
+
     let lastSerialized = "";
+    let lastGameKey: string | null = null;
+
+    /** The current game page, or null off a game. A new game always re-sends its players. */
+    function currentGame(): string | null {
+      const key = gameKeyFromUrl(location.href);
+      if (key !== lastGameKey) {
+        lastGameKey = key;
+        lastSerialized = "";
+      }
+      return key;
+    }
 
     function findCommonAncestor(els: Element[]): Element | null {
       let ancestor = els[0].parentElement;
@@ -24,6 +44,7 @@ export default defineContentScript({
     }
 
     function scrape() {
+      if (!currentGame()) return;
       console.log("[SpellTable] Scrape triggered");
       const nameEls = Array.from(
         document.querySelectorAll(".font-bold.truncate.leading-snug.text-sm")
@@ -95,7 +116,7 @@ export default defineContentScript({
       console.log("[SpellTable] Sending update to background");
       chrome.runtime.sendMessage({
         action: "UPDATE_STORAGE",
-        data: { playersOnPage: playerData },
+        data: { playersOnPage: playerData, url: location.href },
       });
     }
 

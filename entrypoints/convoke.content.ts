@@ -1,8 +1,28 @@
+import { gameKeyFromUrl } from "../src/shared/live-games";
+
 export default defineContentScript({
-  matches: ["https://convoke.games/en/play/*"],
+  // The whole site: SpellTable and Convoke open games from the lobby without a full page load,
+  // and content scripts only load on a full page load (#35). Scrapes run only on game pages.
+  matches: ["https://convoke.games/*"],
 
   main() {
+    // The popup injects this script when ↺ gets no answer; don't start a second copy.
+    const flags = globalThis as { __edhScraperRunning?: boolean };
+    if (flags.__edhScraperRunning) return;
+    flags.__edhScraperRunning = true;
+
     let lastSerialized = "";
+    let lastGameKey: string | null = null;
+
+    /** The current game page, or null off a game. A new game always re-sends its players. */
+    function currentGame(): string | null {
+      const key = gameKeyFromUrl(location.href);
+      if (key !== lastGameKey) {
+        lastGameKey = key;
+        lastSerialized = "";
+      }
+      return key;
+    }
     let lastTimesSerialized = "";
 
     function clockwisePos(el: Element, midX: number, midY: number): number {
@@ -28,6 +48,7 @@ export default defineContentScript({
     // Scrapes player turn times from the game-end summary dialog.
     // Convoke renders "N turn(s) · Xs" inside span.tabular-nums next to each player name.
     function scrapeTimes() {
+      if (!currentGame()) return;
       // Format: "2 turns · 7s" or "1 turn · 8s" etc.
       const turnTimeRe = /^\d+\s+turns?\s+·\s+(.+)$/;
       const times: Record<string, number> = {};
@@ -69,6 +90,7 @@ export default defineContentScript({
     }
 
     function scrape() {
+      if (!currentGame()) return;
       console.log("[Convoke] Scrape triggered");
 
       const slots = Array.from(document.querySelectorAll<HTMLElement>(".slot[data-player-name]"));
@@ -106,7 +128,7 @@ export default defineContentScript({
 
       chrome.runtime.sendMessage({
         action: "UPDATE_STORAGE",
-        data: { playersOnPage: playerData },
+        data: { playersOnPage: playerData, url: location.href },
       });
     }
 

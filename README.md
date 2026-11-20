@@ -119,7 +119,7 @@ CI (`.github/workflows/ci.yml`) runs lint, type-check, tests and a prod build on
 1. Run `npm run build:dev` (or `build:prod`)
 2. Open `chrome://extensions`
 3. Enable **Developer mode**
-4. Click **Load unpacked** → select `.output/chrome-mv3/`
+4. Click **Load unpacked** → select `.output/chrome-mv3-dev/` (or `.output/chrome-mv3-prod/`)
 
 After code changes, rebuild and click the reload icon on the extension card.
 

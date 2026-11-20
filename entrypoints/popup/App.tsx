@@ -7,6 +7,7 @@ import {
 } from "../../src/shared/convoke/review";
 import { useGameData } from "../../src/shared/hooks/useGameData";
 import { usePendingMatches } from "../../src/shared/hooks/usePendingMatches";
+import { requestScrape } from "../../src/shared/request-scrape";
 import type { NotionConfig, PlayerData } from "../../src/shared/storage";
 import { notionConfigStorage, playerTimesStorage } from "../../src/shared/storage";
 import type { SubmitResult } from "../../src/shared/submit";
@@ -1915,7 +1916,7 @@ function debugShuffled(arr: PlayerData[]): PlayerData[] {
 
 // ── App ────────────────────────────────────────────────────────────────────────
 export default function App() {
-  const { players: detectedPlayers, onGamePage } = useGameData();
+  const { players: detectedPlayers, onGamePage, tab: activeTab } = useGameData();
   const livePlayers = useMemo(
     () =>
       DEBUG_SINGLE_PLAYER ? debugShuffled([...detectedPlayers, ...DEBUG_PLAYERS]) : detectedPlayers,
@@ -2093,8 +2094,7 @@ export default function App() {
     if (refreshing) return;
     setRefreshing(true);
     try {
-      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-      if (tab?.id) await chrome.tabs.sendMessage(tab.id, { action: "SCRAPE_NOW" });
+      await requestScrape(activeTab);
     } catch (err) {
       console.error("[Popup] Refresh failed:", err);
     } finally {
