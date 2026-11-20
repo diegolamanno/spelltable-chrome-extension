@@ -11,9 +11,7 @@ A Chrome extension for logging Commander game results from [SpellTable](https://
 5. Fill in game details: win condition, KO type, first kill event, board wipes, rounds, and Sol Ring.
 6. Click **Submit Score** → review the summary → **Log it**. The game is recorded in Notion.
 
-When playing on Convoke, the extension also scrapes each player's total turn time from the end-of-game screen and stores it alongside their seat record.
-
-Convoke matches are also recorded in the background as they end. The extension icon shows a badge with the number of ended matches not yet logged; the popup lists them and pre-fills the form (players, first player, winner, date) from Convoke's data, so you only review and submit.
+Convoke matches are also recorded in the background as they end, with each player's total turn time from Convoke's match data. The extension icon shows a badge with the number of ended matches not yet logged; the popup lists them and pre-fills the form (players, first player, winner, date) from Convoke's data, so you only review and submit.
 
 ## Requirements
 
@@ -96,7 +94,7 @@ One entry per player per game, linking seat position and turn-time data.
 | `Player` | Relation → Players |
 | `Deck` | Relation → Decks |
 | `Seat` | Number (clockwise seat order, 1-based) |
-| `Raw Time` | Number (total turn time in seconds, Convoke only) |
+| `Raw Time` | Number (total turn time in seconds). Only set when logging a pending Convoke match |
 
 ## Environment variables
 
@@ -128,7 +126,7 @@ After code changes, rebuild and click the reload icon on the extension card.
 | Part | Where | Role |
 |---|---|---|
 | SpellTable scraper | `entrypoints/content.ts` | Scrapes players and commanders from the game page, in clockwise seat order |
-| Convoke scraper | `entrypoints/convoke.content.ts` | Scrapes players and commanders from the seat tiles, and turn times from the end-of-game dialog |
+| Convoke scraper | `entrypoints/convoke.content.ts` | Scrapes players and commanders from the seat tiles |
 | Convoke match watcher | `entrypoints/convoke-network.content.ts`, `entrypoints/convoke-bridge.content.ts` | Watches Convoke's match API from inside the page and relays match start, end and winner votes to the background |
 | Background worker | `entrypoints/background.ts` | Stores scraped data and match records, updates the badge, and runs submits |
 | Submit flow | `src/shared/submit.ts` | Looks up players and decks, creates the Game and its Game Seats, blocks duplicates and resumes a submit that failed halfway |

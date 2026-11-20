@@ -24,8 +24,8 @@ import {
 import {
   convokeMatchesStorage,
   LEGACY_GAME_KEY,
+  LEGACY_PLAYER_TIMES_KEY,
   liveGamesStorage,
-  playerTimesStorage,
   submitProgressStorage,
 } from "../src/shared/storage";
 import {
@@ -55,7 +55,6 @@ const submitDeps: SubmitDeps = {
     const { [key]: _done, ...rest } = await submitProgressStorage.getValue();
     await submitProgressStorage.setValue(rest);
   },
-  fallbackPlayerTimes: () => playerTimesStorage.getValue(),
   // Local date: toISOString() would put evening games (after 7–8 pm Eastern) on the next day.
   today: () => toLocalDate(new Date().toISOString()),
   now: () => new Date().toISOString(),
@@ -126,7 +125,7 @@ function updateLiveGames(change: (games: LiveGames) => LiveGames): void {
 export default defineBackground(() => {
   // The old single game shared by every tab (#18). It would otherwise stay in storage for good.
   chrome.runtime.onInstalled.addListener(() => {
-    storage.removeItem(LEGACY_GAME_KEY).catch(() => {});
+    storage.removeItems([LEGACY_GAME_KEY, LEGACY_PLAYER_TIMES_KEY]).catch(() => {});
   });
 
   // Tabs closed while the service worker was stopped still fire onRemoved, but be safe.
@@ -198,12 +197,6 @@ export default defineBackground(() => {
       const players = message.data.playersOnPage;
       const now = new Date().toISOString();
       updateLiveGames((games) => setLiveGame(games, tabId, url, players, now));
-      return false;
-    }
-
-    if (message.action === "UPDATE_TIMES") {
-      console.log("[Background] Updating player times:", message.data.playerTimes);
-      playerTimesStorage.setValue(message.data.playerTimes);
       return false;
     }
 

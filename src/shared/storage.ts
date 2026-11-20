@@ -38,13 +38,11 @@ export interface NotionConfig {
   gameSeatsDbId: string;
 }
 
-// playerName (lowercased) → total turn time in seconds, populated from Convoke end screen
-export const playerTimesStorage = storage.defineItem<Record<string, number>>(
-  "local:convoke-player-times",
-  {
-    fallback: {},
-  }
-);
+/**
+ * Replaced by the turn times in Convoke's match data (#6). Removed on update: names matched
+ * stale times onto later games.
+ */
+export const LEGACY_PLAYER_TIMES_KEY = "local:convoke-player-times";
 
 export const notionConfigStorage = storage.defineItem<NotionConfig>("local:notion-config", {
   fallback: {

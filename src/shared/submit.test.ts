@@ -43,7 +43,6 @@ function fakeNotion(
     clearProgress: async (key) => {
       progress.delete(key);
     },
-    fallbackPlayerTimes: async () => ({}),
     today: () => "2026-11-18",
     now: () => "2026-11-18T12:00:00Z",
   };
@@ -171,5 +170,12 @@ describe("submitGame", () => {
     expect(await submitGame(live, n.deps)).toEqual({ status: "logged", gameId: "game-1" });
     expect(n.games[0]).not.toHaveProperty("matchId");
     expect(n.games[0].date).toBe("2026-11-18");
+  });
+
+  it("creates live-table seats without turn times (#6)", async () => {
+    const n = fakeNotion();
+    await submitGame({ ...game, matchId: undefined, playerTimes: undefined }, n.deps);
+    expect(n.seats).toHaveLength(game.players.length);
+    for (const seat of n.seats) expect(seat).not.toHaveProperty("rawTime");
   });
 });

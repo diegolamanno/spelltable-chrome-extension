@@ -9,7 +9,7 @@ import { useGameData } from "../../src/shared/hooks/useGameData";
 import { usePendingMatches } from "../../src/shared/hooks/usePendingMatches";
 import { requestScrape } from "../../src/shared/request-scrape";
 import type { NotionConfig, PlayerData } from "../../src/shared/storage";
-import { notionConfigStorage, playerTimesStorage } from "../../src/shared/storage";
+import { notionConfigStorage } from "../../src/shared/storage";
 import type { SubmitResult } from "../../src/shared/submit";
 
 type SubmitResponse = SubmitResult & { success: boolean };
@@ -1978,7 +1978,6 @@ export default function App() {
   const [refreshing, setRefreshing] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [formKey, setFormKey] = useState(0);
-  const [playerTimes, setPlayerTimes] = useState<Record<string, string>>({});
   const [suggested, setSuggested] = useState<SuggestedField[]>([]);
   const [loggedSummary, setLoggedSummary] = useState<SummaryData | null>(null);
   const [alreadyLogged, setAlreadyLogged] = useState(false);
@@ -2032,17 +2031,6 @@ export default function App() {
     unsuggest("firstVictim");
     setFirstVictim(name);
   };
-
-  useEffect(() => {
-    const toDisplay = (raw: Record<string, number> | null) => {
-      const out: Record<string, string> = {};
-      for (const [name, secs] of Object.entries(raw ?? {})) out[name] = formatSeconds(secs);
-      return out;
-    };
-    playerTimesStorage.getValue().then((raw) => setPlayerTimes(toDisplay(raw)));
-    const unwatch = playerTimesStorage.watch((raw) => setPlayerTimes(toDisplay(raw)));
-    return () => unwatch();
-  }, []);
 
   // Draw clears winner and kill event
   const isDraw = wincon === "Draw";
@@ -2492,11 +2480,8 @@ export default function App() {
                       onSetFirst={() => setFirstPlayer(p.name)}
                       t={t}
                       isDark={isDark}
-                      time={
-                        review
-                          ? fmtTime(review.playerTimes[p.name])
-                          : playerTimes[p.name.toLowerCase()]
-                      }
+                      // Turn times come only from Convoke's match data (#6).
+                      time={review ? fmtTime(review.playerTimes[p.name]) : undefined}
                       winnerDisabled={isDraw}
                     />
                   ))}
