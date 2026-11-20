@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { gameKeyFromUrl, type LiveGames, liveGameForTab } from "../live-games";
+import { requestScrape } from "../request-scrape";
 import type { PlayerData } from "../storage";
 import { liveGamesStorage } from "../storage";
 
@@ -26,16 +27,13 @@ export function useGameData() {
   const game = liveGameForTab(games, tab?.id, tab?.url);
 
   // A game page without a stored game (scraped before a navigation, or not yet): ask once.
-  const tabId = tab?.id;
   const needsScrape = onGamePage && !game;
   useEffect(() => {
-    if (needsScrape && tabId !== undefined) {
-      chrome.tabs.sendMessage(tabId, { action: "SCRAPE_NOW" }).catch(() => {});
-    }
-  }, [needsScrape, tabId]);
+    if (needsScrape) requestScrape(tab).catch(() => {});
+  }, [needsScrape, tab]);
 
   const players: PlayerData[] = game?.players ?? EMPTY;
-  return { players, onGamePage };
+  return { players, onGamePage, tab };
 }
 
 const EMPTY: PlayerData[] = [];

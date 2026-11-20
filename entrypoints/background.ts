@@ -192,7 +192,8 @@ export default defineBackground(() => {
     console.log("[Background] Received message:", message);
     if (message.action === "UPDATE_STORAGE") {
       const tabId = sender.tab?.id;
-      const url = sender.url;
+      // The scraper reports its URL: on in-site navigation it is the current game page.
+      const url: string | undefined = message.data.url ?? sender.url;
       if (tabId === undefined || !url) return false;
       const players = message.data.playersOnPage;
       const now = new Date().toISOString();
