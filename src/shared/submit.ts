@@ -32,7 +32,10 @@ export interface SubmitGameData {
   matchId?: string;
   /** YYYY-MM-DD the game was played (local). Defaults to deps.today(). */
   date?: string;
-  /** lowercased player name → turn time in seconds. Defaults to deps.fallbackPlayerTimes(). */
+  /**
+   * lowercased player name → turn time in seconds, from Convoke's match data. Only pending
+   * Convoke matches have it; seats without a time are created without Raw Time.
+   */
   playerTimes?: Record<string, number>;
 }
 
@@ -67,7 +70,6 @@ export interface SubmitDeps {
   loadProgress(key: string): Promise<SubmitProgress | null>;
   saveProgress(key: string, progress: SubmitProgress): Promise<void>;
   clearProgress(key: string): Promise<void>;
-  fallbackPlayerTimes(): Promise<Record<string, number>>;
   today(): string;
   now(): string;
 }
@@ -105,7 +107,7 @@ export async function submitGame(data: SubmitGameData, deps: SubmitDeps): Promis
       if (key) await deps.saveProgress(key, progress);
     }
 
-    const times = data.playerTimes ?? (await deps.fallbackPlayerTimes());
+    const times = data.playerTimes ?? {};
     const gameId = progress.gameId;
     const missing = players
       .map((_, i) => i + 1)
