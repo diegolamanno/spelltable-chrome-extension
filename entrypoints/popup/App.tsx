@@ -1915,7 +1915,7 @@ function debugShuffled(arr: PlayerData[]): PlayerData[] {
 
 // ── App ────────────────────────────────────────────────────────────────────────
 export default function App() {
-  const { players: detectedPlayers } = useGameData();
+  const { players: detectedPlayers, onGamePage } = useGameData();
   const livePlayers = useMemo(
     () =>
       DEBUG_SINGLE_PLAYER ? debugShuffled([...detectedPlayers, ...DEBUG_PLAYERS]) : detectedPlayers,
@@ -2472,9 +2472,11 @@ export default function App() {
                   <p
                     style={{ color: t.muted, fontSize: 11.5, textAlign: "center", lineHeight: 1.5 }}
                   >
-                    No players detected.
+                    {onGamePage ? "No players detected yet." : "No game in this tab."}
                     <br />
-                    Open a SpellTable game and click ↺.
+                    {onGamePage
+                      ? "Click ↺ once everyone is seated."
+                      : "Open a SpellTable or Convoke game."}
                   </p>
                 </div>
               ) : (

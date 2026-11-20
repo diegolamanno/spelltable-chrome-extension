@@ -1,3 +1,4 @@
+import { storage } from "wxt/utils/storage";
 import type { ConvokeMatchEvent } from "../src/shared/convoke/events";
 import {
   applyMatchEvent,
@@ -7,6 +8,13 @@ import {
 } from "../src/shared/convoke/match-records";
 import { toLocalDate } from "../src/shared/convoke/suggestions";
 import {
+  keepOpenTabs,
+  type LiveGames,
+  removeTab,
+  setLiveGame,
+  tabNavigated,
+} from "../src/shared/live-games";
+import {
   createGame,
   createGameSeat,
   findDeckByPlayerAndCommander,
@@ -15,7 +23,8 @@ import {
 } from "../src/shared/notion";
 import {
   convokeMatchesStorage,
-  gameStorage,
+  LEGACY_GAME_KEY,
+  liveGamesStorage,
   playerTimesStorage,
   submitProgressStorage,
 } from "../src/shared/storage";
@@ -101,14 +110,54 @@ function handleConvokeMatchEvent(event: ConvokeMatchEvent): void {
     .catch((err: unknown) => console.error("[Background] Failed to apply Convoke event", err));
 }
 
+// Live game writes are read-modify-write too: scrapes and tab events from several tabs can overlap.
+let liveQueue: Promise<void> = Promise.resolve();
+
+function updateLiveGames(change: (games: LiveGames) => LiveGames): void {
+  liveQueue = liveQueue
+    .then(async () => {
+      const games = await liveGamesStorage.getValue();
+      const next = change(games);
+      if (next !== games) await liveGamesStorage.setValue(next);
+    })
+    .catch((err: unknown) => console.error("[Background] Failed to update live games", err));
+}
+
 export default defineBackground(() => {
+  // The old single game shared by every tab (#18). It would otherwise stay in storage for good.
+  chrome.runtime.onInstalled.addListener(() => {
+    storage.removeItem(LEGACY_GAME_KEY).catch(() => {});
+  });
+
+  // Tabs closed while the service worker was stopped still fire onRemoved, but be safe.
+  chrome.tabs
+    .query({})
+    .then((tabs) =>
+      updateLiveGames((games) =>
+        keepOpenTabs(
+          games,
+          tabs.flatMap((t) => (t.id === undefined ? [] : [t.id]))
+        )
+      )
+    )
+    .catch(() => {});
+
+  chrome.tabs.onRemoved.addListener((tabId) => updateLiveGames((games) => removeTab(games, tabId)));
+
+  // A tab that leaves its game (another game, another site) no longer shows it.
+  // tab.url is undefined on pages outside the host permissions, which are never game pages.
+  chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+    if (changeInfo.url === undefined && changeInfo.status !== "loading") return;
+    updateLiveGames((games) => tabNavigated(games, tabId, changeInfo.url ?? tab.url));
+  });
+
   // The service worker restarts often; restore the badge from storage each time.
   convokeMatchesStorage
     .getValue()
     .then(updateBadge)
     .catch(() => {});
 
-  chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+  chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.action === "CONVOKE_MATCH_EVENT") {
       handleConvokeMatchEvent(message.data as ConvokeMatchEvent);
       return false;
@@ -142,8 +191,12 @@ export default defineBackground(() => {
 
     console.log("[Background] Received message:", message);
     if (message.action === "UPDATE_STORAGE") {
-      console.log("[Background] Updating storage with:", message.data.playersOnPage);
-      gameStorage.setValue(message.data.playersOnPage);
+      const tabId = sender.tab?.id;
+      const url = sender.url;
+      if (tabId === undefined || !url) return false;
+      const players = message.data.playersOnPage;
+      const now = new Date().toISOString();
+      updateLiveGames((games) => setLiveGame(games, tabId, url, players, now));
       return false;
     }
 

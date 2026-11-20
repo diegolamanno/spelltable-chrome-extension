@@ -1,5 +1,6 @@
 import { storage } from "wxt/utils/storage";
 import type { MatchRecords } from "./convoke/match-records";
+import type { LiveGames } from "./live-games";
 import type { SubmitProgress } from "./submit";
 
 // Unfinished submissions (Game created, some seats failed), keyed by submissionKey.
@@ -20,9 +21,14 @@ export interface PlayerData {
   commanders: string[];
 }
 
-export const gameStorage = storage.defineItem<PlayerData[]>("local:spelltable-game", {
-  fallback: [],
+// Players scraped from each open game tab, keyed by tab id (see src/shared/live-games.ts).
+// Session storage: tab ids only mean something until the browser closes.
+export const liveGamesStorage = storage.defineItem<LiveGames>("session:live-games", {
+  fallback: {},
 });
+
+/** Replaced by liveGamesStorage. Removed on update so the old game doesn't linger. */
+export const LEGACY_GAME_KEY = "local:spelltable-game";
 
 export interface NotionConfig {
   apiKey: string;
